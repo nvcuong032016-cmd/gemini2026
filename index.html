@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Cá Nhân</title>
+    <title>Quản Lý Cá Nhân & Công Việc</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -19,7 +19,7 @@
 
         <!-- Header -->
         <header class="p-5 bg-white flex justify-between items-center border-b border-gray-100">
-            <h1 id="header-title" class="text-xl font-bold text-gray-800">Tài chính Cá nhân</h1>
+            <h1 id="header-title" class="text-xl font-bold text-gray-800">Quản Lý</h1>
             <button onclick="clearCache()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2.5 py-1.5 rounded-lg font-medium">
                 <i class="fa-solid fa-arrows-rotate mr-1"></i> Làm mới
             </button>
@@ -68,10 +68,12 @@
     <script>
         const STORAGE_KEY = 'my_unified_app_data';
 
-        // Tự động tìm & quét dữ liệu từ các bản cũ để khôi phục công việc
         function loadCombinedStore() {
             let store = {
-                tasks: [],
+                tasks: [
+                    { id: 1, text: 'Nộp báo cáo công việc tháng', priority: 'Gấp', dueDate: '2026-08-20', done: false, note: 'Gửi qua email cho sếp' },
+                    { id: 2, text: 'Họp với nhóm dự án mới', priority: 'Bình thường', dueDate: '2026-08-22', done: true, note: '' }
+                ],
                 cards: [
                     { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '15', dueDate: '5' }
                 ],
@@ -83,59 +85,15 @@
                 ]
             };
 
-            // Quét tất cả các key lưu trữ có thể tồn tại trong LocalStorage
             let savedMain = localStorage.getItem(STORAGE_KEY);
-            let allTasks = [];
-
             if (savedMain) {
                 try { store = JSON.parse(savedMain); } catch(e){}
             }
-
-            // Thu thập lại tất cả công việc từ các key cũ
-            for (let i = 0; i < localStorage.length; i++) {
-                let key = localStorage.key(i);
-                if (key.includes('my_app_data') || key === STORAGE_KEY || key.includes('task')) {
-                    try {
-                        let parsed = JSON.parse(localStorage.getItem(key));
-                        if (parsed && Array.isArray(parsed.tasks)) {
-                            allTasks = [...allTasks, ...parsed.tasks];
-                        } else if (Array.isArray(parsed)) {
-                            allTasks = [...allTasks, ...parsed];
-                        }
-                    } catch(e){}
-                }
-            }
-
-            // Gom nhóm và loại bỏ công việc bị trùng
-            if (allTasks.length > 0) {
-                const uniqueTasks = [];
-                const map = new Map();
-                for (const item of allTasks) {
-                    if (item && item.text && !map.has(item.text)) {
-                        map.set(item.text, true);
-                        uniqueTasks.push({
-                            id: item.id || Date.now() + Math.random(),
-                            text: item.text,
-                            done: !!item.done
-                        });
-                    }
-                }
-                store.tasks = uniqueTasks;
-            }
-
-            // Nếu vẫn trống thì thêm dữ liệu mặc định
-            if (!store.tasks || store.tasks.length === 0) {
-                store.tasks = [
-                    { id: 1, text: 'Thanh toán tiền điện tháng này', done: false },
-                    { id: 2, text: 'Kiểm tra sao kê thẻ VPBank', done: true }
-                ];
-            }
-
             return store;
         }
 
         let store = loadCombinedStore();
-        let currentTab = 'projects'; // Mặc định mở tab Công việc để kiểm tra
+        let currentTab = 'projects';
 
         function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
@@ -216,14 +174,6 @@
         }
 
         // --- TASKS HANDLERS ---
-        function addTask() {
-            const inp = document.getElementById('task-inp');
-            if (inp && inp.value.trim()) {
-                store.tasks.push({ id: Date.now(), text: inp.value.trim(), done: false });
-                saveData(); render();
-            }
-        }
-
         function toggleTask(id) {
             const task = store.tasks.find(t => t.id === id);
             if (task) { task.done = !task.done; saveData(); render(); }
@@ -243,7 +193,51 @@
 
             modal.classList.remove('hidden');
 
-            if (type === 'card') {
+            if (type === 'task') {
+                const item = editId ? store.tasks.find(t => t.id === editId) : null;
+                title.innerText = item ? 'Sửa Công Việc' : 'Thêm Công Việc Mới';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên công việc *</label>
+                        <input id="inp-task-text" type="text" value="${item ? item.text : ''}" placeholder="Nhập tên việc..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Mức ưu tiên</label>
+                            <select id="inp-task-priority" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                <option value="Bình thường" ${item && item.priority === 'Bình thường' ? 'selected' : ''}>Bình thường</option>
+                                <option value="Gấp" ${item && item.priority === 'Gấp' ? 'selected' : ''}>Gấp</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn chót</label>
+                            <input id="inp-task-date" type="date" value="${item ? item.dueDate : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-task-note" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm" placeholder="Mô tả thêm...">${item ? item.note || '' : ''}</textarea>
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    if (!validateFields(['inp-task-text'])) return;
+                    const data = {
+                        id: editId || Date.now(),
+                        text: document.getElementById('inp-task-text').value,
+                        priority: document.getElementById('inp-task-priority').value,
+                        dueDate: document.getElementById('inp-task-date').value,
+                        note: document.getElementById('inp-task-note').value,
+                        done: item ? item.done : false
+                    };
+                    if (editId) {
+                        const idx = store.tasks.findIndex(t => t.id === editId);
+                        store.tasks[idx] = data;
+                    } else {
+                        store.tasks.push(data);
+                    }
+                    saveData(); closeModal(); render();
+                };
+            } else if (type === 'card') {
                 const item = editId ? store.cards.find(c => c.id === editId) : null;
                 title.innerText = item ? 'Sửa Thẻ Tín Dụng' : 'Thêm Thẻ Tín Dụng';
                 body.innerHTML = `
@@ -445,12 +439,13 @@
                 const totalLimit = store.cards.reduce((acc, c) => acc + (c.limit || 0), 0);
                 const totalLend = store.lends.filter(l => !l.completed).reduce((acc, l) => acc + (l.amount || 0), 0);
                 const totalLoan = store.loans.reduce((acc, l) => acc + (l.totalAmount || 0), 0);
+                const pendingTasks = store.tasks.filter(t => !t.done).length;
 
                 main.innerHTML = `
                     <div class="space-y-4">
                         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl text-white shadow-md">
-                            <span class="text-xs opacity-80 uppercase font-semibold">Tổng Hạn Mức Tín Dụng</span>
-                            <div class="text-2xl font-bold mt-1">${totalLimit.toLocaleString()} đ</div>
+                            <span class="text-xs opacity-80 uppercase font-semibold">Công việc còn lại</span>
+                            <div class="text-2xl font-bold mt-1">${pendingTasks} việc cần làm</div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -468,11 +463,11 @@
                             <h3 class="font-bold text-gray-800 text-sm mb-3">Lối tắt nhanh</h3>
                             <div class="grid grid-cols-2 gap-2">
                                 <button onclick="switchTab('finance')" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-semibold text-gray-700 flex items-center justify-between">
-                                    <span>Quản lý Tài chính</span>
+                                    <span>Tài chính</span>
                                     <i class="fa-solid fa-arrow-right text-gray-400"></i>
                                 </button>
                                 <button onclick="switchTab('projects')" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-semibold text-gray-700 flex items-center justify-between">
-                                    <span>Danh sách Công việc</span>
+                                    <span>Công việc</span>
                                     <i class="fa-solid fa-arrow-right text-gray-400"></i>
                                 </button>
                             </div>
@@ -480,26 +475,66 @@
                     </div>
                 `;
             } else if (currentTab === 'projects') {
-                title.innerText = 'Công Việc';
+                title.innerText = 'Danh Sách Công Việc';
+                const activeTasks = store.tasks.filter(t => !t.done);
+                const completedTasks = store.tasks.filter(t => t.done);
+
                 main.innerHTML = `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
-                        <div class="flex gap-2 mb-3">
-                            <input id="task-inp" type="text" placeholder="Nhập công việc mới..." class="flex-1 p-2.5 border border-gray-200 rounded-lg text-sm">
-                            <button onclick="addTask()" class="bg-blue-600 text-white px-4 rounded-lg text-xs font-bold shadow-sm">Thêm</button>
-                        </div>
-                        <div class="space-y-2 mt-3">
-                            ${store.tasks.length === 0 ? '<p class="text-xs text-gray-400 italic py-2 text-center">Chưa có công việc nào</p>' : ''}
-                            ${store.tasks.map(t => `
-                                <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                                    <label class="flex items-center gap-2 cursor-pointer flex-1 mr-2">
-                                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})" class="rounded text-blue-600 w-4 h-4">
-                                        <span class="text-xs font-medium ${t.done ? 'line-through text-gray-400' : 'text-gray-700'}">${t.text}</span>
-                                    </label>
-                                    <button onclick="deleteTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs px-2 py-1"><i class="fa-regular fa-trash-can"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-semibold text-gray-500">Còn lại: <b>${activeTasks.length}</b> công việc</span>
+                        <button onclick="openModal('task')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Thêm việc
+                        </button>
                     </div>
+
+                    <!-- Việc chưa xong -->
+                    <div class="space-y-3 mb-5">
+                        ${activeTasks.length === 0 ? '<p class="text-xs text-gray-400 italic py-4 text-center">Tuyệt vời! Không còn việc tồn đọng nào.</p>' : ''}
+                        ${activeTasks.map(t => `
+                            <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100">
+                                <div class="flex items-start justify-between gap-2">
+                                    <label class="flex items-start gap-2.5 cursor-pointer flex-1">
+                                        <input type="checkbox" onchange="toggleTask(${t.id})" class="mt-0.5 rounded text-blue-600 w-4 h-4">
+                                        <div>
+                                            <span class="text-xs font-semibold text-gray-800 block">${t.text}</span>
+                                            ${t.note ? `<p class="text-[11px] text-gray-500 mt-1">${t.note}</p>` : ''}
+                                        </div>
+                                    </label>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="openModal('task', ${t.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
+                                        <button onclick="deleteTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs p-1"><i class="fa-regular fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-50 text-[10px]">
+                                    <span class="px-2 py-0.5 rounded-full font-bold ${t.priority === 'Gấp' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-gray-100 text-gray-600'}">
+                                        ${t.priority || 'Bình thường'}
+                                    </span>
+                                    ${t.dueDate ? `<span class="text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${formatDate(t.dueDate)}</span>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Việc đã xong -->
+                    ${completedTasks.length > 0 ? `
+                        <details open class="group border-t border-gray-200 pt-3">
+                            <summary class="flex justify-between items-center cursor-pointer text-xs font-bold text-gray-500 py-1 select-none">
+                                <span>Đã hoàn thành (${completedTasks.length})</span>
+                                <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="space-y-2 mt-2">
+                                ${completedTasks.map(t => `
+                                    <div class="flex items-center justify-between p-2.5 bg-gray-100/70 rounded-lg">
+                                        <label class="flex items-center gap-2 cursor-pointer flex-1 mr-2">
+                                            <input type="checkbox" checked onchange="toggleTask(${t.id})" class="rounded text-blue-600 w-4 h-4">
+                                            <span class="text-xs font-medium line-through text-gray-400">${t.text}</span>
+                                        </label>
+                                        <button onclick="deleteTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs px-2 py-1"><i class="fa-regular fa-trash-can"></i></button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </details>
+                    ` : ''}
                 `;
             } else if (currentTab === 'finance') {
                 title.innerText = 'Tài chính Cá nhân';

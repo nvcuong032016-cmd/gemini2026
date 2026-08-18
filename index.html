@@ -79,12 +79,12 @@
         function loadCombinedStore() {
             let store = {
                 projects: [
-                    { id: 1, name: 'DVCI Đà Lạt', amount: 50000000, startDate: '2026-08-01', note: 'Dự án dịch vụ công', type: 'DVCI', tasks: [
+                    { id: 1, name: 'DVCI Đà Lạt', amount: 50000000, startDate: '2026-08-01', note: 'Dự án dịch vụ công', type: 'DVCI', collapsed: false, tasks: [
                         { id: 101, text: 'Khảo sát hiện trạng', done: true },
                         { id: 102, text: 'Lập hồ sơ kỹ thuật', done: true },
                         { id: 103, text: 'Triển khai hạ tầng', done: false }
                     ]},
-                    { id: 2, name: 'Dự án B', amount: 20000000, startDate: '2026-08-05', note: 'Vé điện tử', type: 'G-Ticket', tasks: [
+                    { id: 2, name: 'Dự án B', amount: 20000000, startDate: '2026-08-05', note: 'Vé điện tử', type: 'G-Ticket', collapsed: false, tasks: [
                         { id: 201, text: 'Tích hợp Gateway', done: true },
                         { id: 202, text: 'Kiểm thử ứng dụng', done: false }
                     ]}
@@ -113,6 +113,7 @@
         let store = loadCombinedStore();
         let currentTab = 'projects';
         let workSubTab = 'projects';
+        let financeSubTab = 'cards';
 
         function saveData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
@@ -144,12 +145,19 @@
             render();
         }
 
+        function switchFinanceSubTab(sub) {
+            financeSubTab = sub;
+            render();
+        }
+
         function handleHeaderAdd() {
             if (currentTab === 'projects') {
                 if (workSubTab === 'projects') openModal('project');
                 else openModal('singleTask');
             } else if (currentTab === 'finance') {
-                openModal('card');
+                if (financeSubTab === 'cards') openModal('card');
+                else if (financeSubTab === 'loans') openModal('loan');
+                else if (financeSubTab === 'lends') openModal('lend');
             }
         }
 
@@ -186,12 +194,6 @@
             return opts;
         }
 
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Đã chép nội dung vào bộ nhớ tạm');
-            });
-        }
-
         function validateFields(fieldIds) {
             let isValid = true;
             fieldIds.forEach(id => {
@@ -204,6 +206,16 @@
                 }
             });
             return isValid;
+        }
+
+        // --- BẬT/TẮT THU GỌN DỰ ÁN ---
+        function toggleProjectCollapse(projectId) {
+            const project = store.projects.find(p => p.id === projectId);
+            if (project) {
+                project.collapsed = !project.collapsed;
+                saveData();
+                render();
+            }
         }
 
         // --- NHIỆM VỤ DỰ ÁN ---
@@ -245,7 +257,7 @@
             }
         }
 
-        // --- HANDLERS VIỆC RIÊNG LẺ ---
+        // --- HANDLERS VIỆC RIÊNG LẺ & KHÁC ---
         function toggleSingleTask(id) {
             const t = store.singleTasks.find(x => x.id === id);
             if (t) { t.done = !t.done; saveData(); render(); }
@@ -261,6 +273,27 @@
         function deleteSingleTask(id) {
             store.singleTasks = store.singleTasks.filter(t => t.id !== id);
             saveData(); render();
+        }
+
+        function deleteCard(id) {
+            if (confirm('Bạn có chắc muốn xóa thẻ này?')) {
+                store.cards = store.cards.filter(c => c.id !== id);
+                saveData(); render();
+            }
+        }
+
+        function deleteLoan(id) {
+            if (confirm('Bạn có chắc muốn xóa khoản vay này?')) {
+                store.loans = store.loans.filter(l => l.id !== id);
+                saveData(); render();
+            }
+        }
+
+        function deleteLend(id) {
+            if (confirm('Bạn có chắc muốn xóa khoản cho vay này?')) {
+                store.lends = store.lends.filter(l => l.id !== id);
+                saveData(); render();
+            }
         }
 
         function toggleLendStatus(lendId) {
@@ -331,6 +364,7 @@
                         amount: getRawNumber(document.getElementById('inp-p-amount').value),
                         startDate: document.getElementById('inp-p-start').value,
                         note: document.getElementById('inp-p-note').value,
+                        collapsed: item ? !!item.collapsed : false,
                         tasks: item ? item.tasks : []
                     };
                     if (editId) {
@@ -573,314 +607,274 @@
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Đang cho vay</span>
-                                <span class="font-bold text-emerald-600 text-base mt-1 block">${totalLend.toLocaleString()} đ</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Cho vay / Gửi</span>
+                                <div class="text-base font-bold text-green-600 mt-1">${totalLend.toLocaleString()} đ</div>
                             </div>
                             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                                 <span class="text-[10px] text-gray-400 font-bold uppercase block">Tổng khoản vay</span>
-                                <span class="font-bold text-blue-600 text-base mt-1 block">${totalLoan.toLocaleString()} đ</span>
+                                <div class="text-base font-bold text-red-500 mt-1">${totalLoan.toLocaleString()} đ</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm mb-3">Dự án hiện có (${store.projects.length})</h3>
+                            <div class="space-y-2">
+                                ${store.projects.map(p => `
+                                    <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">${p.type || 'Khác'}</span>
+                                            <span class="font-semibold text-gray-700">${p.name}</span>
+                                        </div>
+                                        <span class="text-gray-500">${p.amount ? p.amount.toLocaleString() + ' đ' : 'Chưa có giá'}</span>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
                 `;
             } else if (currentTab === 'projects') {
                 title.innerText = 'Công việc';
-                const folderColors = {
-                    'DVCI': { bg: 'bg-blue-500', bar: 'bg-blue-500' },
-                    'G-Ticket': { bg: 'bg-emerald-500', bar: 'bg-emerald-500' },
-                    'Khác': { bg: 'bg-amber-500', bar: 'bg-amber-500' }
-                };
-
                 main.innerHTML = `
-                    <div class="flex border-b border-gray-100 mb-4">
-                        <button onclick="switchWorkSubTab('projects')" class="flex-1 py-2 text-center text-sm font-semibold relative ${workSubTab === 'projects' ? 'text-blue-600' : 'text-gray-400'}">
-                            Dự án
-                            ${workSubTab === 'projects' ? '<div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full"></div>' : ''}
-                        </button>
-                        <button onclick="switchWorkSubTab('single')" class="flex-1 py-2 text-center text-sm font-semibold relative ${workSubTab === 'single' ? 'text-blue-600' : 'text-gray-400'}">
-                            Việc riêng lẻ
-                            ${workSubTab === 'single' ? '<div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full"></div>' : ''}
-                        </button>
-                    </div>
+                    <div class="space-y-3">
+                        <div class="flex bg-gray-200/60 p-1 rounded-xl text-xs font-semibold">
+                            <button onclick="switchWorkSubTab('projects')" class="flex-1 py-2 rounded-lg transition-all ${workSubTab === 'projects' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Dự án</button>
+                            <button onclick="switchWorkSubTab('single')" class="flex-1 py-2 rounded-lg transition-all ${workSubTab === 'single' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Việc riêng lẻ</button>
+                        </div>
 
-                    ${workSubTab === 'projects' ? `
-                        <div class="space-y-3">
-                            ${store.projects.length === 0 ? '<p class="text-xs text-gray-400 text-center py-6">Chưa có dự án nào</p>' : ''}
-                            ${store.projects.map(p => {
-                                const tasks = p.tasks || [];
-                                const total = tasks.length;
-                                const doneCount = tasks.filter(t => t.done).length;
-                                const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-                                const theme = folderColors[p.type] || folderColors['Khác'];
+                        ${workSubTab === 'projects' ? `
+                            <div class="space-y-3">
+                                ${store.projects.map(p => {
+                                    const tasks = p.tasks || [];
+                                    const doneCount = tasks.filter(t => t.done).length;
+                                    const progress = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
+                                    const daysPassed = calculateDaysFrom(p.startDate);
+                                    const isCollapsed = !!p.collapsed;
 
-                                return `
-                                <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                                    <!-- Header Card -->
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 ${theme.bg} rounded-xl flex items-center justify-center text-white text-lg shadow-sm">
-                                                <i class="fa-solid fa-folder"></i>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-bold text-gray-800 text-sm">${p.name}</h4>
-                                                <span class="text-[11px] text-gray-400 font-medium">${doneCount}/${total} nhiệm vụ</span>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <button onclick="openModal('project', ${p.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
-                                            <button onclick="deleteProject(${p.id})" class="text-gray-400 hover:text-red-500 text-xs p-1"><i class="fa-solid fa-trash-can"></i></button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Progress Bar -->
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
-                                            <div class="${theme.bar} h-full rounded-full transition-all duration-300" style="width: ${percent}%"></div>
-                                        </div>
-                                        <span class="text-xs font-bold text-gray-600 min-w-[32px] text-right">${percent}%</span>
-                                    </div>
-
-                                    ${p.amount ? `<div class="mt-2 text-[11px] text-gray-500 font-medium">Ngân sách: <b class="text-blue-600">${p.amount.toLocaleString()} đ</b></div>` : ''}
-
-                                    <!-- Danh Sách Công Việc (Task List) -->
-                                    <div class="mt-3 pt-3 border-t border-gray-100">
-                                        <div class="space-y-1.5 mb-2">
-                                            ${tasks.map(t => `
-                                                <div class="flex items-center justify-between group py-1 px-1 rounded-lg hover:bg-gray-50">
-                                                    <label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
-                                                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleProjectTask(${p.id}, ${t.id})" class="rounded text-blue-600 w-4 h-4 cursor-pointer">
-                                                        <span class="text-xs font-medium truncate ${t.done ? 'line-through text-gray-400' : 'text-gray-700'}">${t.text}</span>
-                                                    </label>
-                                                    <button onclick="deleteProjectTask(${p.id}, ${t.id})" class="text-gray-300 hover:text-red-500 text-[10px] px-1.5 opacity-80 group-hover:opacity-100">
-                                                        <i class="fa-solid fa-xmark"></i>
+                                    return `
+                                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+                                            <!-- Card Header -->
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">${p.type || 'Khác'}</span>
+                                                    <h3 class="font-bold text-gray-800 text-base mt-1">${p.name}</h3>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick="openModal('project', ${p.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                                    <button onclick="deleteProject(${p.id})" class="text-gray-400 hover:text-red-500 text-xs p-1" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                                                    <!-- Nút mũi tên Thu gọn / Mở rộng -->
+                                                    <button onclick="toggleProjectCollapse(${p.id})" class="text-gray-500 hover:text-gray-800 text-sm p-1 ml-1" title="${isCollapsed ? 'Mở rộng' : 'Thu gọn'}">
+                                                        <i class="fa-solid ${isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
                                                     </button>
                                                 </div>
-                                            `).join('')}
-                                        </div>
+                                            </div>
 
-                                        <!-- Ô nhập thêm nhiệm vụ mới -->
-                                        <div class="flex items-center gap-2 mt-2">
-                                            <input id="inp-new-task-${p.id}" type="text" placeholder="Thêm công việc..." onkeyup="if(event.key==='Enter') addProjectTask(${p.id})" class="flex-1 text-xs px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
-                                            <button onclick="addProjectTask(${p.id})" class="bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-600 text-xs px-2.5 py-1.5 rounded-lg transition-colors font-bold">+</button>
+                                            <!-- Tiến độ vắn tắt (Luôn hiển thị) -->
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-[11px] font-semibold text-gray-500">
+                                                    <span>Tiến độ (${doneCount}/${tasks.length} nhiệm vụ)</span>
+                                                    <span>${progress}%</span>
+                                                </div>
+                                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                                    <div class="bg-blue-600 h-full transition-all duration-300" style="width: ${progress}%"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Chi tiết (Ẩn khi thu gọn) -->
+                                            ${!isCollapsed ? `
+                                                <div class="text-xs text-gray-500 space-y-1 pt-1 border-t border-gray-50">
+                                                    <div class="flex justify-between">
+                                                        <span>Ngân sách: <strong class="text-gray-700">${p.amount ? p.amount.toLocaleString() + ' đ' : 'N/A'}</strong></span>
+                                                        <span>Bắt đầu: ${formatDate(p.startDate)}</span>
+                                                    </div>
+                                                    <div class="text-blue-600 font-medium">Đã thực hiện: ${daysPassed} ngày</div>
+                                                    ${p.note ? `<div class="text-gray-400 italic">Ghi chú: ${p.note}</div>` : ''}
+                                                </div>
+
+                                                <div class="border-t border-gray-50 pt-2 space-y-2">
+                                                    <div class="text-xs font-bold text-gray-700">Nhiệm vụ:</div>
+                                                    <div class="space-y-1.5">
+                                                        ${tasks.map(t => `
+                                                            <div class="flex items-center justify-between text-xs group">
+                                                                <label class="flex items-center gap-2 cursor-pointer flex-1">
+                                                                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleProjectTask(${p.id}, ${t.id})" class="rounded text-blue-600 focus:ring-0">
+                                                                    <span class="${t.done ? 'line-through text-gray-400' : 'text-gray-700'}">${t.text}</span>
+                                                                </label>
+                                                                <button onclick="deleteProjectTask(${p.id}, ${t.id})" class="text-gray-300 hover:text-red-500 text-[10px] pl-2"><i class="fa-solid fa-xmark"></i></button>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                    <div class="flex gap-1 mt-2">
+                                                        <input id="inp-new-task-${p.id}" type="text" placeholder="Thêm công việc..." class="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
+                                                        <button onclick="addProjectTask(${p.id})" class="bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-lg text-xs hover:bg-blue-100">+</button>
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : `
+                            <div class="space-y-2">
+                                ${store.singleTasks.map(t => `
+                                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleSingleTask(${t.id})" class="rounded text-blue-600 focus:ring-0">
+                                            <div>
+                                                <p class="text-xs font-semibold ${t.done ? 'line-through text-gray-400' : 'text-gray-800'}">${t.text}</p>
+                                                <div class="flex gap-2 text-[10px] text-gray-400 mt-0.5">
+                                                    <span class="${t.priority === 'Gấp' ? 'text-red-500 font-bold' : ''}">${t.priority}</span>
+                                                    ${t.dueDate ? `<span>• Hạn: ${formatDate(t.dueDate)}</span>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="openModal('singleTask', ${t.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
+                                            <button onclick="deleteSingleTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
                                         </div>
                                     </div>
-                                </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    ` : `
-                        <div class="space-y-2">
-                            ${store.singleTasks.length === 0 ? '<p class="text-xs text-gray-400 text-center py-6">Không có việc riêng lẻ nào</p>' : ''}
-                            ${store.singleTasks.map(t => `
-                                <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm">
-                                    <label class="flex items-center gap-2.5 cursor-pointer flex-1">
-                                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleSingleTask(${t.id})" class="rounded text-blue-600 w-4 h-4">
-                                        <span class="text-xs font-medium ${t.done ? 'line-through text-gray-400' : 'text-gray-800'}">${t.text}</span>
-                                    </label>
-                                    <button onclick="deleteSingleTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs px-2 py-1"><i class="fa-regular fa-trash-can"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `}
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
                 `;
             } else if (currentTab === 'finance') {
-                title.innerText = 'Cá nhân';
+                title.innerText = 'Cá Nhân';
                 main.innerHTML = `
-                    <!-- 1. Thẻ tín dụng -->
-                    <details open class="mb-4 group">
-                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
-                            <h3 class="font-bold text-gray-800 text-sm">Thẻ tín dụng ngân hàng</h3>
-                            <div class="flex items-center gap-3">
-                                <button onclick="event.preventDefault(); openModal('card')" class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
-                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="pt-1">
-                            ${store.cards.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có thẻ nào</p>' : ''}
-                            ${store.cards.map(c => {
-                                const copyContent = `Ngân hàng: ${c.bank}\nLoại thẻ: ${c.cardType}\nHạn mức: ${c.limit.toLocaleString()} đ\nNgày sao kê: Ngày ${c.statementDate}\nHạn thanh toán: Ngày ${c.dueDate}\nGhi chú: ${c.info || 'Không có'}`;
-                                return `
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5">
-                                                ${c.bank}
-                                                <button onclick="openModal('card', ${c.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
-                                            </div>
-                                            <div class="flex items-center gap-1.5 mt-1">
-                                                <span class="text-[10px] bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded-full border border-blue-100">${c.cardType || 'Visa'}</span>
-                                                <span class="text-[10px] bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded-full">${c.days || '45 ngày'}</span>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase block">Hạn mức</span>
-                                            <span class="font-bold text-blue-600 text-sm">${(c.limit || 0).toLocaleString()} đ</span>
-                                        </div>
-                                    </div>
-                                    
-                                    ${c.info ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg my-2.5 border border-gray-100">${c.info}</p>` : ''}
-                                    
-                                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl mt-2 border border-slate-100">
-                                        <div>
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày sao kê</span>
-                                            <b class="text-gray-700">Ngày ${c.statementDate} hàng tháng</b>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Hạn thanh toán</span>
-                                            <b class="text-red-500">Ngày ${c.dueDate} hàng tháng</b>
-                                        </div>
-                                    </div>
-                                </div>
-                                `;
-                            }).join('')}
+                    <div class="space-y-3">
+                        <div class="flex bg-gray-200/60 p-1 rounded-xl text-xs font-semibold">
+                            <button onclick="switchFinanceSubTab('cards')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'cards' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Thẻ tín dụng</button>
+                            <button onclick="switchFinanceSubTab('loans')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'loans' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Khoản vay</button>
+                            <button onclick="switchFinanceSubTab('lends')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'lends' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Cho vay / Gửi</button>
                         </div>
-                    </details>
 
-                    <!-- 2. Tiền gửi / Cho vay -->
-                    <details open class="mb-4 group">
-                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
-                            <h3 class="font-bold text-gray-800 text-sm">Tiền gửi / Cho vay</h3>
-                            <div class="flex items-center gap-3">
-                                <button onclick="event.preventDefault(); openModal('lend')" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
-                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
-                            </div>
-                        </summary>
-                        <div class="pt-1">
-                            ${store.lends.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có khoản gửi/cho vay nào</p>' : ''}
-                            ${store.lends.map(l => {
-                                const daysCount = calculateDaysFrom(l.startDate);
-                                const isOrg = l.type === 'Tổ chức';
-                                const copyContent = `Đối tượng: ${l.borrower} (${l.type})\nSố tiền: ${l.amount.toLocaleString()} đ\nNgày bắt đầu: ${formatDate(l.startDate)}\nSố ngày cho vay: ${daysCount} ngày\nTrạng thái: ${l.completed ? 'Hoàn thành' : 'Đang xử lý'}\nGhi chú: ${l.note || 'Không có'}`;
-                                
-                                return `
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5 flex-wrap">
-                                                <span>${l.borrower}</span>
-                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
-                                                <span class="text-[10px] ${isOrg ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-amber-50 text-amber-600 border-amber-100'} border font-semibold px-2.5 py-0.5 rounded-full inline-block">
-                                                    ${l.type || 'Cá nhân'}
-                                                </span>
+                        ${financeSubTab === 'cards' ? `
+                            <div class="space-y-3">
+                                ${store.cards.map(c => `
+                                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <span class="text-xs text-slate-400">${c.bank}</span>
+                                                <h3 class="font-bold text-lg">${c.cardType}</h3>
                                             </div>
-                                            
-                                            <button onclick="toggleLendStatus(${l.id})" class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${l.completed ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}">
-                                                <i class="fa-solid ${l.completed ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
-                                                <span>${l.completed ? 'Hoàn thành' : 'Đang xử lý'}</span>
+                                            <div class="flex gap-2">
+                                                <button onclick="openModal('card', ${c.id})" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="deleteCard(${c.id})" class="text-slate-400 hover:text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <div class="text-[10px] text-slate-400">Hạn mức</div>
+                                            <div class="text-xl font-bold">${c.limit ? c.limit.toLocaleString() : 0} đ</div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-700/50 text-xs">
+                                            <div>
+                                                <span class="text-slate-400 block text-[10px]">Ngày sao kê</span>
+                                                <span>Ngày ${c.statementDate} hàng tháng</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-slate-400 block text-[10px]">Hạn thanh toán</span>
+                                                <span>Ngày ${c.dueDate} hàng tháng</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : financeSubTab === 'loans' ? `
+                            <div class="space-y-3">
+                                ${store.loans.map(l => {
+                                    const paidCount = (l.paidMonths || []).length;
+                                    const progress = Math.round((paidCount / l.months) * 100);
+
+                                    return `
+                                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-600 uppercase">${l.bank}</span>
+                                                    <h3 class="font-bold text-gray-800 text-base mt-1">${l.name}</h3>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
+                                                    <button onclick="deleteLoan(${l.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                                <div>
+                                                    <span class="text-gray-400 block text-[10px]">Tổng khoản vay</span>
+                                                    <span class="font-bold text-gray-800">${l.totalAmount ? l.totalAmount.toLocaleString() : 0} đ</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-gray-400 block text-[10px]">Trả hàng tháng</span>
+                                                    <span class="font-bold text-red-500">${l.monthlyPay ? l.monthlyPay.toLocaleString() : 0} đ</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-[11px] font-semibold text-gray-500">
+                                                    <span>Tiến độ trả (${paidCount}/${l.months} tháng)</span>
+                                                    <span>${progress}%</span>
+                                                </div>
+                                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                                    <div class="bg-red-500 h-full transition-all duration-300" style="width: ${progress}%"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="pt-2 border-t border-gray-50">
+                                                <div class="text-[11px] font-bold text-gray-700 mb-2">Đã thanh toán kỳ:</div>
+                                                <div class="grid grid-cols-6 gap-1.5">
+                                                    ${Array.from({ length: l.months }, (_, i) => i + 1).map(m => {
+                                                        const isPaid = (l.paidMonths || []).includes(m);
+                                                        return `
+                                                            <button onclick="toggleLoanMonth(${l.id}, ${m})" class="py-1 rounded text-[10px] font-bold transition-all ${isPaid ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400'}">
+                                                                T${m}
+                                                            </button>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : `
+                            <div class="space-y-3">
+                                ${store.lends.map(l => `
+                                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-2">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${l.type === 'Cá nhân' ? 'bg-green-50 text-green-600' : 'bg-purple-50 text-purple-600'} uppercase">${l.type}</span>
+                                                <h3 class="font-bold text-gray-800 text-base mt-1">${l.borrower}</h3>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="deleteLend(${l.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex justify-between items-end">
+                                            <div>
+                                                <span class="text-gray-400 block text-[10px]">Số tiền</span>
+                                                <span class="text-base font-bold text-green-600">${l.amount ? l.amount.toLocaleString() : 0} đ</span>
+                                            </div>
+                                            <button onclick="toggleLendStatus(${l.id})" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${l.completed ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-700'}">
+                                                ${l.completed ? 'Đã thu hồi' : 'Đang cho vay'}
                                             </button>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase block">Số tiền</span>
-                                            <span class="font-bold text-emerald-600 text-sm">${(l.amount || 0).toLocaleString()} đ</span>
+
+                                        <div class="text-[11px] text-gray-400 pt-1 border-t border-gray-50 flex justify-between">
+                                            <span>Ngày bắt đầu: ${formatDate(l.startDate)}</span>
+                                            ${l.note ? `<span>${l.note}</span>` : ''}
                                         </div>
                                     </div>
-
-                                    <div class="grid grid-cols-2 gap-2 text-xs bg-emerald-50/50 p-3 rounded-xl my-2.5 border border-emerald-100/50">
-                                        <div>
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
-                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Số ngày cho vay</span>
-                                            <b class="text-emerald-700">${daysCount} ngày</b>
-                                        </div>
-                                    </div>
-
-                                    ${l.note ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100">${l.note}</p>` : ''}
-                                </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </details>
-
-                    <!-- 3. Khoản vay / Trả góp -->
-                    <details open class="mb-4 group">
-                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
-                            <h3 class="font-bold text-gray-800 text-sm">Khoản vay / Trả góp</h3>
-                            <div class="flex items-center gap-3">
-                                <button onclick="event.preventDefault(); openModal('loan')" class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
-                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                `).join('')}
                             </div>
-                        </summary>
-                        <div class="pt-1">
-                            ${store.loans.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có khoản vay nào</p>' : ''}
-                            ${store.loans.map(l => {
-                                const monthlyPay = l.monthlyPay || Math.round(l.totalAmount / l.months);
-                                const paidCount = (l.paidMonths || []).length;
-                                const percent = Math.round((paidCount / l.months) * 100);
-                                const isCompleted = paidCount === l.months;
-                                const copyContent = `Khoản vay: ${l.name}\nĐơn vị: ${l.bank}\nTổng vay: ${l.totalAmount.toLocaleString()} đ\nTrả hàng tháng: ${monthlyPay.toLocaleString()} đ\nTiến độ: ${paidCount}/${l.months} kỳ (${percent}%)\nTrạng thái: ${isCompleted ? 'Hoàn thành' : 'Đang xử lý'}`;
-
-                                return `
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div>
-                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5 flex-wrap">
-                                                <span>${l.name}</span>
-                                                <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
-                                            </div>
-                                            <div class="text-xs text-blue-600 font-semibold mt-0.5">${l.bank}</div>
-
-                                            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">
-                                                <i class="fa-solid ${isCompleted ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
-                                                <span>${isCompleted ? 'Hoàn thành' : 'Đang xử lý'}</span>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-[10px] text-gray-400 font-bold uppercase">Tổng vay</div>
-                                            <div class="font-bold text-gray-800 text-sm">${l.totalAmount.toLocaleString()} đ</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-2 text-xs bg-blue-50/50 p-3 rounded-xl my-3 border border-blue-100/50">
-                                        <div>
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
-                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Trả hàng tháng</span>
-                                            <b class="text-blue-700">${monthlyPay.toLocaleString()} đ</b>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between items-center text-xs mb-1.5">
-                                        <span class="text-gray-500">Tiến độ: <b>${paidCount}/${l.months} kỳ</b></span>
-                                        <span class="font-bold text-green-600">${percent}%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
-                                        <div class="bg-green-500 h-2 rounded-full transition-all" style="width: ${percent}%"></div>
-                                    </div>
-
-                                    <details class="border-t border-gray-100 pt-2 group/sub">
-                                        <summary class="flex justify-between items-center cursor-pointer text-xs font-bold text-gray-700 py-1 select-none">
-                                            <span>Chi tiết kỳ thanh toán</span>
-                                            <i class="fa-solid fa-chevron-down text-gray-400 group-open/sub:rotate-180 transition-transform text-xs"></i>
-                                        </summary>
-                                        <div class="grid grid-cols-3 gap-2 mt-2 pt-1">
-                                            ${Array.from({ length: l.months }, (_, i) => i + 1).map(m => {
-                                                const isChecked = (l.paidMonths || []).includes(m);
-                                                return `
-                                                    <button onclick="toggleLoanMonth(${l.id}, ${m})" class="flex items-center justify-between p-2 rounded-lg text-[11px] font-medium border ${isChecked ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-500'}">
-                                                        <span>Kỳ ${m}/${l.months}</span>
-                                                        <i class="fa-solid ${isChecked ? 'fa-circle-check text-green-600' : 'fa-circle-thin text-gray-300'} text-xs"></i>
-                                                    </button>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </details>
-                                </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </details>
+                        `}
+                    </div>
                 `;
             }
         }
 
-        switchTab('projects');
+        // Khởi chạy ứng dụng
+        render();
     </script>
 </body>
 </html>

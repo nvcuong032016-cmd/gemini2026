@@ -66,7 +66,7 @@
     </div>
 
     <script>
-        let store = JSON.parse(localStorage.getItem('my_app_data_v8')) || {
+        let store = JSON.parse(localStorage.getItem('my_app_data_v9')) || {
             projects: [],
             cards: [
                 { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '15', dueDate: '5' }
@@ -80,10 +80,9 @@
         };
 
         let currentTab = 'finance';
-        let activeProjectId = null;
 
         function saveData() {
-            localStorage.setItem('my_app_data_v8', JSON.stringify(store));
+            localStorage.setItem('my_app_data_v9', JSON.stringify(store));
         }
 
         function showToast(msg) {
@@ -102,7 +101,6 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            activeProjectId = null;
             document.querySelectorAll('nav button').forEach(btn => btn.className = 'flex flex-col items-center text-gray-400');
             document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-blue-600';
             render();
@@ -155,14 +153,13 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        // --- COPY FUNCTION ---
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast('Đã chép nội dung vào bộ nhớ tạm');
             });
         }
 
-        // --- MODAL HANDLERS (ADD & EDIT) ---
+        // --- MODALS ---
         function openModal(type, editId = null) {
             const modal = document.getElementById('modal');
             const title = document.getElementById('modal-title');
@@ -385,17 +382,17 @@
                             ${store.cards.map(c => {
                                 const copyContent = `Ngân hàng: ${c.bank}\nLoại thẻ: ${c.cardType}\nHạn mức: ${c.limit.toLocaleString()} đ\nNgày sao kê: Ngày ${c.statementDate}\nHạn thanh toán: Ngày ${c.dueDate}\nGhi chú: ${c.info || 'Không có'}`;
                                 return `
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 relative group/card">
-                                    <div class="flex justify-between items-start mb-1">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
+                                    <div class="flex justify-between items-start mb-2">
                                         <div>
-                                            <div class="font-bold text-gray-800 text-base flex items-center gap-2">
+                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5">
                                                 ${c.bank}
-                                                <button onclick="openModal('card', ${c.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs p-1" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                                <button onclick="openModal('card', ${c.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
                                             </div>
-                                            <div class="flex items-center gap-2 mt-0.5">
-                                                <span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">${c.cardType || 'Visa'}</span>
-                                                <span class="text-[10px] bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded">${c.days || '45 ngày'}</span>
+                                            <div class="flex items-center gap-1.5 mt-1">
+                                                <span class="text-[10px] bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded-full border border-blue-100">${c.cardType || 'Visa'}</span>
+                                                <span class="text-[10px] bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded-full">${c.days || '45 ngày'}</span>
                                             </div>
                                         </div>
                                         <div class="text-right">
@@ -403,14 +400,17 @@
                                             <span class="font-bold text-blue-600 text-sm">${(c.limit || 0).toLocaleString()} đ</span>
                                         </div>
                                     </div>
-                                    ${c.info ? `<p class="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg whitespace-pre-line my-2.5 border border-gray-100">${c.info}</p>` : ''}
-                                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-lg mt-2">
+                                    
+                                    ${c.info ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg my-2.5 border border-gray-100">${c.info}</p>` : ''}
+                                    
+                                    <!-- Cân đối 2 bên đều nhau -->
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl mt-2 border border-slate-100">
                                         <div>
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold">Ngày sao kê</span>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày sao kê</span>
                                             <b class="text-gray-700">Ngày ${c.statementDate} hàng tháng</b>
                                         </div>
-                                        <div>
-                                            <span class="text-gray-400 block text-[10px] uppercase font-bold">Hạn thanh toán</span>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Hạn thanh toán</span>
                                             <b class="text-red-500">Ngày ${c.dueDate} hàng tháng</b>
                                         </div>
                                     </div>
@@ -434,19 +434,27 @@
                             ${store.lends.map(l => {
                                 const daysCount = calculateDaysFrom(l.startDate);
                                 const isOrg = l.type === 'Tổ chức';
-                                const copyContent = `Đối tượng: ${l.borrower} (${l.type})\nSố tiền: ${l.amount.toLocaleString()} đ\nNgày bắt đầu: ${formatDate(l.startDate)}\nSố ngày cho vay: ${daysCount} ngày\nGhi chú: ${l.note || 'Không có'}`;
+                                const copyContent = `Đối tượng: ${l.borrower} (${l.type})\nSố tiền: ${l.amount.toLocaleString()} đ\nNgày bắt đầu: ${formatDate(l.startDate)}\nSố ngày cho vay: ${daysCount} ngày\nTrạng thái: ${l.completed ? 'Hoàn thành' : 'Đang xử lý'}\nGhi chú: ${l.note || 'Không có'}`;
+                                
                                 return `
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 ${l.completed ? 'opacity-60 bg-gray-50' : ''}">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
                                             <div class="font-bold text-gray-800 text-base flex items-center gap-1.5 flex-wrap">
-                                                ${l.borrower}
-                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-emerald-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-emerald-600 text-xs p-1" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
-                                                <span class="text-[10px] ${isOrg ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'} font-bold px-2 py-0.5 rounded">${l.type || 'Cá nhân'}</span>
-                                                ${l.completed ? '<span class="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded">Đã thu hồi</span>' : ''}
+                                                <span>${l.borrower}</span>
+                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                                <!-- Thẻ Cá nhân / Tổ chức mịn hơn -->
+                                                <span class="text-[10px] ${isOrg ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-amber-50 text-amber-600 border-amber-100'} border font-semibold px-2.5 py-0.5 rounded-full inline-block">
+                                                    ${l.type || 'Cá nhân'}
+                                                </span>
                                             </div>
-                                            <div class="text-xs text-gray-400 mt-0.5">Ngày bắt đầu: <b>${formatDate(l.startDate)}</b></div>
+                                            
+                                            <!-- Trạng thái tích chọn gọn màu sắc -->
+                                            <button onclick="toggleLendStatus(${l.id})" class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${l.completed ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}">
+                                                <i class="fa-solid ${l.completed ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
+                                                <span>${l.completed ? 'Hoàn thành' : 'Đang xử lý'}</span>
+                                            </button>
                                         </div>
                                         <div class="text-right">
                                             <span class="text-[10px] text-gray-400 font-bold uppercase block">Số tiền</span>
@@ -454,19 +462,19 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex justify-between items-center bg-emerald-50/60 p-2.5 rounded-lg my-2 border border-emerald-100/50 text-xs">
-                                        <span class="text-gray-600 font-medium">Số ngày cho vay:</span>
-                                        <span class="font-bold text-emerald-700 text-sm">${daysCount} ngày</span>
+                                    <!-- Cân đối 2 bên đều nhau -->
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-emerald-50/50 p-3 rounded-xl my-2.5 border border-emerald-100/50">
+                                        <div>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
+                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Số ngày cho vay</span>
+                                            <b class="text-emerald-700">${daysCount} ngày</b>
+                                        </div>
                                     </div>
 
-                                    ${l.note ? `<p class="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg whitespace-pre-line my-2 border border-gray-100">${l.note}</p>` : ''}
-
-                                    <div class="mt-3 text-right">
-                                        <button onclick="toggleLendStatus(${l.id})" class="px-3 py-1.5 text-xs font-bold rounded-lg transition ${l.completed ? 'bg-gray-200 text-gray-700' : 'bg-emerald-600 text-white hover:bg-emerald-700'}">
-                                            <i class="fa-solid ${l.completed ? 'fa-rotate-left' : 'fa-check'} mr-1"></i>
-                                            ${l.completed ? 'Đánh dấu chưa lấy tiền' : 'Hoàn thành (Đã lấy lại tiền)'}
-                                        </button>
-                                    </div>
+                                    ${l.note ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100">${l.note}</p>` : ''}
                                 </div>
                                 `;
                             }).join('')}
@@ -494,12 +502,12 @@
                                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
                                     <div class="flex justify-between items-start mb-2">
                                         <div>
-                                            <div class="font-bold text-gray-800 text-base flex items-center gap-2">
+                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5">
                                                 ${l.name}
-                                                <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs p-1" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                                <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
                                             </div>
-                                            <div class="text-xs text-blue-600 font-semibold">${l.bank}</div>
+                                            <div class="text-xs text-blue-600 font-semibold mt-0.5">${l.bank}</div>
                                         </div>
                                         <div class="text-right">
                                             <div class="text-[10px] text-gray-400 font-bold uppercase">Tổng vay</div>
@@ -507,13 +515,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-2 text-xs bg-blue-50/50 p-2.5 rounded-lg my-3 border border-blue-100/50">
+                                    <!-- Cân đối 2 bên đều nhau -->
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-blue-50/50 p-3 rounded-xl my-3 border border-blue-100/50">
                                         <div>
-                                            <span class="text-gray-500 block text-[10px]">Ngày bắt đầu:</span>
-                                            <b>${formatDate(l.startDate)}</b>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
+                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
                                         </div>
-                                        <div>
-                                            <span class="text-gray-500 block text-[10px]">Trả hàng tháng:</span>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Trả hàng tháng</span>
                                             <b class="text-blue-700">${monthlyPay.toLocaleString()} đ</b>
                                         </div>
                                     </div>

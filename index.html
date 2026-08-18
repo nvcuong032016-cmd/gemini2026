@@ -44,7 +44,7 @@
         <!-- Header -->
         <header class="px-5 pt-5 pb-3 bg-white/80 backdrop-blur-md flex justify-between items-center border-b border-sage-100 sticky top-0 z-20">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-bars text-lg text-slateDark cursor-pointer"></i>
+                <i class="fa-solid fa-leaf text-lg text-sage-500"></i>
                 <h1 id="header-title" class="text-xl font-bold text-slateDark">Công việc</h1>
             </div>
             <div class="flex items-center gap-3">
@@ -73,7 +73,7 @@
                 <span class="text-[10px] mt-1 font-medium">Công việc</span>
             </button>
             <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center text-gray-400 hover:text-sage-500 transition">
-                <i class="fa-regular fa-user text-lg"></i>
+                <i class="fa-regular fa-credit-card text-lg"></i>
                 <span class="text-[10px] mt-1 font-medium">Cá nhân</span>
             </button>
         </nav>
@@ -94,7 +94,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slateDark text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
         <i class="fa-solid fa-check text-warmYellow-400"></i>
-        <span id="toast-msg">Đã chép nội dung</span>
+        <span id="toast-msg">Đã cập nhật</span>
     </div>
 
     <script>
@@ -108,7 +108,7 @@
                         { id: 102, text: 'Lập hồ sơ kỹ thuật', done: true },
                         { id: 103, text: 'Triển khai hạ tầng', done: false }
                     ]},
-                    { id: 2, name: 'Dự án B', amount: 20000000, startDate: '2026-08-05', note: 'Vé điện tử', type: 'G-Ticket', collapsed: false, tasks: [
+                    { id: 2, name: 'Hệ thống Vé Điện Tử', amount: 20000000, startDate: '2026-08-05', note: 'Vé điện tử', type: 'G-Ticket', collapsed: false, tasks: [
                         { id: 201, text: 'Tích hợp Gateway', done: true },
                         { id: 202, text: 'Kiểm thử ứng dụng', done: false }
                     ]}
@@ -143,15 +143,8 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 2000);
-        }
-
         function clearCache() {
-            if (confirm("Làm mới dữ liệu?")) {
+            if (confirm("Reset lại dữ liệu mặc định?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -180,8 +173,6 @@
                 else openModal('singleTask');
             } else if (currentTab === 'finance') {
                 if (financeSubTab === 'cards') openModal('card');
-                else if (financeSubTab === 'loans') openModal('loan');
-                else if (financeSubTab === 'lends') openModal('lend');
             }
         }
 
@@ -200,34 +191,11 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        function renderDayOptions(selected = '') {
-            let opts = `<option value="">Chọn ngày</option>`;
-            for (let i = 1; i <= 31; i++) {
-                opts += `<option value="${i}" ${String(selected) === String(i) ? 'selected' : ''}>Ngày ${i}</option>`;
-            }
-            return opts;
-        }
-
-        function validateFields(fieldIds) {
-            let isValid = true;
-            fieldIds.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && !el.value.trim()) {
-                    el.classList.add('border-red-400');
-                    isValid = false;
-                } else if (el) {
-                    el.classList.remove('border-red-400');
-                }
-            });
-            return isValid;
-        }
-
         function toggleProjectCollapse(projectId) {
             const project = store.projects.find(p => p.id === projectId);
             if (project) {
                 project.collapsed = !project.collapsed;
-                saveData();
-                render();
+                saveData(); render();
             }
         }
 
@@ -237,8 +205,7 @@
                 const task = project.tasks.find(t => t.id === taskId);
                 if (task) {
                     task.done = !task.done;
-                    saveData();
-                    render();
+                    saveData(); render();
                 }
             }
         }
@@ -250,13 +217,8 @@
             const project = store.projects.find(p => p.id === projectId);
             if (project) {
                 if (!project.tasks) project.tasks = [];
-                project.tasks.push({
-                    id: Date.now(),
-                    text: input.value.trim(),
-                    done: false
-                });
-                saveData();
-                render();
+                project.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });
+                saveData(); render();
             }
         }
 
@@ -264,8 +226,7 @@
             const project = store.projects.find(p => p.id === projectId);
             if (project && project.tasks) {
                 project.tasks = project.tasks.filter(t => t.id !== taskId);
-                saveData();
-                render();
+                saveData(); render();
             }
         }
 
@@ -274,63 +235,11 @@
             if (t) { t.done = !t.done; saveData(); render(); }
         }
 
-        function deleteProject(id) {
-            if (confirm('Xóa dự án này?')) {
-                store.projects = store.projects.filter(p => p.id !== id);
-                saveData(); render();
-            }
-        }
-
-        function deleteSingleTask(id) {
-            store.singleTasks = store.singleTasks.filter(t => t.id !== id);
-            saveData(); render();
-        }
-
-        function deleteCard(id) {
-            if (confirm('Xóa thẻ này?')) {
-                store.cards = store.cards.filter(c => c.id !== id);
-                saveData(); render();
-            }
-        }
-
-        function deleteLoan(id) {
-            if (confirm('Xóa khoản vay này?')) {
-                store.loans = store.loans.filter(l => l.id !== id);
-                saveData(); render();
-            }
-        }
-
-        function deleteLend(id) {
-            if (confirm('Xóa khoản này?')) {
-                store.lends = store.lends.filter(l => l.id !== id);
-                saveData(); render();
-            }
-        }
-
-        function toggleLendStatus(lendId) {
-            const lend = store.lends.find(l => l.id === lendId);
-            if (lend) {
-                lend.completed = !lend.completed;
-                saveData(); render();
-            }
-        }
-
-        function toggleLoanMonth(loanId, monthIndex) {
-            const loan = store.loans.find(l => l.id === loanId);
-            if (loan) {
-                if (!Array.isArray(loan.paidMonths)) loan.paidMonths = [];
-                const idx = loan.paidMonths.indexOf(monthIndex);
-                if (idx > -1) loan.paidMonths.splice(idx, 1);
-                else loan.paidMonths.push(monthIndex);
-                saveData(); render();
-            }
-        }
-
         function closeModal() {
             document.getElementById('modal').classList.add('hidden');
         }
 
-        function openModal(type, editId = null) {
+        function openModal(type) {
             const modal = document.getElementById('modal');
             const title = document.getElementById('modal-title');
             const body = document.getElementById('modal-body');
@@ -339,157 +248,71 @@
             modal.classList.remove('hidden');
 
             if (type === 'project') {
-                const item = editId ? store.projects.find(p => p.id === editId) : null;
-                title.innerText = item ? 'Sửa Dự Án' : 'Thêm Dự Án Mới';
+                title.innerText = 'Thêm Dự Án Mới';
                 body.innerHTML = `
                     <div>
                         <label class="text-xs text-slateDark font-semibold mb-1 block">Tên dự án *</label>
-                        <input id="inp-p-name" type="text" value="${item ? item.name : ''}" placeholder="Nhập tên..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm focus:outline-none focus:border-sage-500">
+                        <input id="inp-p-name" type="text" placeholder="Nhập tên dự án..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm focus:outline-none focus:border-sage-500">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại *</label>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại</label>
                             <select id="inp-p-type" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
-                                <option value="DVCI" ${item && item.type === 'DVCI' ? 'selected' : ''}>DVCI</option>
-                                <option value="G-Ticket" ${item && item.type === 'G-Ticket' ? 'selected' : ''}>G-Ticket</option>
-                                <option value="Khác" ${item && item.type === 'Khác' ? 'selected' : ''}>Khác</option>
+                                <option value="DVCI">DVCI</option>
+                                <option value="G-Ticket">G-Ticket</option>
+                                <option value="Khác">Khác</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Số tiền (VNĐ)</label>
-                            <input id="inp-p-amount" type="text" value="${item && item.amount ? item.amount.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="0" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Giá trị (VNĐ)</label>
+                            <input id="inp-p-amount" type="text" oninput="formatNumberInput(this)" placeholder="0" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                         </div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ngày bắt đầu</label>
-                        <input id="inp-p-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ghi chú</label>
-                        <textarea id="inp-p-note" rows="2" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm" placeholder="Ghi chú...">${item ? item.note || '' : ''}</textarea>
                     </div>
                 `;
                 saveBtn.onclick = () => {
-                    if (!validateFields(['inp-p-name'])) return;
-                    const data = {
-                        id: editId || Date.now(),
-                        name: document.getElementById('inp-p-name').value,
+                    const name = document.getElementById('inp-p-name').value;
+                    if (!name) return;
+                    store.projects.push({
+                        id: Date.now(),
+                        name: name,
                         type: document.getElementById('inp-p-type').value,
                         amount: getRawNumber(document.getElementById('inp-p-amount').value),
-                        startDate: document.getElementById('inp-p-start').value,
-                        note: document.getElementById('inp-p-note').value,
-                        collapsed: item ? !!item.collapsed : false,
-                        tasks: item ? item.tasks : []
-                    };
-                    if (editId) {
-                        const idx = store.projects.findIndex(p => p.id === editId);
-                        store.projects[idx] = data;
-                    } else {
-                        store.projects.push(data);
-                    }
+                        collapsed: false,
+                        tasks: []
+                    });
                     saveData(); closeModal(); render();
                 };
             } else if (type === 'singleTask') {
-                const item = editId ? store.singleTasks.find(t => t.id === editId) : null;
-                title.innerText = item ? 'Sửa Việc Riêng Lẻ' : 'Thêm Việc Riêng Lẻ';
+                title.innerText = 'Thêm Việc Riêng Lẻ';
                 body.innerHTML = `
                     <div>
                         <label class="text-xs text-slateDark font-semibold mb-1 block">Nội dung *</label>
-                        <input id="inp-t-text" type="text" value="${item ? item.text : ''}" placeholder="Tên việc..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                        <input id="inp-t-text" type="text" placeholder="Tên công việc..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="text-xs text-slateDark font-semibold mb-1 block">Mức ưu tiên</label>
                             <select id="inp-t-priority" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
-                                <option value="Bình thường" ${item && item.priority === 'Bình thường' ? 'selected' : ''}>Bình thường</option>
-                                <option value="Gấp" ${item && item.priority === 'Gấp' ? 'selected' : ''}>Gấp</option>
+                                <option value="Bình thường">Bình thường</option>
+                                <option value="Gấp">Gấp</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn chót</label>
-                            <input id="inp-t-date" type="date" value="${item ? item.dueDate : ''}" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                            <input id="inp-t-date" type="date" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                         </div>
                     </div>
                 `;
                 saveBtn.onclick = () => {
-                    if (!validateFields(['inp-t-text'])) return;
-                    const data = {
-                        id: editId || Date.now(),
-                        text: document.getElementById('inp-t-text').value,
+                    const text = document.getElementById('inp-t-text').value;
+                    if (!text) return;
+                    store.singleTasks.push({
+                        id: Date.now(),
+                        text: text,
                         priority: document.getElementById('inp-t-priority').value,
                         dueDate: document.getElementById('inp-t-date').value,
-                        done: item ? item.done : false
-                    };
-                    if (editId) {
-                        const idx = store.singleTasks.findIndex(t => t.id === editId);
-                        store.singleTasks[idx] = data;
-                    } else {
-                        store.singleTasks.push(data);
-                    }
-                    saveData(); closeModal(); render();
-                };
-            } else if (type === 'card') {
-                const item = editId ? store.cards.find(c => c.id === editId) : null;
-                title.innerText = item ? 'Sửa Thẻ Tín Dụng' : 'Thêm Thẻ Tín Dụng';
-                body.innerHTML = `
-                    <div>
-                        <label class="text-xs text-slateDark font-semibold mb-1 block">Tên ngân hàng *</label>
-                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" placeholder="VPBank, MB..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại thẻ</label>
-                            <select id="inp-card-type" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
-                                <option value="Visa" ${item && item.cardType === 'Visa' ? 'selected' : ''}>Visa</option>
-                                <option value="JCB" ${item && item.cardType === 'JCB' ? 'selected' : ''}>JCB</option>
-                                <option value="Mastercard" ${item && item.cardType === 'Mastercard' ? 'selected' : ''}>Mastercard</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Thời hạn</label>
-                            <select id="inp-days" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
-                                <option value="45 ngày" ${item && item.days === '45 ngày' ? 'selected' : ''}>45 ngày</option>
-                                <option value="55 ngày" ${item && item.days === '55 ngày' ? 'selected' : ''}>55 ngày</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn mức *</label>
-                        <input id="inp-limit" type="text" value="${item ? item.limit.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="50,000,000" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ghi chú</label>
-                        <textarea id="inp-info" rows="2" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">${item ? item.info : ''}</textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Ngày sao kê *</label>
-                            <select id="inp-statement" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">${renderDayOptions(item ? item.statementDate : '')}</select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn thanh toán *</label>
-                            <select id="inp-due" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">${renderDayOptions(item ? item.dueDate : '')}</select>
-                        </div>
-                    </div>
-                `;
-                saveBtn.onclick = () => {
-                    if (!validateFields(['inp-bank', 'inp-limit', 'inp-statement', 'inp-due'])) return;
-                    const data = {
-                        id: editId || Date.now(),
-                        bank: document.getElementById('inp-bank').value,
-                        cardType: document.getElementById('inp-card-type').value,
-                        days: document.getElementById('inp-days').value,
-                        limit: getRawNumber(document.getElementById('inp-limit').value),
-                        info: document.getElementById('inp-info').value,
-                        statementDate: document.getElementById('inp-statement').value,
-                        dueDate: document.getElementById('inp-due').value
-                    };
-                    if (editId) {
-                        const idx = store.cards.findIndex(c => c.id === editId);
-                        store.cards[idx] = data;
-                    } else {
-                        store.cards.push(data);
-                    }
+                        done: false
+                    });
                     saveData(); closeModal(); render();
                 };
             }
@@ -518,25 +341,23 @@
                             <div class="bg-white rounded-2xl p-4 shadow-sm mb-3 border border-sage-100">
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sage-100 text-sage-700">${p.type}</span>
-                                        <h3 class="font-bold text-slateDark mt-1 text-base">${p.name}</h3>
+                                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-sage-100 text-sage-700">${p.type}</span>
+                                        <h3 class="font-bold text-slateDark mt-2 text-base">${p.name}</h3>
                                     </div>
-                                    <div class="flex gap-2 text-gray-400">
-                                        <button onclick="openModal('project', ${p.id})" class="hover:text-sage-600"><i class="fa-solid fa-pen text-xs"></i></button>
-                                        <button onclick="deleteProject(${p.id})" class="hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
-                                        <button onclick="toggleProjectCollapse(${p.id})" class="hover:text-slateDark"><i class="fa-solid fa-chevron-${p.collapsed ? 'down' : 'up'} text-xs"></i></button>
-                                    </div>
+                                    <button onclick="toggleProjectCollapse(${p.id})" class="text-gray-400 hover:text-slateDark p-1">
+                                        <i class="fa-solid fa-chevron-${p.collapsed ? 'down' : 'up'} text-xs"></i>
+                                    </button>
                                 </div>
-                                <div class="text-xs text-gray-500 mb-2">Số tiền: <span class="font-semibold text-slateDark">${p.amount ? p.amount.toLocaleString() : '0'} VNĐ</span></div>
+                                <div class="text-xs text-gray-500 mb-2">Ngân sách: <span class="font-semibold text-slateDark">${p.amount ? p.amount.toLocaleString() : '0'} VNĐ</span></div>
 
-                                <div class="w-full bg-gray-100 h-2 rounded-full mb-3 overflow-hidden">
+                                <div class="w-full bg-sage-50 h-2 rounded-full mb-3 overflow-hidden">
                                     <div class="bg-sage-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
                                 </div>
 
                                 ${!p.collapsed ? `
-                                    <div class="space-y-2 border-t border-gray-50 pt-3">
+                                    <div class="space-y-2 border-t border-sage-50 pt-3">
                                         ${tasks.map(t => `
-                                            <div class="flex items-center justify-between text-xs bg-cream p-2 rounded-xl">
+                                            <div class="flex items-center justify-between text-xs bg-cream p-2.5 rounded-xl border border-sage-50">
                                                 <div class="flex items-center gap-2 cursor-pointer" onclick="toggleProjectTask(${p.id}, ${t.id})">
                                                     <i class="fa-${t.done ? 'solid fa-circle-check text-sage-500' : 'regular fa-circle text-gray-300'} text-base"></i>
                                                     <span class="${t.done ? 'line-through text-gray-400' : 'text-slateDark'}">${t.text}</span>
@@ -567,21 +388,49 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex gap-2 text-gray-400">
-                                    <button onclick="openModal('singleTask', ${t.id})" class="hover:text-sage-600"><i class="fa-solid fa-pen text-xs"></i></button>
-                                    <button onclick="deleteSingleTask(${t.id})" class="hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
-                                </div>
                             </div>
                         `;
                     });
                 }
                 main.innerHTML = html;
             } else if (currentTab === 'finance') {
-                title.innerText = 'Cá nhân';
-                main.innerHTML = `<div class="bg-white p-4 rounded-2xl border border-sage-100 text-center text-xs text-gray-500">Khu vực quản lý thẻ & tài chính cá nhân</div>`;
+                title.innerText = 'Thẻ & Tài chính';
+                main.innerHTML = `
+                    <div class="space-y-3">
+                        ${store.cards.map(c => `
+                            <div class="bg-gradient-to-br from-sage-500 to-sage-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs opacity-80">${c.bank}</p>
+                                        <h4 class="font-bold text-lg tracking-wide">${c.cardType}</h4>
+                                    </div>
+                                    <span class="bg-warmYellow-400 text-slateDark text-[10px] font-bold px-2 py-0.5 rounded-md">${c.days}</span>
+                                </div>
+                                <div class="mt-6 flex justify-between items-end">
+                                    <div>
+                                        <p class="text-[10px] opacity-70">Hạn mức</p>
+                                        <p class="font-bold text-base">${c.limit.toLocaleString()} đ</p>
+                                    </div>
+                                    <div class="text-right text-[10px]">
+                                        <p>Sao kê: Ngày ${c.statementDate}</p>
+                                        <p class="text-warmYellow-400 font-semibold">Hạn trả: Ngày ${c.dueDate}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             } else {
-                title.innerText = 'Trang chủ';
-                main.innerHTML = `<div class="bg-white p-4 rounded-2xl border border-sage-100 text-center text-xs text-gray-500">Tổng quan hoạt động</div>`;
+                title.innerText = 'Tổng quan';
+                main.innerHTML = `
+                    <div class="bg-white p-5 rounded-2xl border border-sage-100 shadow-sm text-center">
+                        <div class="w-12 h-12 bg-sage-50 text-sage-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-chart-pie text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-slateDark text-sm">Chào mừng trở lại!</h3>
+                        <p class="text-xs text-gray-400 mt-1">Ứng dụng đã được cập nhật tông màu Sage & Warm Yellow mới.</p>
+                    </div>
+                `;
             }
         }
 

@@ -61,7 +61,7 @@
 
     <!-- Application Script -->
     <script>
-        let store = JSON.parse(localStorage.getItem('my_app_data_v4')) || {
+        let store = JSON.parse(localStorage.getItem('my_app_data_v5')) || {
             projects: [
                 {
                     id: 1, name: 'DVCI Đà Lạt', startDate: '2026-08-01', note: 'Dự án trọng điểm.',
@@ -72,7 +72,7 @@
                 }
             ],
             cards: [
-                { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '2026-08-15', dueDate: '2026-09-05' }
+                { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '15', dueDate: '5' }
             ],
             loans: [
                 { id: 1, bank: 'VPBank', name: 'Khoản vay mua xe', totalAmount: 24000000, monthlyPay: 2000000, startDate: '2026-01-10', months: 12, paidMonths: [1, 2, 3] }
@@ -83,7 +83,7 @@
         let activeProjectId = null;
 
         function saveData() {
-            localStorage.setItem('my_app_data_v4', JSON.stringify(store));
+            localStorage.setItem('my_app_data_v5', JSON.stringify(store));
         }
 
         function clearCache() {
@@ -92,6 +92,7 @@
                 localStorage.removeItem('my_app_data_v2');
                 localStorage.removeItem('my_app_data_v3');
                 localStorage.removeItem('my_app_data_v4');
+                localStorage.removeItem('my_app_data_v5');
                 location.reload();
             }
         }
@@ -104,12 +105,57 @@
             render();
         }
 
+        // Định dạng input tiền mặt phân cách bằng dấu phẩy
+        function formatNumberInput(input) {
+            let val = input.value.replace(/,/g, '').replace(/\D/g, '');
+            if (val) {
+                input.value = Number(val).toLocaleString('en-US');
+            } else {
+                input.value = '';
+            }
+        }
+
+        function getRawNumber(value) {
+            return parseFloat(value.replace(/,/g, '')) || 0;
+        }
+
+        // Tạo danh sách option từ ngày 1 đến 31
+        function renderDayOptions() {
+            let opts = `<option value="">Chọn ngày</option>`;
+            for (let i = 1; i <= 31; i++) {
+                opts += `<option value="${i}">Ngày ${i}</option>`;
+            }
+            return opts;
+        }
+
         function calcMonthly() {
-            const total = parseFloat(document.getElementById('inp-amount').value) || 0;
+            const total = getRawNumber(document.getElementById('inp-amount').value);
             const months = parseInt(document.getElementById('inp-months').value) || 12;
             if (total > 0) {
-                document.getElementById('inp-monthly').value = Math.round(total / months);
+                const monthly = Math.round(total / months);
+                document.getElementById('inp-monthly').value = monthly.toLocaleString('en-US');
             }
+        }
+
+        function clearValidationErrors() {
+            document.querySelectorAll('.required-field').forEach(el => {
+                el.classList.remove('border-red-500');
+                el.classList.add('border-gray-200');
+            });
+        }
+
+        function validateFields(fieldIds) {
+            clearValidationErrors();
+            let isValid = true;
+            fieldIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.value.trim()) {
+                    el.classList.remove('border-gray-200');
+                    el.classList.add('border-red-500');
+                    isValid = false;
+                }
+            });
+            return isValid;
         }
 
         function openModal(type, projId = null) {
@@ -124,8 +170,8 @@
                 title.innerText = 'Thêm Dự Án Mới';
                 body.innerHTML = `
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên dự án</label>
-                        <input id="inp-name" type="text" placeholder="Nhập tên dự án" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên dự án *</label>
+                        <input id="inp-name" type="text" placeholder="Nhập tên dự án" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu</label>
@@ -133,17 +179,19 @@
                     </div>
                 `;
                 saveBtn.onclick = () => {
+                    if (!validateFields(['inp-name'])) return;
                     const name = document.getElementById('inp-name').value;
                     const startDate = document.getElementById('inp-start').value;
-                    if (name) {
-                        store.projects.push({ id: Date.now(), name, startDate, note: '', tasks: [] });
-                        saveData(); closeModal(); render();
-                    }
+                    store.projects.push({ id: Date.now(), name, startDate, note: '', tasks: [] });
+                    saveData(); closeModal(); render();
                 };
             } else if (type === 'card') {
                 title.innerText = 'Thêm Thẻ Tín Dụng';
                 body.innerHTML = `
-                    <input id="inp-bank" type="text" placeholder="Tên ngân hàng (VPBank, MB...)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên ngân hàng *</label>
+                        <input id="inp-bank" type="text" placeholder="Tên ngân hàng (VPBank, MB...)" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -163,41 +211,60 @@
                         </div>
                     </div>
 
-                    <input id="inp-limit" type="number" placeholder="Hạn mức thẻ (VNĐ)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn mức thẻ (VNĐ) *</label>
+                        <input id="inp-limit" type="text" oninput="formatNumberInput(this)" placeholder="Ví dụ: 50,000,000" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
 
-                    <textarea id="inp-info" rows="2" placeholder="Ghi chú (có thể xuống dòng)..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm"></textarea>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-info" rows="2" placeholder="Ghi chú (có thể xuống dòng)..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm"></textarea>
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày sao kê</label>
-                            <input id="inp-statement" type="date" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày sao kê *</label>
+                            <select id="inp-statement" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                ${renderDayOptions()}
+                            </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn thanh toán</label>
-                            <input id="inp-due" type="date" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn thanh toán *</label>
+                            <select id="inp-due" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                ${renderDayOptions()}
+                            </select>
                         </div>
                     </div>
                 `;
                 saveBtn.onclick = () => {
+                    if (!validateFields(['inp-bank', 'inp-limit', 'inp-statement', 'inp-due'])) return;
+                    
                     const bank = document.getElementById('inp-bank').value;
                     const cardType = document.getElementById('inp-card-type').value;
                     const days = document.getElementById('inp-days').value;
-                    const limit = parseFloat(document.getElementById('inp-limit').value) || 0;
+                    const limit = getRawNumber(document.getElementById('inp-limit').value);
                     const info = document.getElementById('inp-info').value;
                     const statementDate = document.getElementById('inp-statement').value;
                     const dueDate = document.getElementById('inp-due').value;
 
-                    if (bank) {
-                        store.cards.push({ id: Date.now(), bank, cardType, days, limit, info, statementDate, dueDate });
-                        saveData(); closeModal(); render();
-                    }
+                    store.cards.push({ id: Date.now(), bank, cardType, days, limit, info, statementDate, dueDate });
+                    saveData(); closeModal(); render();
                 };
             } else if (type === 'loan') {
                 title.innerText = 'Thêm Khoản Vay / Trả Góp';
                 body.innerHTML = `
-                    <input id="inp-bank" type="text" placeholder="Ngân hàng / Đơn vị cho vay" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    <input id="inp-name" type="text" placeholder="Tên khoản vay / Món đồ" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    <input id="inp-amount" type="number" oninput="calcMonthly()" placeholder="Tổng số tiền (VNĐ)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngân hàng / Đơn vị cho vay *</label>
+                        <input id="inp-bank" type="text" placeholder="VPBank, FE Credit..." class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên khoản vay / Món đồ *</label>
+                        <input id="inp-name" type="text" placeholder="Mua xe, Mua điện thoại..." class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tổng số tiền (VNĐ) *</label>
+                        <input id="inp-amount" type="text" oninput="formatNumberInput(this); calcMonthly();" placeholder="Ví dụ: 24,000,000" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
                     
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -210,8 +277,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Trả hàng tháng (VNĐ)</label>
-                            <input id="inp-monthly" type="number" placeholder="Số tiền/tháng" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50">
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Trả hàng tháng (VNĐ) *</label>
+                            <input id="inp-monthly" type="text" oninput="formatNumberInput(this)" placeholder="Số tiền/tháng" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50">
                         </div>
                     </div>
 
@@ -221,28 +288,32 @@
                     </div>
                 `;
                 saveBtn.onclick = () => {
+                    if (!validateFields(['inp-bank', 'inp-name', 'inp-amount', 'inp-monthly'])) return;
+
                     const bank = document.getElementById('inp-bank').value;
-                    const name = document.getElementById('inp-name').value || 'Khoản vay';
-                    const totalAmount = parseFloat(document.getElementById('inp-amount').value) || 0;
-                    const monthlyPay = parseFloat(document.getElementById('inp-monthly').value) || Math.round(totalAmount / 12);
+                    const name = document.getElementById('inp-name').value;
+                    const totalAmount = getRawNumber(document.getElementById('inp-amount').value);
+                    const monthlyPay = getRawNumber(document.getElementById('inp-monthly').value);
                     const startDate = document.getElementById('inp-start').value;
                     const months = parseInt(document.getElementById('inp-months').value);
 
-                    if (bank && totalAmount > 0) {
-                        store.loans.push({ id: Date.now(), bank, name, totalAmount, monthlyPay, startDate, months, paidMonths: [] });
-                        saveData(); closeModal(); render();
-                    }
+                    store.loans.push({ id: Date.now(), bank, name, totalAmount, monthlyPay, startDate, months, paidMonths: [] });
+                    saveData(); closeModal(); render();
                 };
             } else if (type === 'task') {
                 title.innerText = 'Thêm Nhiệm Vụ';
-                body.innerHTML = `<input id="inp-title" type="text" placeholder="Tên nhiệm vụ" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">`;
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Nhiệm vụ *</label>
+                        <input id="inp-title" type="text" placeholder="Tên nhiệm vụ" class="required-field w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                `;
                 saveBtn.onclick = () => {
+                    if (!validateFields(['inp-title'])) return;
                     const titleVal = document.getElementById('inp-title').value;
-                    if (titleVal) {
-                        const proj = store.projects.find(p => p.id === projId);
-                        proj.tasks.push({ id: Date.now(), title: titleVal, date: new Date().toISOString().split('T')[0], done: false });
-                        saveData(); closeModal(); render();
-                    }
+                    const proj = store.projects.find(p => p.id === projId);
+                    proj.tasks.push({ id: Date.now(), title: titleVal, date: new Date().toISOString().split('T')[0], done: false });
+                    saveData(); closeModal(); render();
                 };
             }
         }
@@ -287,6 +358,7 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return 'Chưa chọn';
+            if (!dateStr.includes('-')) return dateStr;
             const d = new Date(dateStr);
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
@@ -370,11 +442,11 @@
                                 <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-lg mt-2">
                                     <div>
                                         <span class="text-gray-400 block text-[10px] uppercase font-bold">Ngày sao kê</span>
-                                        <b class="text-gray-700">${formatDate(c.statementDate)}</b>
+                                        <b class="text-gray-700">Mùng ${c.statementDate} hàng tháng</b>
                                     </div>
                                     <div>
                                         <span class="text-gray-400 block text-[10px] uppercase font-bold">Hạn thanh toán</span>
-                                        <b class="text-red-500">${formatDate(c.dueDate)}</b>
+                                        <b class="text-red-500">Mùng ${c.dueDate} hàng tháng</b>
                                     </div>
                                 </div>
                             </div>
@@ -422,14 +494,17 @@
                                     <span class="text-gray-500">Tiến độ: <b>${paidCount}/${l.months} kỳ</b></span>
                                     <span class="font-bold text-green-600">${percent}%</span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2 mb-4">
+                                <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
                                     <div class="bg-green-500 h-2 rounded-full transition-all" style="width: ${percent}%"></div>
                                 </div>
 
-                                <!-- Kỳ thanh toán theo định dạng Kỳ 1/12, Kỳ 2/12... -->
-                                <div class="border-t border-gray-100 pt-3">
-                                    <div class="text-xs font-bold text-gray-700 mb-2">Chi tiết kỳ thanh toán:</div>
-                                    <div class="grid grid-cols-3 gap-2">
+                                <!-- Accordion Chi tiết kỳ thanh toán thu gọn -->
+                                <details class="border-t border-gray-100 pt-2 group">
+                                    <summary class="flex justify-between items-center cursor-pointer text-xs font-bold text-gray-700 py-1 select-none">
+                                        <span>Chi tiết kỳ thanh toán</span>
+                                        <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
+                                    </summary>
+                                    <div class="grid grid-cols-3 gap-2 mt-2 pt-1">
                                         ${Array.from({ length: l.months }, (_, i) => i + 1).map(m => {
                                             const isChecked = l.paidMonths.includes(m);
                                             return `
@@ -440,7 +515,7 @@
                                             `;
                                         }).join('')}
                                     </div>
-                                </div>
+                                </details>
                             </div>
                             `;
                         }).join('')}

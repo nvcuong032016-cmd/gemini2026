@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Cá Nhân</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- Mobile Frame -->
+    <div class="w-full sm:max-w-md bg-slate-50 min-h-screen sm:min-h-[844px] sm:rounded-[36px] shadow-2xl flex flex-col justify-between overflow-hidden relative border-gray-200 border">
+
+        <!-- Header -->
+        <header class="p-5 bg-white flex justify-between items-center border-b border-gray-100">
+            <h1 id="header-title" class="text-xl font-bold text-gray-800">Trang chủ</h1>
+            <button onclick="alert('Không có thông báo mới')" class="text-gray-500 relative">
+                <i class="fa-regular fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2.5 h-2.5 rounded-full"></span>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 p-4 overflow-y-auto hide-scrollbar pb-20">
+            <!-- Nội dung sẽ được render bằng JavaScript -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bg-white border-t border-gray-100 flex justify-around py-3 absolute bottom-0 w-full z-10">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-600">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-xs mt-1 font-medium">Trang chủ</span>
+            </button>
+            <button onclick="switchTab('projects')" id="nav-projects" class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-list-check text-lg"></i>
+                <span class="text-xs mt-1 font-medium">Công việc</span>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center text-gray-400">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-xs mt-1 font-medium">Cá nhân</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // Dữ liệu ứng dụng lưu trong LocalStorage
+        let store = JSON.parse(localStorage.getItem('my_app_data')) || {
+            projects: [
+                {
+                    id: 1, name: 'DVCI Đà Lạt', color: 'blue',
+                    tasks: [
+                        { id: 101, title: 'Chuẩn bị hồ sơ', date: '2026-08-10', done: true },
+                        { id: 102, title: 'Kiểm tra dự toán', date: '2026-08-11', done: true },
+                        { id: 103, title: 'Đăng hồ sơ lên hệ thống', date: '2026-08-19', done: false },
+                        { id: 104, title: 'Nghiệm thu', date: '2026-08-30', done: false }
+                    ]
+                },
+                {
+                    id: 2, name: 'Dự án B', color: 'green',
+                    tasks: [
+                        { id: 201, title: 'Khảo sát mặt bằng', date: '2026-08-01', done: true },
+                        { id: 202, title: 'Lập bản vẽ', date: '2026-08-15', done: false }
+                    ]
+                }
+            ],
+            cards: [
+                { id: 1, bank: 'VPBank', statementDay: 15, dueDay: 5, statusText: 'Sắp đến hạn thanh toán: 3 ngày nữa', statusBg: 'bg-red-50 text-red-600' },
+                { id: 2, bank: 'Techcombank', statementDay: 20, dueDay: 10, statusText: 'Còn 18 ngày nữa đến hạn thanh toán', statusBg: 'bg-green-50 text-green-600' }
+            ],
+            loans: [
+                { id: 1, name: 'Khoản vay A - Ngân hàng A', amount: '20.000.000 đ', totalMonths: 12, paidMonths: 5, nextPayment: '10/09/2026 - 1.800.000 đ' },
+                { id: 2, name: 'Vay mua xe máy', amount: '30.000.000 đ', totalMonths: 24, paidMonths: 8, nextPayment: '15/09/2026 - 1.500.000 đ' }
+            ]
+        };
+
+        let currentTab = 'home';
+        let activeProjectId = null;
+
+        function saveData() {
+            localStorage.setItem('my_app_data', JSON.stringify(store));
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            activeProjectId = null;
+            
+            // Cập nhật màu Nav
+            document.querySelectorAll('nav button').forEach(btn => btn.className = 'flex flex-col items-center text-gray-400');
+            document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-blue-600';
+            
+            render();
+        }
+
+        function toggleTask(projId, taskId) {
+            const proj = store.projects.find(p => p.id === projId);
+            if (proj) {
+                const task = proj.tasks.find(t => t.id === taskId);
+                if (task) task.done = !task.done;
+                saveData();
+                render();
+            }
+        }
+
+        function addProject() {
+            const name = prompt("Nhập tên dự án mới:");
+            if (name) {
+                store.projects.push({ id: Date.now(), name, color: 'blue', tasks: [] });
+                saveData();
+                render();
+            }
+        }
+
+        function addTask(projId) {
+            const title = prompt("Nhập tên nhiệm vụ:");
+            if (title) {
+                const proj = store.projects.find(p => p.id === projId);
+                proj.tasks.push({ id: Date.now(), title, date: '2026-08-20', done: false });
+                saveData();
+                render();
+            }
+        }
+
+        function render() {
+            const main = document.getElementById('main-content');
+            const title = document.getElementById('header-title');
+
+            if (activeProjectId) {
+                renderProjectDetail(activeProjectId);
+                return;
+            }
+
+            if (currentTab === 'home') {
+                title.innerText = 'Trang chủ';
+                let totalTasks = 0, completedTasks = 0;
+                store.projects.forEach(p => {
+                    totalTasks += p.tasks.length;
+                    completedTasks += p.tasks.filter(t => t.done).length;
+                });
+
+                main.innerHTML = `
+                    <div class="mb-4">
+                        <span class="text-xs text-gray-500 font-medium">Hôm nay</span>
+                        <h2 class="text-lg font-bold text-gray-800">Thứ Ba, 18/08/2026</h2>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-gray-700">Công việc</h3>
+                            <button onclick="addProject()" class="text-blue-600 text-sm font-semibold">+ Thêm</button>
+                        </div>
+                        ${renderProjectCards()}
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-3">Cá nhân</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div onclick="switchTab('finance')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer">
+                                <i class="fa-solid fa-credit-card text-blue-500 text-xl mb-2"></i>
+                                <div class="font-semibold text-sm">Thẻ tín dụng</div>
+                                <div class="text-xs text-red-500 mt-1">${store.cards.length} thẻ (1 sắp đến hạn)</div>
+                            </div>
+                            <div onclick="switchTab('finance')" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 cursor-pointer">
+                                <i class="fa-solid fa-wallet text-purple-500 text-xl mb-2"></i>
+                                <div class="font-semibold text-sm">Khoản vay</div>
+                                <div class="text-xs text-gray-500 mt-1">${store.loans.length} khoản vay</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'projects') {
+                title.innerText = 'Công việc';
+                main.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-gray-800 text-lg">Danh sách dự án</h2>
+                        <button onclick="addProject()" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">+</button>
+                    </div>
+                    ${renderProjectCards()}
+                `;
+            } else if (currentTab === 'finance') {
+                title.innerText = 'Cá nhân';
+                main.innerHTML = `
+                    <!-- Thẻ tín dụng -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Thẻ tín dụng</h3>
+                        ${store.cards.map(c => `
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
+                                <div class="font-bold text-gray-800 mb-2">${c.bank}</div>
+                                <div class="flex justify-between text-xs text-gray-500 mb-3">
+                                    <div>Ngày sao kê: <b class="text-gray-700">${c.statementDay} hàng tháng</b></div>
+                                    <div>Ngày thanh toán: <b class="text-gray-700">${c.dueDay} hàng tháng</b></div>
+                                </div>
+                                <div class="text-xs font-semibold p-2 rounded-lg text-center ${c.statusBg}">${c.statusText}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Trả góp -->
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Khoản vay trả góp</h3>
+                        ${store.loans.map(l => {
+                            const percent = Math.round((l.paidMonths / l.totalMonths) * 100);
+                            return `
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
+                                <div class="font-bold text-gray-800">${l.name}</div>
+                                <div class="flex justify-between text-xs text-gray-500 my-2">
+                                    <div>Số tiền: <b>${l.amount}</b></div>
+                                    <div>Kỳ hạn: <b>${l.totalMonths} tháng</b></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <div>Đã trả: <b>${l.paidMonths}/${l.totalMonths} kỳ</b></div>
+                                    <div>Còn lại: <b>${l.totalMonths - l.paidMonths} kỳ</b></div>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: ${percent}%"></div>
+                                </div>
+                                <div class="text-xs font-semibold p-2 rounded-lg bg-green-50 text-green-700 text-center">Kỳ tới: ${l.nextPayment}</div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        function renderProjectCards() {
+            return store.projects.map(p => {
+                const total = p.tasks.length;
+                const done = p.tasks.filter(t => t.done).length;
+                const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+                
+                return `
+                    <div onclick="openProject(${p.id})" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 cursor-pointer">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-folder text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">${p.name}</h4>
+                                    <span class="text-xs text-gray-400">${done}/${total} nhiệm vụ</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-gray-500">${percent}%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
+                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openProject(id) {
+            activeProjectId = id;
+            render();
+        }
+
+        function renderProjectDetail(id) {
+            const p = store.projects.find(proj => proj.id === id);
+            const title = document.getElementById('header-title');
+            title.innerText = p.name;
+
+            const total = p.tasks.length;
+            const done = p.tasks.filter(t => t.done).length;
+            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            const main = document.getElementById('main-content');
+            main.innerHTML = `
+                <button onclick="activeProjectId=null; render()" class="text-sm text-blue-600 mb-3 flex items-center gap-1 font-medium">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </button>
+
+                <!-- Banner Dự án -->
+                <div class="bg-blue-600 text-white p-5 rounded-2xl mb-5 shadow-lg">
+                    <h2 class="text-xl font-bold mb-1">${p.name}</h2>
+                    <p class="text-xs opacity-80 mb-3">${done}/${total} nhiệm vụ hoàn thành</p>
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="w-full bg-blue-400 rounded-full h-2">
+                            <div class="bg-white h-2 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                        <span class="text-lg font-bold">${percent}%</span>
+                    </div>
+                </div>
+
+                <!-- Danh sách công việc -->
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-700">Danh sách nhiệm vụ</h3>
+                    <button onclick="addTask(${p.id})" class="text-blue-600 text-sm font-semibold">+ Thêm nhiệm vụ</button>
+                </div>
+
+                <div class="space-y-2">
+                    ${p.tasks.map((t, idx) => `
+                        <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs text-gray-400 font-bold w-4">${idx + 1}</span>
+                                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${p.id}, ${t.id})" class="w-5 h-5 accent-blue-600 rounded cursor-pointer">
+                                <span class="text-sm ${t.done ? 'line-through text-gray-400' : 'text-gray-800 font-medium'}">${t.title}</span>
+                            </div>
+                            <span class="text-[11px] text-gray-400"><i class="fa-regular fa-calendar mr-1"></i>${t.date}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Khởi chạy ứng dụng
+        render();
+    </script>
+</body>
+</html>

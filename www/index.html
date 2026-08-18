@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Cá Nhân & Công Việc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe4',
+                            500: '#7CA982',
+                            600: '#648f6a',
+                            700: '#4e7053',
+                        },
+                        cream: '#F9F9F6',
+                        warmYellow: {
+                            100: '#fef9e7',
+                            400: '#f7e79d',
+                            500: '#f4d35e',
+                        },
+                        slateDark: '#2B3A42',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-200 flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- Mobile Frame -->
+    <div class="w-full sm:max-w-md bg-cream min-h-screen sm:min-h-[844px] sm:rounded-[36px] shadow-2xl flex flex-col justify-between overflow-hidden relative border-gray-200 border">
+
+        <!-- Header -->
+        <header class="px-5 pt-5 pb-3 bg-white/80 backdrop-blur-md flex justify-between items-center border-b border-sage-100 sticky top-0 z-20">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-leaf text-lg text-sage-500"></i>
+                <h1 id="header-title" class="text-xl font-bold text-slateDark">Công việc</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="clearCache()" class="text-xs bg-sage-50 hover:bg-sage-100 text-sage-700 px-2.5 py-1.5 rounded-xl transition">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+                <button id="header-add-btn" onclick="handleHeaderAdd()" class="w-8 h-8 rounded-full bg-warmYellow-400 hover:bg-warmYellow-500 text-slateDark flex items-center justify-center font-bold shadow-sm transition">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 px-4 pt-3 overflow-y-auto hide-scrollbar pb-24">
+            <!-- Content render -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bg-white/90 backdrop-blur-md border-t border-sage-100 flex justify-around py-3 absolute bottom-0 w-full z-10">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-gray-400 hover:text-sage-500 transition">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Trang chủ</span>
+            </button>
+            <button onclick="switchTab('projects')" id="nav-projects" class="flex flex-col items-center text-sage-600 font-semibold">
+                <i class="fa-solid fa-border-all text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Công việc</span>
+            </button>
+            <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center text-gray-400 hover:text-sage-500 transition">
+                <i class="fa-regular fa-credit-card text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">Cá nhân</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal" class="fixed inset-0 bg-slateDark/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto hide-scrollbar border border-sage-100">
+            <h3 id="modal-title" class="font-bold text-lg text-slateDark mb-4">Thêm mới</h3>
+            <div id="modal-body" class="space-y-3"></div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-500 rounded-xl bg-gray-100 hover:bg-gray-200 transition">Hủy</button>
+                <button id="modal-save-btn" class="px-5 py-2 text-xs font-bold text-slateDark bg-warmYellow-400 hover:bg-warmYellow-500 rounded-xl shadow-sm transition">Lưu lại</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slateDark text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
+        <i class="fa-solid fa-check text-warmYellow-400"></i>
+        <span id="toast-msg">Đã cập nhật</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'my_unified_app_data_v2';
+
+        function loadCombinedStore() {
+            let store = {
+                projects: [
+                    { id: 1, name: 'DVCI Đà Lạt', amount: 50000000, startDate: '2026-08-01', note: 'Dự án dịch vụ công', type: 'DVCI', collapsed: false, tasks: [
+                        { id: 101, text: 'Khảo sát hiện trạng', done: true },
+                        { id: 102, text: 'Lập hồ sơ kỹ thuật', done: true },
+                        { id: 103, text: 'Triển khai hạ tầng', done: false }
+                    ]},
+                    { id: 2, name: 'Hệ thống Vé Điện Tử', amount: 20000000, startDate: '2026-08-05', note: 'Vé điện tử', type: 'G-Ticket', collapsed: false, tasks: [
+                        { id: 201, text: 'Tích hợp Gateway', done: true },
+                        { id: 202, text: 'Kiểm thử ứng dụng', done: false }
+                    ]}
+                ],
+                singleTasks: [
+                    { id: 1, text: 'Nộp báo cáo công việc tuần', priority: 'Gấp', dueDate: '2026-08-20', done: false }
+                ],
+                cards: [
+                    { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Thẻ thanh toán chính', statementDate: '15', dueDate: '5' }
+                ],
+                loans: [
+                    { id: 1, bank: 'VPBank', name: 'Khoản vay mua xe', totalAmount: 24000000, monthlyPay: 2000000, startDate: '2026-01-10', months: 12, paidMonths: [1, 2, 3] }
+                ],
+                lends: [
+                    { id: 1, borrower: 'Nguyễn Văn A', type: 'Cá nhân', amount: 10000000, startDate: '2026-08-01', note: 'Cho vay ngắn hạn', completed: false }
+                ]
+            };
+
+            let savedMain = localStorage.getItem(STORAGE_KEY);
+            if (savedMain) {
+                try { store = JSON.parse(savedMain); } catch(e){}
+            }
+            return store;
+        }
+
+        let store = loadCombinedStore();
+        let currentTab = 'projects';
+        let workSubTab = 'projects';
+        let financeSubTab = 'cards';
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        }
+
+        function clearCache() {
+            if (confirm("Reset lại dữ liệu mặc định?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('nav button').forEach(btn => btn.className = 'flex flex-col items-center text-gray-400 hover:text-sage-500 transition');
+            document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-sage-600 font-semibold';
+            render();
+        }
+
+        function switchWorkSubTab(sub) {
+            workSubTab = sub;
+            render();
+        }
+
+        function switchFinanceSubTab(sub) {
+            financeSubTab = sub;
+            render();
+        }
+
+        function handleHeaderAdd() {
+            if (currentTab === 'projects') {
+                if (workSubTab === 'projects') openModal('project');
+                else openModal('singleTask');
+            } else if (currentTab === 'finance') {
+                if (financeSubTab === 'cards') openModal('card');
+            }
+        }
+
+        function formatNumberInput(input) {
+            let val = input.value.replace(/,/g, '').replace(/\D/g, '');
+            input.value = val ? Number(val).toLocaleString('en-US') : '';
+        }
+
+        function getRawNumber(value) {
+            return parseFloat(String(value).replace(/,/g, '')) || 0;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || !dateStr.includes('-')) return dateStr || '';
+            const d = new Date(dateStr);
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
+        function toggleProjectCollapse(projectId) {
+            const project = store.projects.find(p => p.id === projectId);
+            if (project) {
+                project.collapsed = !project.collapsed;
+                saveData(); render();
+            }
+        }
+
+        function toggleProjectTask(projectId, taskId) {
+            const project = store.projects.find(p => p.id === projectId);
+            if (project && project.tasks) {
+                const task = project.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.done = !task.done;
+                    saveData(); render();
+                }
+            }
+        }
+
+        function addProjectTask(projectId) {
+            const input = document.getElementById(`inp-new-task-${projectId}`);
+            if (!input || !input.value.trim()) return;
+
+            const project = store.projects.find(p => p.id === projectId);
+            if (project) {
+                if (!project.tasks) project.tasks = [];
+                project.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });
+                saveData(); render();
+            }
+        }
+
+        function deleteProjectTask(projectId, taskId) {
+            const project = store.projects.find(p => p.id === projectId);
+            if (project && project.tasks) {
+                project.tasks = project.tasks.filter(t => t.id !== taskId);
+                saveData(); render();
+            }
+        }
+
+        function toggleSingleTask(id) {
+            const t = store.singleTasks.find(x => x.id === id);
+            if (t) { t.done = !t.done; saveData(); render(); }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        function openModal(type) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            const saveBtn = document.getElementById('modal-save-btn');
+
+            modal.classList.remove('hidden');
+
+            if (type === 'project') {
+                title.innerText = 'Thêm Dự Án Mới';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Tên dự án *</label>
+                        <input id="inp-p-name" type="text" placeholder="Nhập tên dự án..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm focus:outline-none focus:border-sage-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại</label>
+                            <select id="inp-p-type" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
+                                <option value="DVCI">DVCI</option>
+                                <option value="G-Ticket">G-Ticket</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Giá trị (VNĐ)</label>
+                            <input id="inp-p-amount" type="text" oninput="formatNumberInput(this)" placeholder="0" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                        </div>
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    const name = document.getElementById('inp-p-name').value;
+                    if (!name) return;
+                    store.projects.push({
+                        id: Date.now(),
+                        name: name,
+                        type: document.getElementById('inp-p-type').value,
+                        amount: getRawNumber(document.getElementById('inp-p-amount').value),
+                        collapsed: false,
+                        tasks: []
+                    });
+                    saveData(); closeModal(); render();
+                };
+            } else if (type === 'singleTask') {
+                title.innerText = 'Thêm Việc Riêng Lẻ';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Nội dung *</label>
+                        <input id="inp-t-text" type="text" placeholder="Tên công việc..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Mức ưu tiên</label>
+                            <select id="inp-t-priority" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
+                                <option value="Bình thường">Bình thường</option>
+                                <option value="Gấp">Gấp</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn chót</label>
+                            <input id="inp-t-date" type="date" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
+                        </div>
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    const text = document.getElementById('inp-t-text').value;
+                    if (!text) return;
+                    store.singleTasks.push({
+                        id: Date.now(),
+                        text: text,
+                        priority: document.getElementById('inp-t-priority').value,
+                        dueDate: document.getElementById('inp-t-date').value,
+                        done: false
+                    });
+                    saveData(); closeModal(); render();
+                };
+            }
+        }
+
+        function render() {
+            const main = document.getElementById('main-content');
+            const title = document.getElementById('header-title');
+
+            if (currentTab === 'projects') {
+                title.innerText = 'Công việc';
+                let html = `
+                    <div class="flex gap-2 mb-4 bg-sage-50 p-1 rounded-2xl border border-sage-100">
+                        <button onclick="switchWorkSubTab('projects')" class="flex-1 py-1.5 text-xs font-semibold rounded-xl transition ${workSubTab === 'projects' ? 'bg-white text-slateDark shadow-sm' : 'text-gray-500'}">Dự án (${store.projects.length})</button>
+                        <button onclick="switchWorkSubTab('singles')" class="flex-1 py-1.5 text-xs font-semibold rounded-xl transition ${workSubTab === 'singles' ? 'bg-white text-slateDark shadow-sm' : 'text-gray-500'}">Việc riêng lẻ (${store.singleTasks.length})</button>
+                    </div>
+                `;
+
+                if (workSubTab === 'projects') {
+                    store.projects.forEach(p => {
+                        const tasks = p.tasks || [];
+                        const doneCount = tasks.filter(t => t.done).length;
+                        const progress = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
+
+                        html += `
+                            <div class="bg-white rounded-2xl p-4 shadow-sm mb-3 border border-sage-100">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-sage-100 text-sage-700">${p.type}</span>
+                                        <h3 class="font-bold text-slateDark mt-2 text-base">${p.name}</h3>
+                                    </div>
+                                    <button onclick="toggleProjectCollapse(${p.id})" class="text-gray-400 hover:text-slateDark p-1">
+                                        <i class="fa-solid fa-chevron-${p.collapsed ? 'down' : 'up'} text-xs"></i>
+                                    </button>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-2">Ngân sách: <span class="font-semibold text-slateDark">${p.amount ? p.amount.toLocaleString() : '0'} VNĐ</span></div>
+
+                                <div class="w-full bg-sage-50 h-2 rounded-full mb-3 overflow-hidden">
+                                    <div class="bg-sage-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                                </div>
+
+                                ${!p.collapsed ? `
+                                    <div class="space-y-2 border-t border-sage-50 pt-3">
+                                        ${tasks.map(t => `
+                                            <div class="flex items-center justify-between text-xs bg-cream p-2.5 rounded-xl border border-sage-50">
+                                                <div class="flex items-center gap-2 cursor-pointer" onclick="toggleProjectTask(${p.id}, ${t.id})">
+                                                    <i class="fa-${t.done ? 'solid fa-circle-check text-sage-500' : 'regular fa-circle text-gray-300'} text-base"></i>
+                                                    <span class="${t.done ? 'line-through text-gray-400' : 'text-slateDark'}">${t.text}</span>
+                                                </div>
+                                                <button onclick="deleteProjectTask(${p.id}, ${t.id})" class="text-gray-300 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                                            </div>
+                                        `).join('')}
+                                        <div class="flex gap-2 mt-2">
+                                            <input id="inp-new-task-${p.id}" type="text" placeholder="Thêm việc..." class="flex-1 text-xs p-2 border border-sage-100 rounded-xl focus:outline-none focus:border-sage-500">
+                                            <button onclick="addProjectTask(${p.id})" class="bg-warmYellow-400 hover:bg-warmYellow-500 text-slateDark px-3 py-1 rounded-xl text-xs font-bold transition">Thêm</button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                } else {
+                    store.singleTasks.forEach(t => {
+                        html += `
+                            <div class="bg-white rounded-2xl p-3.5 shadow-sm mb-2.5 border border-sage-100 flex items-center justify-between">
+                                <div class="flex items-center gap-3 cursor-pointer" onclick="toggleSingleTask(${t.id})">
+                                    <i class="fa-${t.done ? 'solid fa-circle-check text-sage-500' : 'regular fa-circle text-gray-300'} text-lg"></i>
+                                    <div>
+                                        <p class="text-xs font-semibold ${t.done ? 'line-through text-gray-400' : 'text-slateDark'}">${t.text}</p>
+                                        <div class="flex gap-2 mt-1">
+                                            ${t.priority === 'Gấp' ? `<span class="text-[9px] bg-warmYellow-400 text-slateDark font-bold px-1.5 py-0.5 rounded-md">GẤP</span>` : ''}
+                                            ${t.dueDate ? `<span class="text-[10px] text-gray-400"><i class="fa-regular fa-clock text-[9px] mr-1"></i>${formatDate(t.dueDate)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                main.innerHTML = html;
+            } else if (currentTab === 'finance') {
+                title.innerText = 'Thẻ & Tài chính';
+                main.innerHTML = `
+                    <div class="space-y-3">
+                        ${store.cards.map(c => `
+                            <div class="bg-gradient-to-br from-sage-500 to-sage-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-xs opacity-80">${c.bank}</p>
+                                        <h4 class="font-bold text-lg tracking-wide">${c.cardType}</h4>
+                                    </div>
+                                    <span class="bg-warmYellow-400 text-slateDark text-[10px] font-bold px-2 py-0.5 rounded-md">${c.days}</span>
+                                </div>
+                                <div class="mt-6 flex justify-between items-end">
+                                    <div>
+                                        <p class="text-[10px] opacity-70">Hạn mức</p>
+                                        <p class="font-bold text-base">${c.limit.toLocaleString()} đ</p>
+                                    </div>
+                                    <div class="text-right text-[10px]">
+                                        <p>Sao kê: Ngày ${c.statementDate}</p>
+                                        <p class="text-warmYellow-400 font-semibold">Hạn trả: Ngày ${c.dueDate}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                title.innerText = 'Tổng quan';
+                main.innerHTML = `
+                    <div class="bg-white p-5 rounded-2xl border border-sage-100 shadow-sm text-center">
+                        <div class="w-12 h-12 bg-sage-50 text-sage-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-chart-pie text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-slateDark text-sm">Chào mừng trở lại!</h3>
+                        <p class="text-xs text-gray-400 mt-1">Ứng dụng đã được cập nhật tông màu Sage & Warm Yellow mới.</p>
+                    </div>
+                `;
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>

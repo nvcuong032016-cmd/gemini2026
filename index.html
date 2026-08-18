@@ -66,26 +66,79 @@
     </div>
 
     <script>
-        let store = JSON.parse(localStorage.getItem('my_app_data_v10')) || {
-            tasks: [
-                { id: 1, text: 'Thanh toán tiền điện tháng này', done: false },
-                { id: 2, text: 'Kiểm tra sao kê thẻ VPBank', done: true }
-            ],
-            cards: [
-                { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '15', dueDate: '5' }
-            ],
-            loans: [
-                { id: 1, bank: 'VPBank', name: 'Khoản vay mua xe', totalAmount: 24000000, monthlyPay: 2000000, startDate: '2026-01-10', months: 12, paidMonths: [1, 2, 3] }
-            ],
-            lends: [
-                { id: 1, borrower: 'Nguyễn Văn A', type: 'Cá nhân', amount: 10000000, startDate: '2026-08-01', note: 'Cho vay ngắn hạn', completed: false }
-            ]
-        };
+        const STORAGE_KEY = 'my_unified_app_data';
 
-        let currentTab = 'finance';
+        // Tự động tìm & quét dữ liệu từ các bản cũ để khôi phục công việc
+        function loadCombinedStore() {
+            let store = {
+                tasks: [],
+                cards: [
+                    { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Ghi chú thẻ...', statementDate: '15', dueDate: '5' }
+                ],
+                loans: [
+                    { id: 1, bank: 'VPBank', name: 'Khoản vay mua xe', totalAmount: 24000000, monthlyPay: 2000000, startDate: '2026-01-10', months: 12, paidMonths: [1, 2, 3] }
+                ],
+                lends: [
+                    { id: 1, borrower: 'Nguyễn Văn A', type: 'Cá nhân', amount: 10000000, startDate: '2026-08-01', note: 'Cho vay ngắn hạn', completed: false }
+                ]
+            };
+
+            // Quét tất cả các key lưu trữ có thể tồn tại trong LocalStorage
+            let savedMain = localStorage.getItem(STORAGE_KEY);
+            let allTasks = [];
+
+            if (savedMain) {
+                try { store = JSON.parse(savedMain); } catch(e){}
+            }
+
+            // Thu thập lại tất cả công việc từ các key cũ
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if (key.includes('my_app_data') || key === STORAGE_KEY || key.includes('task')) {
+                    try {
+                        let parsed = JSON.parse(localStorage.getItem(key));
+                        if (parsed && Array.isArray(parsed.tasks)) {
+                            allTasks = [...allTasks, ...parsed.tasks];
+                        } else if (Array.isArray(parsed)) {
+                            allTasks = [...allTasks, ...parsed];
+                        }
+                    } catch(e){}
+                }
+            }
+
+            // Gom nhóm và loại bỏ công việc bị trùng
+            if (allTasks.length > 0) {
+                const uniqueTasks = [];
+                const map = new Map();
+                for (const item of allTasks) {
+                    if (item && item.text && !map.has(item.text)) {
+                        map.set(item.text, true);
+                        uniqueTasks.push({
+                            id: item.id || Date.now() + Math.random(),
+                            text: item.text,
+                            done: !!item.done
+                        });
+                    }
+                }
+                store.tasks = uniqueTasks;
+            }
+
+            // Nếu vẫn trống thì thêm dữ liệu mặc định
+            if (!store.tasks || store.tasks.length === 0) {
+                store.tasks = [
+                    { id: 1, text: 'Thanh toán tiền điện tháng này', done: false },
+                    { id: 2, text: 'Kiểm tra sao kê thẻ VPBank', done: true }
+                ];
+            }
+
+            return store;
+        }
+
+        let store = loadCombinedStore();
+        let currentTab = 'projects'; // Mặc định mở tab Công việc để kiểm tra
 
         function saveData() {
-            localStorage.setItem('my_app_data_v10', JSON.stringify(store));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
         }
 
         function showToast(msg) {
@@ -589,7 +642,6 @@
                                             </div>
                                             <div class="text-xs text-blue-600 font-semibold mt-0.5">${l.bank}</div>
 
-                                            <!-- Tự động nhảy trạng thái Đang xử lý / Hoàn thành -->
                                             <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">
                                                 <i class="fa-solid ${isCompleted ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
                                                 <span>${isCompleted ? 'Hoàn thành' : 'Đang xử lý'}</span>
@@ -646,7 +698,7 @@
             }
         }
 
-        render();
+        switchTab('projects');
     </script>
 </body>
 </html>

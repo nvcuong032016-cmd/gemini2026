@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Cá Nhân & Công Việc</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe4',
+                            500: '#7CA982',
+                            600: '#648f6a',
+                            700: '#4e7053',
+                        },
+                        cream: '#F9F9F6',
+                        warmYellow: {
+                            100: '#fef9e7',
+                            400: '#f7e79d',
+                            500: '#f4d35e',
+                        },
+                        slateDark: '#2B3A42',
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -12,43 +36,43 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center min-h-screen p-0 sm:p-4">
+<body class="bg-gray-200 flex justify-center items-center min-h-screen p-0 sm:p-4">
 
     <!-- Mobile Frame -->
-    <div class="w-full sm:max-w-md bg-white min-h-screen sm:min-h-[844px] sm:rounded-[36px] shadow-2xl flex flex-col justify-between overflow-hidden relative border-gray-200 border">
+    <div class="w-full sm:max-w-md bg-cream min-h-screen sm:min-h-[844px] sm:rounded-[36px] shadow-2xl flex flex-col justify-between overflow-hidden relative border-gray-200 border">
 
         <!-- Header -->
-        <header class="px-5 pt-5 pb-3 bg-white flex justify-between items-center border-b border-gray-50">
+        <header class="px-5 pt-5 pb-3 bg-white/80 backdrop-blur-md flex justify-between items-center border-b border-sage-100 sticky top-0 z-20">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-bars text-lg text-gray-700 cursor-pointer"></i>
-                <h1 id="header-title" class="text-xl font-bold text-gray-900">Công việc</h1>
+                <i class="fa-solid fa-bars text-lg text-slateDark cursor-pointer"></i>
+                <h1 id="header-title" class="text-xl font-bold text-slateDark">Công việc</h1>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="clearCache()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded-lg">
+                <button onclick="clearCache()" class="text-xs bg-sage-50 hover:bg-sage-100 text-sage-700 px-2.5 py-1.5 rounded-xl transition">
                     <i class="fa-solid fa-arrows-rotate"></i>
                 </button>
-                <button id="header-add-btn" onclick="handleHeaderAdd()" class="text-blue-600 text-2xl font-light hover:opacity-80">
-                    <i class="fa-solid fa-plus"></i>
+                <button id="header-add-btn" onclick="handleHeaderAdd()" class="w-8 h-8 rounded-full bg-warmYellow-400 hover:bg-warmYellow-500 text-slateDark flex items-center justify-center font-bold shadow-sm transition">
+                    <i class="fa-solid fa-plus text-sm"></i>
                 </button>
             </div>
         </header>
 
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 px-4 pt-2 overflow-y-auto hide-scrollbar pb-20">
+        <main id="main-content" class="flex-1 px-4 pt-3 overflow-y-auto hide-scrollbar pb-24">
             <!-- Content render -->
         </main>
 
         <!-- Bottom Navigation -->
-        <nav class="bg-white border-t border-gray-100 flex justify-around py-3 absolute bottom-0 w-full z-10">
-            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-gray-400">
+        <nav class="bg-white/90 backdrop-blur-md border-t border-sage-100 flex justify-around py-3 absolute bottom-0 w-full z-10">
+            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-gray-400 hover:text-sage-500 transition">
                 <i class="fa-solid fa-house text-lg"></i>
                 <span class="text-[10px] mt-1 font-medium">Trang chủ</span>
             </button>
-            <button onclick="switchTab('projects')" id="nav-projects" class="flex flex-col items-center text-blue-600">
+            <button onclick="switchTab('projects')" id="nav-projects" class="flex flex-col items-center text-sage-600 font-semibold">
                 <i class="fa-solid fa-border-all text-lg"></i>
                 <span class="text-[10px] mt-1 font-medium">Công việc</span>
             </button>
-            <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center text-gray-400">
+            <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center text-gray-400 hover:text-sage-500 transition">
                 <i class="fa-regular fa-user text-lg"></i>
                 <span class="text-[10px] mt-1 font-medium">Cá nhân</span>
             </button>
@@ -56,20 +80,20 @@
     </div>
 
     <!-- Modal Form -->
-    <div id="modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl relative max-h-[90vh] overflow-y-auto hide-scrollbar">
-            <h3 id="modal-title" class="font-bold text-lg text-gray-800 mb-4">Thêm mới</h3>
+    <div id="modal" class="fixed inset-0 bg-slateDark/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto hide-scrollbar border border-sage-100">
+            <h3 id="modal-title" class="font-bold text-lg text-slateDark mb-4">Thêm mới</h3>
             <div id="modal-body" class="space-y-3"></div>
-            <div class="flex justify-end gap-2 mt-5">
-                <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-500 rounded-lg bg-gray-100">Hủy</button>
-                <button id="modal-save-btn" class="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-lg">Lưu lại</button>
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-gray-500 rounded-xl bg-gray-100 hover:bg-gray-200 transition">Hủy</button>
+                <button id="modal-save-btn" class="px-5 py-2 text-xs font-bold text-slateDark bg-warmYellow-400 hover:bg-warmYellow-500 rounded-xl shadow-sm transition">Lưu lại</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-4 py-2 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
-        <i class="fa-solid fa-check text-green-400"></i>
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slateDark text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
+        <i class="fa-solid fa-check text-warmYellow-400"></i>
         <span id="toast-msg">Đã chép nội dung</span>
     </div>
 
@@ -135,8 +159,8 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            document.querySelectorAll('nav button').forEach(btn => btn.className = 'flex flex-col items-center text-gray-400');
-            document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-blue-600';
+            document.querySelectorAll('nav button').forEach(btn => btn.className = 'flex flex-col items-center text-gray-400 hover:text-sage-500 transition');
+            document.getElementById(`nav-${tab}`).className = 'flex flex-col items-center text-sage-600 font-semibold';
             render();
         }
 
@@ -176,16 +200,6 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        function calculateDaysFrom(startDateStr) {
-            if (!startDateStr) return 0;
-            const start = new Date(startDateStr);
-            const today = new Date();
-            start.setHours(0,0,0,0);
-            today.setHours(0,0,0,0);
-            const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-            return diffDays >= 0 ? diffDays : 0;
-        }
-
         function renderDayOptions(selected = '') {
             let opts = `<option value="">Chọn ngày</option>`;
             for (let i = 1; i <= 31; i++) {
@@ -199,16 +213,15 @@
             fieldIds.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && !el.value.trim()) {
-                    el.classList.add('border-red-500');
+                    el.classList.add('border-red-400');
                     isValid = false;
                 } else if (el) {
-                    el.classList.remove('border-red-500');
+                    el.classList.remove('border-red-400');
                 }
             });
             return isValid;
         }
 
-        // --- BẬT/TẮT THU GỌN DỰ ÁN ---
         function toggleProjectCollapse(projectId) {
             const project = store.projects.find(p => p.id === projectId);
             if (project) {
@@ -218,7 +231,6 @@
             }
         }
 
-        // --- NHIỆM VỤ DỰ ÁN ---
         function toggleProjectTask(projectId, taskId) {
             const project = store.projects.find(p => p.id === projectId);
             if (project && project.tasks) {
@@ -257,14 +269,13 @@
             }
         }
 
-        // --- HANDLERS VIỆC RIÊNG LẺ & KHÁC ---
         function toggleSingleTask(id) {
             const t = store.singleTasks.find(x => x.id === id);
             if (t) { t.done = !t.done; saveData(); render(); }
         }
 
         function deleteProject(id) {
-            if (confirm('Bạn có chắc muốn xóa dự án này?')) {
+            if (confirm('Xóa dự án này?')) {
                 store.projects = store.projects.filter(p => p.id !== id);
                 saveData(); render();
             }
@@ -276,21 +287,21 @@
         }
 
         function deleteCard(id) {
-            if (confirm('Bạn có chắc muốn xóa thẻ này?')) {
+            if (confirm('Xóa thẻ này?')) {
                 store.cards = store.cards.filter(c => c.id !== id);
                 saveData(); render();
             }
         }
 
         function deleteLoan(id) {
-            if (confirm('Bạn có chắc muốn xóa khoản vay này?')) {
+            if (confirm('Xóa khoản vay này?')) {
                 store.loans = store.loans.filter(l => l.id !== id);
                 saveData(); render();
             }
         }
 
         function deleteLend(id) {
-            if (confirm('Bạn có chắc muốn xóa khoản cho vay này?')) {
+            if (confirm('Xóa khoản này?')) {
                 store.lends = store.lends.filter(l => l.id !== id);
                 saveData(); render();
             }
@@ -315,7 +326,10 @@
             }
         }
 
-        // --- MODALS ---
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
         function openModal(type, editId = null) {
             const modal = document.getElementById('modal');
             const title = document.getElementById('modal-title');
@@ -329,30 +343,30 @@
                 title.innerText = item ? 'Sửa Dự Án' : 'Thêm Dự Án Mới';
                 body.innerHTML = `
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên dự án *</label>
-                        <input id="inp-p-name" type="text" value="${item ? item.name : ''}" placeholder="Nhập tên dự án..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Tên dự án *</label>
+                        <input id="inp-p-name" type="text" value="${item ? item.name : ''}" placeholder="Nhập tên..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm focus:outline-none focus:border-sage-500">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Loại dự án *</label>
-                            <select id="inp-p-type" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại *</label>
+                            <select id="inp-p-type" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
                                 <option value="DVCI" ${item && item.type === 'DVCI' ? 'selected' : ''}>DVCI</option>
                                 <option value="G-Ticket" ${item && item.type === 'G-Ticket' ? 'selected' : ''}>G-Ticket</option>
                                 <option value="Khác" ${item && item.type === 'Khác' ? 'selected' : ''}>Khác</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Số tiền (VNĐ)</label>
-                            <input id="inp-p-amount" type="text" value="${item && item.amount ? item.amount.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="0" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Số tiền (VNĐ)</label>
+                            <input id="inp-p-amount" type="text" value="${item && item.amount ? item.amount.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="0" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu</label>
-                        <input id="inp-p-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ngày bắt đầu</label>
+                        <input id="inp-p-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
-                        <textarea id="inp-p-note" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm" placeholder="Ghi chú chi tiết...">${item ? item.note || '' : ''}</textarea>
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-p-note" rows="2" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm" placeholder="Ghi chú...">${item ? item.note || '' : ''}</textarea>
                     </div>
                 `;
                 saveBtn.onclick = () => {
@@ -380,20 +394,20 @@
                 title.innerText = item ? 'Sửa Việc Riêng Lẻ' : 'Thêm Việc Riêng Lẻ';
                 body.innerHTML = `
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Nội dung công việc *</label>
-                        <input id="inp-t-text" type="text" value="${item ? item.text : ''}" placeholder="Tên việc..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Nội dung *</label>
+                        <input id="inp-t-text" type="text" value="${item ? item.text : ''}" placeholder="Tên việc..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Độ ưu tiên</label>
-                            <select id="inp-t-priority" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Mức ưu tiên</label>
+                            <select id="inp-t-priority" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
                                 <option value="Bình thường" ${item && item.priority === 'Bình thường' ? 'selected' : ''}>Bình thường</option>
                                 <option value="Gấp" ${item && item.priority === 'Gấp' ? 'selected' : ''}>Gấp</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn chót</label>
-                            <input id="inp-t-date" type="date" value="${item ? item.dueDate : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn chót</label>
+                            <input id="inp-t-date" type="date" value="${item ? item.dueDate : ''}" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                         </div>
                     </div>
                 `;
@@ -419,42 +433,42 @@
                 title.innerText = item ? 'Sửa Thẻ Tín Dụng' : 'Thêm Thẻ Tín Dụng';
                 body.innerHTML = `
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên ngân hàng *</label>
-                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" placeholder="VPBank, MB..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Tên ngân hàng *</label>
+                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" placeholder="VPBank, MB..." class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Loại thẻ</label>
-                            <select id="inp-card-type" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Loại thẻ</label>
+                            <select id="inp-card-type" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
                                 <option value="Visa" ${item && item.cardType === 'Visa' ? 'selected' : ''}>Visa</option>
                                 <option value="JCB" ${item && item.cardType === 'JCB' ? 'selected' : ''}>JCB</option>
                                 <option value="Mastercard" ${item && item.cardType === 'Mastercard' ? 'selected' : ''}>Mastercard</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Thời hạn thanh toán</label>
-                            <select id="inp-days" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Thời hạn</label>
+                            <select id="inp-days" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">
                                 <option value="45 ngày" ${item && item.days === '45 ngày' ? 'selected' : ''}>45 ngày</option>
                                 <option value="55 ngày" ${item && item.days === '55 ngày' ? 'selected' : ''}>55 ngày</option>
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn mức thẻ (VNĐ) *</label>
-                        <input id="inp-limit" type="text" value="${item ? item.limit.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="50,000,000" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn mức *</label>
+                        <input id="inp-limit" type="text" value="${item ? item.limit.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="50,000,000" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
-                        <textarea id="inp-info" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">${item ? item.info : ''}</textarea>
+                        <label class="text-xs text-slateDark font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-info" rows="2" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm">${item ? item.info : ''}</textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày sao kê *</label>
-                            <select id="inp-statement" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">${renderDayOptions(item ? item.statementDate : '')}</select>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Ngày sao kê *</label>
+                            <select id="inp-statement" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">${renderDayOptions(item ? item.statementDate : '')}</select>
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn thanh toán *</label>
-                            <select id="inp-due" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">${renderDayOptions(item ? item.dueDate : '')}</select>
+                            <label class="text-xs text-slateDark font-semibold mb-1 block">Hạn thanh toán *</label>
+                            <select id="inp-due" class="w-full p-2.5 border border-sage-100 rounded-xl text-sm bg-white">${renderDayOptions(item ? item.dueDate : '')}</select>
                         </div>
                     </div>
                 `;
@@ -478,402 +492,99 @@
                     }
                     saveData(); closeModal(); render();
                 };
-            } else if (type === 'lend') {
-                const item = editId ? store.lends.find(l => l.id === editId) : null;
-                title.innerText = item ? 'Sửa Khoản Tiền Gửi / Cho Vay' : 'Thêm Khoản Tiền Gửi / Cho Vay';
-                body.innerHTML = `
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Nơi / Người vay tiền *</label>
-                        <input id="inp-borrower" type="text" value="${item ? item.borrower : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Loại đối tượng *</label>
-                        <select id="inp-lend-type" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
-                            <option value="Cá nhân" ${item && item.type === 'Cá nhân' ? 'selected' : ''}>Cá nhân</option>
-                            <option value="Tổ chức" ${item && item.type === 'Tổ chức' ? 'selected' : ''}>Tổ chức</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Số tiền (VNĐ) *</label>
-                        <input id="inp-amount" type="text" value="${item ? item.amount.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu *</label>
-                        <input id="inp-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
-                        <textarea id="inp-note" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">${item ? item.note : ''}</textarea>
-                    </div>
-                `;
-                saveBtn.onclick = () => {
-                    if (!validateFields(['inp-borrower', 'inp-amount', 'inp-start'])) return;
-                    const data = {
-                        id: editId || Date.now(),
-                        borrower: document.getElementById('inp-borrower').value,
-                        type: document.getElementById('inp-lend-type').value,
-                        amount: getRawNumber(document.getElementById('inp-amount').value),
-                        startDate: document.getElementById('inp-start').value,
-                        note: document.getElementById('inp-note').value,
-                        completed: item ? item.completed : false
-                    };
-                    if (editId) {
-                        const idx = store.lends.findIndex(l => l.id === editId);
-                        store.lends[idx] = data;
-                    } else {
-                        store.lends.push(data);
-                    }
-                    saveData(); closeModal(); render();
-                };
-            } else if (type === 'loan') {
-                const item = editId ? store.loans.find(l => l.id === editId) : null;
-                title.innerText = item ? 'Sửa Khoản Vay / Trả Góp' : 'Thêm Khoản Vay / Trả Góp';
-                body.innerHTML = `
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Đơn vị cho vay *</label>
-                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên khoản vay / Món đồ *</label>
-                        <input id="inp-name" type="text" value="${item ? item.name : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tổng số tiền (VNĐ) *</label>
-                        <input id="inp-amount" type="text" value="${item ? item.totalAmount.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Kỳ hạn vay</label>
-                            <select id="inp-months" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
-                                <option value="3" ${item && item.months == 3 ? 'selected' : ''}>3 tháng</option>
-                                <option value="6" ${item && item.months == 6 ? 'selected' : ''}>6 tháng</option>
-                                <option value="12" ${item && item.months == 12 ? 'selected' : ''}>12 tháng</option>
-                                <option value="24" ${item && item.months == 24 ? 'selected' : ''}>24 tháng</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Trả hàng tháng (VNĐ) *</label>
-                            <input id="inp-monthly" type="text" value="${item ? item.monthlyPay.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu</label>
-                        <input id="inp-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
-                    </div>
-                `;
-                saveBtn.onclick = () => {
-                    if (!validateFields(['inp-bank', 'inp-name', 'inp-amount', 'inp-monthly'])) return;
-                    const data = {
-                        id: editId || Date.now(),
-                        bank: document.getElementById('inp-bank').value,
-                        name: document.getElementById('inp-name').value,
-                        totalAmount: getRawNumber(document.getElementById('inp-amount').value),
-                        monthlyPay: getRawNumber(document.getElementById('inp-monthly').value),
-                        startDate: document.getElementById('inp-start').value,
-                        months: parseInt(document.getElementById('inp-months').value),
-                        paidMonths: item ? item.paidMonths : []
-                    };
-                    if (editId) {
-                        const idx = store.loans.findIndex(l => l.id === editId);
-                        store.loans[idx] = data;
-                    } else {
-                        store.loans.push(data);
-                    }
-                    saveData(); closeModal(); render();
-                };
             }
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
         }
 
         function render() {
             const main = document.getElementById('main-content');
             const title = document.getElementById('header-title');
 
-            if (currentTab === 'home') {
-                title.innerText = 'Trang Chủ';
-                const totalLend = store.lends.filter(l => !l.completed).reduce((acc, l) => acc + (l.amount || 0), 0);
-                const totalLoan = store.loans.reduce((acc, l) => acc + (l.totalAmount || 0), 0);
-                const pendingTasks = store.singleTasks.filter(t => !t.done).length;
-
-                main.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl text-white shadow-md">
-                            <span class="text-xs opacity-80 uppercase font-semibold">Công việc còn lại</span>
-                            <div class="text-2xl font-bold mt-1">${pendingTasks} việc cần làm</div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Cho vay / Gửi</span>
-                                <div class="text-base font-bold text-green-600 mt-1">${totalLend.toLocaleString()} đ</div>
-                            </div>
-                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Tổng khoản vay</span>
-                                <div class="text-base font-bold text-red-500 mt-1">${totalLoan.toLocaleString()} đ</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                            <h3 class="font-bold text-gray-800 text-sm mb-3">Dự án hiện có (${store.projects.length})</h3>
-                            <div class="space-y-2">
-                                ${store.projects.map(p => `
-                                    <div class="flex justify-between items-center p-2.5 bg-gray-50 rounded-xl text-xs">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">${p.type || 'Khác'}</span>
-                                            <span class="font-semibold text-gray-700">${p.name}</span>
-                                        </div>
-                                        <span class="text-gray-500">${p.amount ? p.amount.toLocaleString() + ' đ' : 'Chưa có giá'}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (currentTab === 'projects') {
+            if (currentTab === 'projects') {
                 title.innerText = 'Công việc';
-                main.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex bg-gray-200/60 p-1 rounded-xl text-xs font-semibold">
-                            <button onclick="switchWorkSubTab('projects')" class="flex-1 py-2 rounded-lg transition-all ${workSubTab === 'projects' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Dự án</button>
-                            <button onclick="switchWorkSubTab('single')" class="flex-1 py-2 rounded-lg transition-all ${workSubTab === 'single' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Việc riêng lẻ</button>
-                        </div>
-
-                        ${workSubTab === 'projects' ? `
-                            <div class="space-y-3">
-                                ${store.projects.map(p => {
-                                    const tasks = p.tasks || [];
-                                    const doneCount = tasks.filter(t => t.done).length;
-                                    const progress = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
-                                    const daysPassed = calculateDaysFrom(p.startDate);
-                                    const isCollapsed = !!p.collapsed;
-
-                                    return `
-                                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-                                            <!-- Card Header -->
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase">${p.type || 'Khác'}</span>
-                                                    <h3 class="font-bold text-gray-800 text-base mt-1">${p.name}</h3>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <button onclick="openModal('project', ${p.id})" class="text-gray-400 hover:text-blue-600 text-xs p-1" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                                                    <button onclick="deleteProject(${p.id})" class="text-gray-400 hover:text-red-500 text-xs p-1" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                                                    <!-- Nút mũi tên Thu gọn / Mở rộng -->
-                                                    <button onclick="toggleProjectCollapse(${p.id})" class="text-gray-500 hover:text-gray-800 text-sm p-1 ml-1" title="${isCollapsed ? 'Mở rộng' : 'Thu gọn'}">
-                                                        <i class="fa-solid ${isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Tiến độ vắn tắt (Luôn hiển thị) -->
-                                            <div class="space-y-1">
-                                                <div class="flex justify-between text-[11px] font-semibold text-gray-500">
-                                                    <span>Tiến độ (${doneCount}/${tasks.length} nhiệm vụ)</span>
-                                                    <span>${progress}%</span>
-                                                </div>
-                                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                                    <div class="bg-blue-600 h-full transition-all duration-300" style="width: ${progress}%"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Chi tiết (Ẩn khi thu gọn) -->
-                                            ${!isCollapsed ? `
-                                                <div class="text-xs text-gray-500 space-y-1 pt-1 border-t border-gray-50">
-                                                    <div class="flex justify-between">
-                                                        <span>Ngân sách: <strong class="text-gray-700">${p.amount ? p.amount.toLocaleString() + ' đ' : 'N/A'}</strong></span>
-                                                        <span>Bắt đầu: ${formatDate(p.startDate)}</span>
-                                                    </div>
-                                                    <div class="text-blue-600 font-medium">Đã thực hiện: ${daysPassed} ngày</div>
-                                                    ${p.note ? `<div class="text-gray-400 italic">Ghi chú: ${p.note}</div>` : ''}
-                                                </div>
-
-                                                <div class="border-t border-gray-50 pt-2 space-y-2">
-                                                    <div class="text-xs font-bold text-gray-700">Nhiệm vụ:</div>
-                                                    <div class="space-y-1.5">
-                                                        ${tasks.map(t => `
-                                                            <div class="flex items-center justify-between text-xs group">
-                                                                <label class="flex items-center gap-2 cursor-pointer flex-1">
-                                                                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleProjectTask(${p.id}, ${t.id})" class="rounded text-blue-600 focus:ring-0">
-                                                                    <span class="${t.done ? 'line-through text-gray-400' : 'text-gray-700'}">${t.text}</span>
-                                                                </label>
-                                                                <button onclick="deleteProjectTask(${p.id}, ${t.id})" class="text-gray-300 hover:text-red-500 text-[10px] pl-2"><i class="fa-solid fa-xmark"></i></button>
-                                                            </div>
-                                                        `).join('')}
-                                                    </div>
-                                                    <div class="flex gap-1 mt-2">
-                                                        <input id="inp-new-task-${p.id}" type="text" placeholder="Thêm công việc..." class="flex-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
-                                                        <button onclick="addProjectTask(${p.id})" class="bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-lg text-xs hover:bg-blue-100">+</button>
-                                                    </div>
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        ` : `
-                            <div class="space-y-2">
-                                ${store.singleTasks.map(t => `
-                                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleSingleTask(${t.id})" class="rounded text-blue-600 focus:ring-0">
-                                            <div>
-                                                <p class="text-xs font-semibold ${t.done ? 'line-through text-gray-400' : 'text-gray-800'}">${t.text}</p>
-                                                <div class="flex gap-2 text-[10px] text-gray-400 mt-0.5">
-                                                    <span class="${t.priority === 'Gấp' ? 'text-red-500 font-bold' : ''}">${t.priority}</span>
-                                                    ${t.dueDate ? `<span>• Hạn: ${formatDate(t.dueDate)}</span>` : ''}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button onclick="openModal('singleTask', ${t.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
-                                            <button onclick="deleteSingleTask(${t.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `}
+                let html = `
+                    <div class="flex gap-2 mb-4 bg-sage-50 p-1 rounded-2xl border border-sage-100">
+                        <button onclick="switchWorkSubTab('projects')" class="flex-1 py-1.5 text-xs font-semibold rounded-xl transition ${workSubTab === 'projects' ? 'bg-white text-slateDark shadow-sm' : 'text-gray-500'}">Dự án (${store.projects.length})</button>
+                        <button onclick="switchWorkSubTab('singles')" class="flex-1 py-1.5 text-xs font-semibold rounded-xl transition ${workSubTab === 'singles' ? 'bg-white text-slateDark shadow-sm' : 'text-gray-500'}">Việc riêng lẻ (${store.singleTasks.length})</button>
                     </div>
                 `;
+
+                if (workSubTab === 'projects') {
+                    store.projects.forEach(p => {
+                        const tasks = p.tasks || [];
+                        const doneCount = tasks.filter(t => t.done).length;
+                        const progress = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
+
+                        html += `
+                            <div class="bg-white rounded-2xl p-4 shadow-sm mb-3 border border-sage-100">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sage-100 text-sage-700">${p.type}</span>
+                                        <h3 class="font-bold text-slateDark mt-1 text-base">${p.name}</h3>
+                                    </div>
+                                    <div class="flex gap-2 text-gray-400">
+                                        <button onclick="openModal('project', ${p.id})" class="hover:text-sage-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                        <button onclick="deleteProject(${p.id})" class="hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+                                        <button onclick="toggleProjectCollapse(${p.id})" class="hover:text-slateDark"><i class="fa-solid fa-chevron-${p.collapsed ? 'down' : 'up'} text-xs"></i></button>
+                                    </div>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-2">Số tiền: <span class="font-semibold text-slateDark">${p.amount ? p.amount.toLocaleString() : '0'} VNĐ</span></div>
+
+                                <div class="w-full bg-gray-100 h-2 rounded-full mb-3 overflow-hidden">
+                                    <div class="bg-sage-500 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                                </div>
+
+                                ${!p.collapsed ? `
+                                    <div class="space-y-2 border-t border-gray-50 pt-3">
+                                        ${tasks.map(t => `
+                                            <div class="flex items-center justify-between text-xs bg-cream p-2 rounded-xl">
+                                                <div class="flex items-center gap-2 cursor-pointer" onclick="toggleProjectTask(${p.id}, ${t.id})">
+                                                    <i class="fa-${t.done ? 'solid fa-circle-check text-sage-500' : 'regular fa-circle text-gray-300'} text-base"></i>
+                                                    <span class="${t.done ? 'line-through text-gray-400' : 'text-slateDark'}">${t.text}</span>
+                                                </div>
+                                                <button onclick="deleteProjectTask(${p.id}, ${t.id})" class="text-gray-300 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                                            </div>
+                                        `).join('')}
+                                        <div class="flex gap-2 mt-2">
+                                            <input id="inp-new-task-${p.id}" type="text" placeholder="Thêm việc..." class="flex-1 text-xs p-2 border border-sage-100 rounded-xl focus:outline-none focus:border-sage-500">
+                                            <button onclick="addProjectTask(${p.id})" class="bg-warmYellow-400 hover:bg-warmYellow-500 text-slateDark px-3 py-1 rounded-xl text-xs font-bold transition">Thêm</button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                } else {
+                    store.singleTasks.forEach(t => {
+                        html += `
+                            <div class="bg-white rounded-2xl p-3.5 shadow-sm mb-2.5 border border-sage-100 flex items-center justify-between">
+                                <div class="flex items-center gap-3 cursor-pointer" onclick="toggleSingleTask(${t.id})">
+                                    <i class="fa-${t.done ? 'solid fa-circle-check text-sage-500' : 'regular fa-circle text-gray-300'} text-lg"></i>
+                                    <div>
+                                        <p class="text-xs font-semibold ${t.done ? 'line-through text-gray-400' : 'text-slateDark'}">${t.text}</p>
+                                        <div class="flex gap-2 mt-1">
+                                            ${t.priority === 'Gấp' ? `<span class="text-[9px] bg-warmYellow-400 text-slateDark font-bold px-1.5 py-0.5 rounded-md">GẤP</span>` : ''}
+                                            ${t.dueDate ? `<span class="text-[10px] text-gray-400"><i class="fa-regular fa-clock text-[9px] mr-1"></i>${formatDate(t.dueDate)}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 text-gray-400">
+                                    <button onclick="openModal('singleTask', ${t.id})" class="hover:text-sage-600"><i class="fa-solid fa-pen text-xs"></i></button>
+                                    <button onclick="deleteSingleTask(${t.id})" class="hover:text-red-400"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                main.innerHTML = html;
             } else if (currentTab === 'finance') {
-                title.innerText = 'Cá Nhân';
-                main.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex bg-gray-200/60 p-1 rounded-xl text-xs font-semibold">
-                            <button onclick="switchFinanceSubTab('cards')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'cards' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Thẻ tín dụng</button>
-                            <button onclick="switchFinanceSubTab('loans')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'loans' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Khoản vay</button>
-                            <button onclick="switchFinanceSubTab('lends')" class="flex-1 py-2 rounded-lg transition-all ${financeSubTab === 'lends' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}">Cho vay / Gửi</button>
-                        </div>
-
-                        ${financeSubTab === 'cards' ? `
-                            <div class="space-y-3">
-                                ${store.cards.map(c => `
-                                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <span class="text-xs text-slate-400">${c.bank}</span>
-                                                <h3 class="font-bold text-lg">${c.cardType}</h3>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button onclick="openModal('card', ${c.id})" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="deleteCard(${c.id})" class="text-slate-400 hover:text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                            </div>
-                                        </div>
-                                        <div class="mt-4">
-                                            <div class="text-[10px] text-slate-400">Hạn mức</div>
-                                            <div class="text-xl font-bold">${c.limit ? c.limit.toLocaleString() : 0} đ</div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-slate-700/50 text-xs">
-                                            <div>
-                                                <span class="text-slate-400 block text-[10px]">Ngày sao kê</span>
-                                                <span>Ngày ${c.statementDate} hàng tháng</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-slate-400 block text-[10px]">Hạn thanh toán</span>
-                                                <span>Ngày ${c.dueDate} hàng tháng</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : financeSubTab === 'loans' ? `
-                            <div class="space-y-3">
-                                ${store.loans.map(l => {
-                                    const paidCount = (l.paidMonths || []).length;
-                                    const progress = Math.round((paidCount / l.months) * 100);
-
-                                    return `
-                                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-600 uppercase">${l.bank}</span>
-                                                    <h3 class="font-bold text-gray-800 text-base mt-1">${l.name}</h3>
-                                                </div>
-                                                <div class="flex gap-2">
-                                                    <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
-                                                    <button onclick="deleteLoan(${l.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                                </div>
-                                            </div>
-
-                                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                                <div>
-                                                    <span class="text-gray-400 block text-[10px]">Tổng khoản vay</span>
-                                                    <span class="font-bold text-gray-800">${l.totalAmount ? l.totalAmount.toLocaleString() : 0} đ</span>
-                                                </div>
-                                                <div>
-                                                    <span class="text-gray-400 block text-[10px]">Trả hàng tháng</span>
-                                                    <span class="font-bold text-red-500">${l.monthlyPay ? l.monthlyPay.toLocaleString() : 0} đ</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-1">
-                                                <div class="flex justify-between text-[11px] font-semibold text-gray-500">
-                                                    <span>Tiến độ trả (${paidCount}/${l.months} tháng)</span>
-                                                    <span>${progress}%</span>
-                                                </div>
-                                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                                    <div class="bg-red-500 h-full transition-all duration-300" style="width: ${progress}%"></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="pt-2 border-t border-gray-50">
-                                                <div class="text-[11px] font-bold text-gray-700 mb-2">Đã thanh toán kỳ:</div>
-                                                <div class="grid grid-cols-6 gap-1.5">
-                                                    ${Array.from({ length: l.months }, (_, i) => i + 1).map(m => {
-                                                        const isPaid = (l.paidMonths || []).includes(m);
-                                                        return `
-                                                            <button onclick="toggleLoanMonth(${l.id}, ${m})" class="py-1 rounded text-[10px] font-bold transition-all ${isPaid ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400'}">
-                                                                T${m}
-                                                            </button>
-                                                        `;
-                                                    }).join('')}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        ` : `
-                            <div class="space-y-3">
-                                ${store.lends.map(l => `
-                                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-2">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${l.type === 'Cá nhân' ? 'bg-green-50 text-green-600' : 'bg-purple-50 text-purple-600'} uppercase">${l.type}</span>
-                                                <h3 class="font-bold text-gray-800 text-base mt-1">${l.borrower}</h3>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs"><i class="fa-solid fa-pen"></i></button>
-                                                <button onclick="deleteLend(${l.id})" class="text-gray-400 hover:text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex justify-between items-end">
-                                            <div>
-                                                <span class="text-gray-400 block text-[10px]">Số tiền</span>
-                                                <span class="text-base font-bold text-green-600">${l.amount ? l.amount.toLocaleString() : 0} đ</span>
-                                            </div>
-                                            <button onclick="toggleLendStatus(${l.id})" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${l.completed ? 'bg-gray-100 text-gray-500' : 'bg-green-100 text-green-700'}">
-                                                ${l.completed ? 'Đã thu hồi' : 'Đang cho vay'}
-                                            </button>
-                                        </div>
-
-                                        <div class="text-[11px] text-gray-400 pt-1 border-t border-gray-50 flex justify-between">
-                                            <span>Ngày bắt đầu: ${formatDate(l.startDate)}</span>
-                                            ${l.note ? `<span>${l.note}</span>` : ''}
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `}
-                    </div>
-                `;
+                title.innerText = 'Cá nhân';
+                main.innerHTML = `<div class="bg-white p-4 rounded-2xl border border-sage-100 text-center text-xs text-gray-500">Khu vực quản lý thẻ & tài chính cá nhân</div>`;
+            } else {
+                title.innerText = 'Trang chủ';
+                main.innerHTML = `<div class="bg-white p-4 rounded-2xl border border-sage-100 text-center text-xs text-gray-500">Tổng quan hoạt động</div>`;
             }
         }
 
-        // Khởi chạy ứng dụng
         render();
     </script>
 </body>

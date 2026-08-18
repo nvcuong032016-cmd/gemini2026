@@ -90,13 +90,17 @@
                     ]}
                 ],
                 singleTasks: [
-                    { id: 1, text: 'Nộp báo cáo công việc tuần', priority: 'Gấp', dueDate: '2026-08-20', done: false, note: '' }
+                    { id: 1, text: 'Nộp báo cáo công việc tuần', priority: 'Gấp', dueDate: '2026-08-20', done: false }
                 ],
                 cards: [
-                    { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: '', statementDate: '15', dueDate: '5' }
+                    { id: 1, bank: 'VPBank', cardType: 'Visa', limit: 50000000, days: '45 ngày', info: 'Thẻ thanh toán chính', statementDate: '15', dueDate: '5' }
                 ],
-                loans: [],
-                lends: []
+                loans: [
+                    { id: 1, bank: 'VPBank', name: 'Khoản vay mua xe', totalAmount: 24000000, monthlyPay: 2000000, startDate: '2026-01-10', months: 12, paidMonths: [1, 2, 3] }
+                ],
+                lends: [
+                    { id: 1, borrower: 'Nguyễn Văn A', type: 'Cá nhân', amount: 10000000, startDate: '2026-08-01', note: 'Cho vay ngắn hạn', completed: false }
+                ]
             };
 
             let savedMain = localStorage.getItem(STORAGE_KEY);
@@ -164,6 +168,30 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
+        function calculateDaysFrom(startDateStr) {
+            if (!startDateStr) return 0;
+            const start = new Date(startDateStr);
+            const today = new Date();
+            start.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+            const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 ? diffDays : 0;
+        }
+
+        function renderDayOptions(selected = '') {
+            let opts = `<option value="">Chọn ngày</option>`;
+            for (let i = 1; i <= 31; i++) {
+                opts += `<option value="${i}" ${String(selected) === String(i) ? 'selected' : ''}>Ngày ${i}</option>`;
+            }
+            return opts;
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Đã chép nội dung vào bộ nhớ tạm');
+            });
+        }
+
         function validateFields(fieldIds) {
             let isValid = true;
             fieldIds.forEach(id => {
@@ -194,6 +222,25 @@
         function deleteSingleTask(id) {
             store.singleTasks = store.singleTasks.filter(t => t.id !== id);
             saveData(); render();
+        }
+
+        function toggleLendStatus(lendId) {
+            const lend = store.lends.find(l => l.id === lendId);
+            if (lend) {
+                lend.completed = !lend.completed;
+                saveData(); render();
+            }
+        }
+
+        function toggleLoanMonth(loanId, monthIndex) {
+            const loan = store.loans.find(l => l.id === loanId);
+            if (loan) {
+                if (!Array.isArray(loan.paidMonths)) loan.paidMonths = [];
+                const idx = loan.paidMonths.indexOf(monthIndex);
+                if (idx > -1) loan.paidMonths.splice(idx, 1);
+                else loan.paidMonths.push(monthIndex);
+                saveData(); render();
+            }
         }
 
         // --- MODALS ---
@@ -294,6 +341,173 @@
                     }
                     saveData(); closeModal(); render();
                 };
+            } else if (type === 'card') {
+                const item = editId ? store.cards.find(c => c.id === editId) : null;
+                title.innerText = item ? 'Sửa Thẻ Tín Dụng' : 'Thêm Thẻ Tín Dụng';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên ngân hàng *</label>
+                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" placeholder="VPBank, MB..." class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Loại thẻ</label>
+                            <select id="inp-card-type" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                <option value="Visa" ${item && item.cardType === 'Visa' ? 'selected' : ''}>Visa</option>
+                                <option value="JCB" ${item && item.cardType === 'JCB' ? 'selected' : ''}>JCB</option>
+                                <option value="Mastercard" ${item && item.cardType === 'Mastercard' ? 'selected' : ''}>Mastercard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Thời hạn thanh toán</label>
+                            <select id="inp-days" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                <option value="45 ngày" ${item && item.days === '45 ngày' ? 'selected' : ''}>45 ngày</option>
+                                <option value="55 ngày" ${item && item.days === '55 ngày' ? 'selected' : ''}>55 ngày</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn mức thẻ (VNĐ) *</label>
+                        <input id="inp-limit" type="text" value="${item ? item.limit.toLocaleString() : ''}" oninput="formatNumberInput(this)" placeholder="50,000,000" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-info" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">${item ? item.info : ''}</textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày sao kê *</label>
+                            <select id="inp-statement" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">${renderDayOptions(item ? item.statementDate : '')}</select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Hạn thanh toán *</label>
+                            <select id="inp-due" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">${renderDayOptions(item ? item.dueDate : '')}</select>
+                        </div>
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    if (!validateFields(['inp-bank', 'inp-limit', 'inp-statement', 'inp-due'])) return;
+                    const data = {
+                        id: editId || Date.now(),
+                        bank: document.getElementById('inp-bank').value,
+                        cardType: document.getElementById('inp-card-type').value,
+                        days: document.getElementById('inp-days').value,
+                        limit: getRawNumber(document.getElementById('inp-limit').value),
+                        info: document.getElementById('inp-info').value,
+                        statementDate: document.getElementById('inp-statement').value,
+                        dueDate: document.getElementById('inp-due').value
+                    };
+                    if (editId) {
+                        const idx = store.cards.findIndex(c => c.id === editId);
+                        store.cards[idx] = data;
+                    } else {
+                        store.cards.push(data);
+                    }
+                    saveData(); closeModal(); render();
+                };
+            } else if (type === 'lend') {
+                const item = editId ? store.lends.find(l => l.id === editId) : null;
+                title.innerText = item ? 'Sửa Khoản Tiền Gửi / Cho Vay' : 'Thêm Khoản Tiền Gửi / Cho Vay';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Nơi / Người vay tiền *</label>
+                        <input id="inp-borrower" type="text" value="${item ? item.borrower : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Loại đối tượng *</label>
+                        <select id="inp-lend-type" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                            <option value="Cá nhân" ${item && item.type === 'Cá nhân' ? 'selected' : ''}>Cá nhân</option>
+                            <option value="Tổ chức" ${item && item.type === 'Tổ chức' ? 'selected' : ''}>Tổ chức</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Số tiền (VNĐ) *</label>
+                        <input id="inp-amount" type="text" value="${item ? item.amount.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu *</label>
+                        <input id="inp-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ghi chú</label>
+                        <textarea id="inp-note" rows="2" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">${item ? item.note : ''}</textarea>
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    if (!validateFields(['inp-borrower', 'inp-amount', 'inp-start'])) return;
+                    const data = {
+                        id: editId || Date.now(),
+                        borrower: document.getElementById('inp-borrower').value,
+                        type: document.getElementById('inp-lend-type').value,
+                        amount: getRawNumber(document.getElementById('inp-amount').value),
+                        startDate: document.getElementById('inp-start').value,
+                        note: document.getElementById('inp-note').value,
+                        completed: item ? item.completed : false
+                    };
+                    if (editId) {
+                        const idx = store.lends.findIndex(l => l.id === editId);
+                        store.lends[idx] = data;
+                    } else {
+                        store.lends.push(data);
+                    }
+                    saveData(); closeModal(); render();
+                };
+            } else if (type === 'loan') {
+                const item = editId ? store.loans.find(l => l.id === editId) : null;
+                title.innerText = item ? 'Sửa Khoản Vay / Trả Góp' : 'Thêm Khoản Vay / Trả Góp';
+                body.innerHTML = `
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Đơn vị cho vay *</label>
+                        <input id="inp-bank" type="text" value="${item ? item.bank : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tên khoản vay / Món đồ *</label>
+                        <input id="inp-name" type="text" value="${item ? item.name : ''}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Tổng số tiền (VNĐ) *</label>
+                        <input id="inp-amount" type="text" value="${item ? item.totalAmount.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Kỳ hạn vay</label>
+                            <select id="inp-months" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-white">
+                                <option value="3" ${item && item.months == 3 ? 'selected' : ''}>3 tháng</option>
+                                <option value="6" ${item && item.months == 6 ? 'selected' : ''}>6 tháng</option>
+                                <option value="12" ${item && item.months == 12 ? 'selected' : ''}>12 tháng</option>
+                                <option value="24" ${item && item.months == 24 ? 'selected' : ''}>24 tháng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Trả hàng tháng (VNĐ) *</label>
+                            <input id="inp-monthly" type="text" value="${item ? item.monthlyPay.toLocaleString() : ''}" oninput="formatNumberInput(this)" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold mb-1 block">Ngày bắt đầu</label>
+                        <input id="inp-start" type="date" value="${item ? item.startDate : new Date().toISOString().split('T')[0]}" class="w-full p-2.5 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                `;
+                saveBtn.onclick = () => {
+                    if (!validateFields(['inp-bank', 'inp-name', 'inp-amount', 'inp-monthly'])) return;
+                    const data = {
+                        id: editId || Date.now(),
+                        bank: document.getElementById('inp-bank').value,
+                        name: document.getElementById('inp-name').value,
+                        totalAmount: getRawNumber(document.getElementById('inp-amount').value),
+                        monthlyPay: getRawNumber(document.getElementById('inp-monthly').value),
+                        startDate: document.getElementById('inp-start').value,
+                        months: parseInt(document.getElementById('inp-months').value),
+                        paidMonths: item ? item.paidMonths : []
+                    };
+                    if (editId) {
+                        const idx = store.loans.findIndex(l => l.id === editId);
+                        store.loans[idx] = data;
+                    } else {
+                        store.loans.push(data);
+                    }
+                    saveData(); closeModal(); render();
+                };
             }
         }
 
@@ -307,11 +521,31 @@
 
             if (currentTab === 'home') {
                 title.innerText = 'Trang Chủ';
-                main.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">Trang chủ đang phát triển. Chuyển sang Tab Công việc hoặc Cá nhân để sử dụng.</div>`;
+                const totalLend = store.lends.filter(l => !l.completed).reduce((acc, l) => acc + (l.amount || 0), 0);
+                const totalLoan = store.loans.reduce((acc, l) => acc + (l.totalAmount || 0), 0);
+                const pendingTasks = store.singleTasks.filter(t => !t.done).length;
+
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 rounded-2xl text-white shadow-md">
+                            <span class="text-xs opacity-80 uppercase font-semibold">Công việc còn lại</span>
+                            <div class="text-2xl font-bold mt-1">${pendingTasks} việc cần làm</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Đang cho vay</span>
+                                <span class="font-bold text-emerald-600 text-base mt-1 block">${totalLend.toLocaleString()} đ</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase block">Tổng khoản vay</span>
+                                <span class="font-bold text-blue-600 text-base mt-1 block">${totalLoan.toLocaleString()} đ</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else if (currentTab === 'projects') {
                 title.innerText = 'Công việc';
-                
-                // Mùa icon folder cho giao diện
                 const folderColors = {
                     'DVCI': { bg: 'bg-blue-500', bar: 'bg-blue-500' },
                     'G-Ticket': { bg: 'bg-emerald-500', bar: 'bg-emerald-500' },
@@ -319,7 +553,6 @@
                 };
 
                 main.innerHTML = `
-                    <!-- Sub Tabs: Dự án / Việc riêng lẻ -->
                     <div class="flex border-b border-gray-100 mb-4">
                         <button onclick="switchWorkSubTab('projects')" class="flex-1 py-2 text-center text-sm font-semibold relative ${workSubTab === 'projects' ? 'text-blue-600' : 'text-gray-400'}">
                             Dự án
@@ -358,7 +591,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Progress bar UI chuẩn như ảnh mẫu -->
                                     <div class="flex items-center gap-3">
                                         <div class="flex-1 bg-gray-100 h-2 rounded-full overflow-hidden">
                                             <div class="${theme.bar} h-full rounded-full transition-all" style="width: ${percent}%"></div>
@@ -372,7 +604,6 @@
                             }).join('')}
                         </div>
                     ` : `
-                        <!-- Tab Việc Riêng Lẻ -->
                         <div class="space-y-2">
                             ${store.singleTasks.length === 0 ? '<p class="text-xs text-gray-400 text-center py-6">Không có việc riêng lẻ nào</p>' : ''}
                             ${store.singleTasks.map(t => `
@@ -389,7 +620,198 @@
                 `;
             } else if (currentTab === 'finance') {
                 title.innerText = 'Cá nhân';
-                main.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">Đã bảo lưu toàn bộ dữ liệu tab Cá nhân.</div>`;
+                main.innerHTML = `
+                    <!-- 1. Thẻ tín dụng -->
+                    <details open class="mb-4 group">
+                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
+                            <h3 class="font-bold text-gray-800 text-sm">Thẻ tín dụng ngân hàng</h3>
+                            <div class="flex items-center gap-3">
+                                <button onclick="event.preventDefault(); openModal('card')" class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="pt-1">
+                            ${store.cards.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có thẻ nào</p>' : ''}
+                            ${store.cards.map(c => {
+                                const copyContent = `Ngân hàng: ${c.bank}\nLoại thẻ: ${c.cardType}\nHạn mức: ${c.limit.toLocaleString()} đ\nNgày sao kê: Ngày ${c.statementDate}\nHạn thanh toán: Ngày ${c.dueDate}\nGhi chú: ${c.info || 'Không có'}`;
+                                return `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5">
+                                                ${c.bank}
+                                                <button onclick="openModal('card', ${c.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-1">
+                                                <span class="text-[10px] bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded-full border border-blue-100">${c.cardType || 'Visa'}</span>
+                                                <span class="text-[10px] bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded-full">${c.days || '45 ngày'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] text-gray-400 font-bold uppercase block">Hạn mức</span>
+                                            <span class="font-bold text-blue-600 text-sm">${(c.limit || 0).toLocaleString()} đ</span>
+                                        </div>
+                                    </div>
+                                    
+                                    ${c.info ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg my-2.5 border border-gray-100">${c.info}</p>` : ''}
+                                    
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl mt-2 border border-slate-100">
+                                        <div>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày sao kê</span>
+                                            <b class="text-gray-700">Ngày ${c.statementDate} hàng tháng</b>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Hạn thanh toán</span>
+                                            <b class="text-red-500">Ngày ${c.dueDate} hàng tháng</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
+
+                    <!-- 2. Tiền gửi / Cho vay -->
+                    <details open class="mb-4 group">
+                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
+                            <h3 class="font-bold text-gray-800 text-sm">Tiền gửi / Cho vay</h3>
+                            <div class="flex items-center gap-3">
+                                <button onclick="event.preventDefault(); openModal('lend')" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="pt-1">
+                            ${store.lends.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có khoản gửi/cho vay nào</p>' : ''}
+                            ${store.lends.map(l => {
+                                const daysCount = calculateDaysFrom(l.startDate);
+                                const isOrg = l.type === 'Tổ chức';
+                                const copyContent = `Đối tượng: ${l.borrower} (${l.type})\nSố tiền: ${l.amount.toLocaleString()} đ\nNgày bắt đầu: ${formatDate(l.startDate)}\nSố ngày cho vay: ${daysCount} ngày\nTrạng thái: ${l.completed ? 'Hoàn thành' : 'Đang xử lý'}\nGhi chú: ${l.note || 'Không có'}`;
+                                
+                                return `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5 flex-wrap">
+                                                <span>${l.borrower}</span>
+                                                <button onclick="openModal('lend', ${l.id})" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-emerald-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                                <span class="text-[10px] ${isOrg ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-amber-50 text-amber-600 border-amber-100'} border font-semibold px-2.5 py-0.5 rounded-full inline-block">
+                                                    ${l.type || 'Cá nhân'}
+                                                </span>
+                                            </div>
+                                            
+                                            <button onclick="toggleLendStatus(${l.id})" class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${l.completed ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200'}">
+                                                <i class="fa-solid ${l.completed ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
+                                                <span>${l.completed ? 'Hoàn thành' : 'Đang xử lý'}</span>
+                                            </button>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] text-gray-400 font-bold uppercase block">Số tiền</span>
+                                            <span class="font-bold text-emerald-600 text-sm">${(l.amount || 0).toLocaleString()} đ</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-emerald-50/50 p-3 rounded-xl my-2.5 border border-emerald-100/50">
+                                        <div>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
+                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Số ngày cho vay</span>
+                                            <b class="text-emerald-700">${daysCount} ngày</b>
+                                        </div>
+                                    </div>
+
+                                    ${l.note ? `<p class="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100">${l.note}</p>` : ''}
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
+
+                    <!-- 3. Khoản vay / Trả góp -->
+                    <details open class="mb-4 group">
+                        <summary class="flex justify-between items-center cursor-pointer select-none mb-3">
+                            <h3 class="font-bold text-gray-800 text-sm">Khoản vay / Trả góp</h3>
+                            <div class="flex items-center gap-3">
+                                <button onclick="event.preventDefault(); openModal('loan')" class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm">+ Thêm</button>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform text-xs"></i>
+                            </div>
+                        </summary>
+                        <div class="pt-1">
+                            ${store.loans.length === 0 ? '<p class="text-xs text-gray-400 italic py-2">Chưa có khoản vay nào</p>' : ''}
+                            ${store.loans.map(l => {
+                                const monthlyPay = l.monthlyPay || Math.round(l.totalAmount / l.months);
+                                const paidCount = (l.paidMonths || []).length;
+                                const percent = Math.round((paidCount / l.months) * 100);
+                                const isCompleted = paidCount === l.months;
+                                const copyContent = `Khoản vay: ${l.name}\nĐơn vị: ${l.bank}\nTổng vay: ${l.totalAmount.toLocaleString()} đ\nTrả hàng tháng: ${monthlyPay.toLocaleString()} đ\nTiến độ: ${paidCount}/${l.months} kỳ (${percent}%)\nTrạng thái: ${isCompleted ? 'Hoàn thành' : 'Đang xử lý'}`;
+
+                                return `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div class="font-bold text-gray-800 text-base flex items-center gap-1.5 flex-wrap">
+                                                <span>${l.name}</span>
+                                                <button onclick="openModal('loan', ${l.id})" class="text-gray-400 hover:text-blue-600 text-xs px-0.5"><i class="fa-solid fa-pen"></i></button>
+                                                <button onclick="copyText(\`${copyContent}\`)" class="text-gray-400 hover:text-blue-600 text-xs px-0.5" title="Chép nội dung"><i class="fa-regular fa-copy"></i></button>
+                                            </div>
+                                            <div class="text-xs text-blue-600 font-semibold mt-0.5">${l.bank}</div>
+
+                                            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}">
+                                                <i class="fa-solid ${isCompleted ? 'fa-circle-check text-green-600' : 'fa-clock text-red-500'}"></i>
+                                                <span>${isCompleted ? 'Hoàn thành' : 'Đang xử lý'}</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-[10px] text-gray-400 font-bold uppercase">Tổng vay</div>
+                                            <div class="font-bold text-gray-800 text-sm">${l.totalAmount.toLocaleString()} đ</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-xs bg-blue-50/50 p-3 rounded-xl my-3 border border-blue-100/50">
+                                        <div>
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Ngày bắt đầu</span>
+                                            <b class="text-gray-700">${formatDate(l.startDate)}</b>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-gray-400 block text-[10px] uppercase font-bold mb-0.5">Trả hàng tháng</span>
+                                            <b class="text-blue-700">${monthlyPay.toLocaleString()} đ</b>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between items-center text-xs mb-1.5">
+                                        <span class="text-gray-500">Tiến độ: <b>${paidCount}/${l.months} kỳ</b></span>
+                                        <span class="font-bold text-green-600">${percent}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2 mb-3">
+                                        <div class="bg-green-500 h-2 rounded-full transition-all" style="width: ${percent}%"></div>
+                                    </div>
+
+                                    <details class="border-t border-gray-100 pt-2 group/sub">
+                                        <summary class="flex justify-between items-center cursor-pointer text-xs font-bold text-gray-700 py-1 select-none">
+                                            <span>Chi tiết kỳ thanh toán</span>
+                                            <i class="fa-solid fa-chevron-down text-gray-400 group-open/sub:rotate-180 transition-transform text-xs"></i>
+                                        </summary>
+                                        <div class="grid grid-cols-3 gap-2 mt-2 pt-1">
+                                            ${Array.from({ length: l.months }, (_, i) => i + 1).map(m => {
+                                                const isChecked = (l.paidMonths || []).includes(m);
+                                                return `
+                                                    <button onclick="toggleLoanMonth(${l.id}, ${m})" class="flex items-center justify-between p-2 rounded-lg text-[11px] font-medium border ${isChecked ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-500'}">
+                                                        <span>Kỳ ${m}/${l.months}</span>
+                                                        <i class="fa-solid ${isChecked ? 'fa-circle-check text-green-600' : 'fa-circle-thin text-gray-300'} text-xs"></i>
+                                                    </button>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </details>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
+                `;
             }
         }
 

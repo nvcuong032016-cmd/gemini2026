@@ -1,4 +1,340 @@
-<svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-5H4v5zm6 0h5v-5h-5v5zm0-13v6h5V5h-5zm6 0v6h5V5h-5zm0 13h5v-5h-5v5z"/></svg>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Công Việc & Tài Chính</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f4f6f8; color: #333; padding-bottom: 70px; }
+    
+    /* Header */
+    .header { background: #1e293b; color: white; padding: 16px; text-align: center; }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .solar-date { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+
+    /* Layout Containers */
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Segment Control / Sub-tabs */
+    .segment-control { display: flex; background: #e2e8f0; border-radius: 8px; padding: 3px; margin-bottom: 16px; }
+    .segment-btn { flex: 1; padding: 8px; text-align: center; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #64748b; border-radius: 6px; cursor: pointer; }
+    .segment-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    /* Cards & Stats */
+    .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; border: 1px solid #e2e8f0; }
+    .card.completed-card { opacity: 0.6; background: #f8fafc; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; }
+    
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .stat-card { background: white; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 18px; font-weight: 700; color: #0f172a; }
+
+    /* Credit Card Specific */
+    .credit-card { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; position: relative; }
+    .badge-group { display: flex; justify-content: space-between; align-items: center; }
+    .badge { background: rgba(255,255,255,0.2); font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    .btn-edit-card { background: transparent; border: none; color: white; cursor: pointer; margin-left: 6px; }
+
+    /* Subtasks & Progress */
+    .progress-container { margin-top: 10px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .progress-bg { background: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden; }
+    .progress-fill { background: #22c55e; height: 100%; transition: width 0.3s; }
+    
+    .subtask-section { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+    .subtask-section.active { display: block; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+    .subtask-item.completed span { text-decoration: line-through; color: #94a3b8; }
+    .add-task-row { display: flex; gap: 6px; margin-top: 8px; }
+    .add-task-row input { flex: 1; padding: 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; }
+    .add-task-row button { padding: 6px 12px; background: #0f172a; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
+
+    /* Actions & Buttons */
+    .action-icons { display: flex; gap: 8px; align-items: center; }
+    .btn-icon { background: none; border: none; cursor: pointer; font-size: 14px; }
+    .toggle-arrow { background: none; border: none; cursor: pointer; font-size: 12px; color: #64748b; transition: transform 0.2s; }
+    .toggle-arrow.expanded { transform: rotate(180deg); }
+    .btn-add-main { position: fixed; bottom: 75px; right: 20px; width: 48px; height: 48px; border-radius: 24px; background: #2563eb; color: white; border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(37,99,235,0.3); cursor: pointer; z-index: 10; }
+
+    /* Modals */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: flex-end; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 16px 16px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; }
+    .form-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+    /* Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; z-index: 10; }
+    .nav-item { border: none; background: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #64748b; cursor: pointer; }
+    .nav-item.active { color: #2563eb; font-weight: 600; }
+    .nav-item svg { fill: currentColor; margin-bottom: 2px; }
+    
+    .settle-check-footer { display: block; margin-top: 8px; font-size: 12px; color: #64748b; }
+    .tag-object { font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-left: 4px; color: #475569; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Quản Lý Công Việc & Tài Chính</h1>
+    <div class="solar-date" id="solar-date-text">--</div>
+  </div>
+
+  <!-- MAIN CONTAINERS -->
+  <div class="container">
+    
+    <!-- TAB 1: TRANG CHỦ -->
+    <div id="tab-trang-chu" class="tab-content active">
+      <h2 style="font-size: 16px; margin-bottom: 12px;">Tổng quan công việc</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Dự án đang chạy</div>
+          <div class="stat-value" id="home-stat-projects">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Việc riêng lẻ</div>
+          <div class="stat-value" id="home-stat-singles">0</div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 16px; margin-bottom: 12px;">Tổng quan tài chính</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Thẻ tín dụng (<span id="home-stat-credit-count">0</span>)</div>
+          <div class="stat-value" style="font-size: 14px; color: #2563eb;" id="home-stat-credit-limit">0 VNĐ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Khoản vay/Trả góp</div>
+          <div class="stat-value" id="home-stat-creditor-count">0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 14px; margin-bottom: 8px;">Tiền cho vay / Tiết kiệm chưa thu</h3>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px;">
+          <span>Cá nhân:</span> <b id="home-stat-debtor-personal" style="color: #16a34a;">0 VNĐ</b>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+          <span>Tổ chức:</span> <b id="home-stat-debtor-org" style="color: #2563eb;">0 VNĐ</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CÔNG VIỆC -->
+    <div id="tab-cong-viec" class="tab-content">
+      <div class="segment-control">
+        <button class="segment-btn active" id="btn-work-project" onclick="switchWorkSegment('project')">Dự Án (<span id="project-count">0</span>)</button>
+        <button class="segment-btn" id="btn-work-single" onclick="switchWorkSegment('single')">Việc Riêng Lẻ (<span id="single-work-count">0</span>)</button>
+      </div>
+
+      <!-- List Dự án -->
+      <div id="work-project-list"></div>
+
+      <!-- List Việc riêng lẻ -->
+      <div id="work-single-list" style="display: none;"></div>
+
+      <button class="btn-add-main" onclick="openAddWorkModal()">+</button>
+    </div>
+
+    <!-- TAB 3: THẺ & TÀI CHÍNH -->
+    <div id="tab-tai-chinh" class="tab-content">
+      <div class="segment-control">
+        <button class="segment-btn active" id="btn-tab-credit" onclick="switchFinanceTab('credit')">Tín Dụng</button>
+        <button class="segment-btn" id="btn-tab-saving" onclick="switchFinanceTab('saving')">Cho Vay/Gửi</button>
+        <button class="segment-btn" id="btn-tab-loan" onclick="switchFinanceTab('loan')">Vay/Trả Góp</button>
+      </div>
+
+      <div id="list-credit"></div>
+      <div id="list-saving" style="display: none;"></div>
+      <div id="list-loan" style="display: none;"></div>
+
+      <button class="btn-add-main" onclick="openAddFinanceModal()">+</button>
+    </div>
+
+  </div>
+
+  <!-- MODAL: DỰ ÁN -->
+  <div class="modal" id="modal-du-an">
+    <div class="modal-content">
+      <h3 id="modal-project-title" style="margin-bottom: 12px;">Thêm Dự Án Mới</h3>
+      <input type="hidden" id="edit-project-id">
+      <div class="form-group">
+        <label>Tên dự án *</label>
+        <input type="text" id="project-name" placeholder="Nhập tên dự án">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div class="form-group">
+          <label>Ngày bắt đầu</label>
+          <input type="date" id="project-start-date">
+        </div>
+        <div class="form-group">
+          <label>Ngày kết thúc</label>
+          <input type="date" id="project-end-date">
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div class="form-group">
+          <label>Loại dự án</label>
+          <select id="project-type">
+            <option value="DVCI">DVCI</option>
+            <option value="Thường">Thường</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ngân sách (VNĐ)</label>
+          <input type="text" id="project-budget" class="currency-input" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Ghi chú</label>
+        <textarea id="project-note" rows="2"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeModal('modal-du-an')">Hủy</button>
+        <button class="btn-save" onclick="saveProject()">Lưu Dự Án</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VIỆC RIÊNG LẺ -->
+  <div class="modal" id="modal-viec-rieng-le">
+    <div class="modal-content">
+      <h3 id="modal-single-title" style="margin-bottom: 12px;">Thêm Việc Riêng Lẻ</h3>
+      <input type="hidden" id="edit-single-id">
+      <div class="form-group">
+        <label>Tên công việc *</label>
+        <input type="text" id="single-work-name" placeholder="Nhập tên việc">
+      </div>
+      <div class="form-group">
+        <label>Ngày bắt đầu</label>
+        <input type="date" id="single-work-start-date">
+      </div>
+      <div class="form-group">
+        <label>Ghi chú</label>
+        <textarea id="single-work-note" rows="2"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeModal('modal-viec-rieng-le')">Hủy</button>
+        <button class="btn-save" onclick="saveSingleWork()">Lưu Công Việc</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TÀI CHÍNH -->
+  <div class="modal" id="modal-tai-khoan">
+    <div class="modal-content">
+      <h3 id="modal-finance-title" style="margin-bottom: 12px;">Thêm Mục Tài Chính</h3>
+      <input type="hidden" id="edit-finance-id">
+      <div class="form-group">
+        <label id="lbl-bank-name">Tên ngân hàng / Đối tượng *</label>
+        <input type="text" id="fin-name" placeholder="Nhập tên">
+      </div>
+
+      <!-- Fields cho Credit -->
+      <div id="fields-credit">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label>Loại thẻ</label>
+            <input type="text" id="fin-card-type" placeholder="VISA, Mastercard...">
+          </div>
+          <div class="form-group">
+            <label>Miễn lãi</label>
+            <input type="text" id="fin-grace-period" value="45 ngày">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Hạn mức thẻ (VNĐ)</label>
+          <input type="text" id="fin-credit-limit" class="currency-input" placeholder="0">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label>Ngày sao kê</label>
+            <input type="number" id="fin-statement-date" placeholder="15">
+          </div>
+          <div class="form-group">
+            <label>Ngày hạn trả</label>
+            <input type="number" id="fin-due-date" placeholder="05">
+          </div>
+        </div>
+      </div>
+
+      <!-- Fields cho Saving/Cho Vay -->
+      <div id="fields-saving" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label>Phân loại</label>
+            <select id="fin-saving-category">
+              <option value="Tiết kiệm">Tiết kiệm</option>
+              <option value="Cho vay">Cho vay</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Đối tượng</label>
+            <select id="fin-customer-type">
+              <option value="Cá nhân">Cá nhân</option>
+              <option value="Tổ chức">Tổ chức</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label>Số tiền (VNĐ)</label>
+            <input type="text" id="fin-saving-amount" class="currency-input" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Kỳ hạn</label>
+            <input type="text" id="fin-saving-term" placeholder="6 tháng, Không kỳ hạn...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Fields cho Vay/Trả góp -->
+      <div id="fields-loan" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="form-group">
+            <label>Tổng số tiền vay</label>
+            <input type="text" id="fin-loan-amount" class="currency-input" placeholder="0" oninput="calculateMonthlyLoan()">
+          </div>
+          <div class="form-group">
+            <label>Số tháng trả góp</label>
+            <input type="number" id="fin-loan-term" value="12" oninput="calculateMonthlyLoan()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Số tiền trả hàng tháng (tạm tính)</label>
+          <input type="text" id="fin-loan-monthly" readonly style="background: #f1f5f9; font-weight: bold; color: #c62828;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Ghi chú</label>
+        <textarea id="fin-note" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeModal('modal-tai-khoan')">Hủy</button>
+        <button class="btn-save" onclick="saveFinanceItem()">Lưu Thông Tin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('tab-trang-chu', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Trang chủ
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-cong-viec', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-5H4v5zm6 0h5v-5h-5v5zm0-13v6h5V5h-5zm6 0v6h5V5h-5zm0 13h5v-5h-5v5z"/></svg>
       Công việc
     </button>
     <button class="nav-item" onclick="switchTab('tab-tai-chinh', this)">
@@ -413,11 +749,13 @@
             <div class="credit-card" id="${id}" data-name="${name}" data-cardtype="${cardType}" data-grace="${grace}" data-limit="${limit}" data-stmt="${stmt}" data-due="${due}" data-note="${note}">
               <div class="badge-group">
                 <div class="badge badge-grace">${grace} miễn lãi</div>
-                <button class="btn-edit-card" title="Sửa" onclick="editCreditCard('${id}')">✏️</button>
-                <button class="btn-edit-card" title="Xóa" onclick="deleteItem('${id}', 'credit')">🗑️</button>
+                <div>
+                  <button class="btn-edit-card" title="Sửa" onclick="editCreditCard('${id}')">✏️</button>
+                  <button class="btn-edit-card" title="Xóa" onclick="deleteItem('${id}', 'credit')">🗑️</button>
+                </div>
               </div>
-              <div class="card-bank-name" style="font-size: 13px; opacity: 0.9;">${name}</div>
-              <div class="card-type-title" style="font-size: 20px; font-weight: bold; margin: 8px 0;">${cardType}</div>
+              <div class="card-bank-name" style="font-size: 13px; opacity: 0.9; margin-top: 6px;">${name}</div>
+              <div class="card-type-title" style="font-size: 20px; font-weight: bold; margin: 6px 0;">${cardType}</div>
               <div style="display: flex; justify-content: space-between; font-size: 12px;">
                 <div>Hạn mức:<br><b class="card-limit">${limit} đ</b></div>
                 <div style="text-align: right;">Sao kê: <b class="card-stmt">Ngày ${stmt || '--'}</b><br>Hạn trả: <b class="card-due">Ngày ${due || '--'}</b></div>
@@ -540,6 +878,7 @@
     function editCreditCard(id) {
       const card = document.getElementById(id);
       switchFinanceTab('credit');
+      openAddFinanceModal();
       document.getElementById('modal-finance-title').textContent = 'Chỉnh Sửa Thẻ Tín Dụng';
       document.getElementById('edit-finance-id').value = id;
       document.getElementById('fin-name').value = card.dataset.name || '';
@@ -549,10 +888,6 @@
       document.getElementById('fin-statement-date').value = card.dataset.stmt || '';
       document.getElementById('fin-due-date').value = card.dataset.due || '';
       document.getElementById('fin-note').value = card.dataset.note || '';
-      openAddFinanceModal();
-      document.getElementById('edit-finance-id').value = id;
-      document.getElementById('fin-name').value = card.dataset.name || '';
-      document.getElementById('fin-credit-limit').value = card.dataset.limit || '';
     }
 
     function editSavingItem(id) {
@@ -632,7 +967,7 @@
 
     // --- 6. INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
-      // Set Solar Date
+      // Set Date
       const today = new Date();
       const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
       const dateStr = `${days[today.getDay()]}, ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;

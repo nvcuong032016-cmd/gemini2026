@@ -34,8 +34,8 @@
     .credit-card .badge { position: absolute; top: 15px; right: 15px; background: #c8e6c9; color: #1b5e20; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
     
     /* Checkbox Tất toán / Hoàn thành */
-    .settle-check { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; color: #2e7d32; cursor: pointer; }
-    .settle-check input { width: 16px; height: 16px; accent-color: #2e7d32; }
+    .settle-check-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 12px; font-weight: bold; color: #2e7d32; cursor: pointer; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #eee; }
+    .settle-check-footer input { width: 16px; height: 16px; accent-color: #2e7d32; }
 
     /* Progress Bar */
     .progress-container { margin-top: 10px; }
@@ -218,16 +218,18 @@
       <!-- CHO VAY / TIỀN GỬI -->
       <div id="list-saving" class="finance-group" style="display: none;">
         <div class="card" id="saving-demo">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
-            <label class="settle-check">
-              <input type="checkbox" onchange="toggleSettled(this, 'saving-demo')"> Đã tất toán
-            </label>
+          <div>
+            <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Tiết kiệm</span>
           </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Vietcombank - Tiền gửi</h3>
-          <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">100,000,000 VNĐ</b></p>
+          <p style="font-size:13px; color:#555;">Số tiền: <b style="color:#2e7d32;">100,000,000 VNĐ</b></p>
           <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>6 tháng</b> | Đối tượng: <b>Cá nhân</b></p>
           <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Tiết kiệm tích lũy</p>
+          
+          <!-- Đã tất toán nằm phía dưới -->
+          <label class="settle-check-footer">
+            <input type="checkbox" onchange="toggleSettled(this, 'saving-demo')"> Đã tất toán
+          </label>
         </div>
       </div>
 
@@ -379,29 +381,38 @@
       <div id="fields-saving" style="display: none;">
         <div class="form-row">
           <div class="form-group">
-            <label>Loại đối tượng *</label>
+            <label>Phân loại *</label>
+            <select id="fin-saving-category" class="form-control">
+              <option value="Tiết kiệm">Tiết kiệm</option>
+              <option value="Cho vay">Cho vay</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Đối tượng *</label>
             <select id="fin-customer-type" class="form-control">
               <option value="Cá nhân">Cá nhân</option>
               <option value="Tổ chức / Doanh nghiệp">Tổ chức / Doanh nghiệp</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Số tiền gửi / cho vay (VNĐ) *</label>
-            <input type="text" inputmode="numeric" pattern="[0-9]*" id="fin-saving-amount" class="form-control currency-input" placeholder="0">
-          </div>
         </div>
 
-        <div class="form-group">
-          <label>Kỳ hạn gửi</label>
-          <select id="fin-saving-term" class="form-control">
-            <option>Không kỳ hạn</option>
-            <option>1 tháng</option>
-            <option>3 tháng</option>
-            <option>6 tháng</option>
-            <option>12 tháng</option>
-            <option>24 tháng</option>
-            <option>36 tháng</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Số tiền (VNĐ) *</label>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="fin-saving-amount" class="form-control currency-input" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Kỳ hạn gửi</label>
+            <select id="fin-saving-term" class="form-control">
+              <option>Không kỳ hạn</option>
+              <option>1 tháng</option>
+              <option>3 tháng</option>
+              <option>6 tháng</option>
+              <option>12 tháng</option>
+              <option>24 tháng</option>
+              <option>36 tháng</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -699,6 +710,7 @@
         document.getElementById('list-credit').insertAdjacentHTML('afterbegin', cardHTML);
 
       } else if(currentFinanceTab === 'saving') {
+        const category = document.getElementById('fin-saving-category').value;
         const custType = document.getElementById('fin-customer-type').value;
         const amount = document.getElementById('fin-saving-amount').value || '0';
         const term = document.getElementById('fin-saving-term').value;
@@ -708,16 +720,17 @@
 
         const savingHTML = `
           <div class="card" id="${cardId}">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Khoản gửi / vay</span>
-              <label class="settle-check">
-                <input type="checkbox" onchange="toggleSettled(this, '${cardId}')"> Đã tất toán
-              </label>
+            <div>
+              <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">${category}</span>
             </div>
             <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
             <p style="font-size:13px; color:#555;">Số tiền: <b style="color:#2e7d32;">${amount} VNĐ</b></p>
             <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>${term}</b> | Đối tượng: <b>${custType}</b></p>
             <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Không có'}</p>
+
+            <label class="settle-check-footer">
+              <input type="checkbox" onchange="toggleSettled(this, '${cardId}')"> Đã tất toán
+            </label>
           </div>`;
         document.getElementById('list-saving').insertAdjacentHTML('afterbegin', savingHTML);
 

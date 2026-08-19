@@ -25,6 +25,10 @@
 
     /* Card Component */
     .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef0ec; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; }
+    .toggle-arrow { background: none; border: none; font-size: 18px; cursor: pointer; color: #666; transition: transform 0.2s; }
+    .toggle-arrow.expanded { transform: rotate(180deg); }
+
     .credit-card { background: linear-gradient(135deg, #4a7c59, #284b33); color: white; border-radius: 16px; padding: 20px; margin-bottom: 12px; position: relative; }
     .credit-card .badge { position: absolute; top: 15px; right: 15px; background: #c8e6c9; color: #1b5e20; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
     
@@ -32,7 +36,17 @@
     .progress-container { margin-top: 10px; }
     .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px; }
     .progress-bg { background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; }
-    .progress-fill { background: #4caf50; height: 100%; border-radius: 4px; }
+    .progress-fill { background: #4caf50; height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+
+    /* Sub-tasks Section */
+    .subtask-section { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e0e0e0; display: none; }
+    .subtask-section.active { display: block; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
+    .subtask-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #2e7d32; }
+    .subtask-item.completed span { text-decoration: line-through; color: #888; }
+    .add-task-row { display: flex; gap: 6px; margin-top: 8px; }
+    .add-task-row input { flex: 1; padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px; }
+    .add-task-row button { padding: 6px 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
 
     /* Modal / Popup Form */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: flex-end; flex-direction: column; }
@@ -46,7 +60,7 @@
     .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; outline: none; background: #fff; }
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
-    textarea.form-control { resize: none; height: 75px; }
+    textarea.form-control { resize: none; height: 70px; }
 
     /* Action Buttons */
     .btn-group { display: flex; gap: 10px; margin-top: 15px; }
@@ -80,35 +94,75 @@
       </div>
 
       <div id="project-list">
-        <!-- Danh sách dự án ban đầu -->
-        <div class="card">
-          <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">DVCI</span>
+        <!-- Dự án 1 -->
+        <div class="card" id="proj-1">
+          <div class="card-header">
+            <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">DVCI</span>
+            <button class="toggle-arrow" onclick="toggleSubtasks('proj-1', this)">▼</button>
+          </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">DVCI Đà Lạt</h3>
+          <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b>01/03/2026</b> - <b>30/04/2026</b></p>
           <p style="font-size:13px; color:#555;">Ngân sách: <b>50.000.000 VNĐ</b></p>
           <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Triển khai hạ tầng công nghệ giai đoạn 1</p>
+          
           <div class="progress-container">
             <div class="progress-info">
               <span>Tiến độ thực hiện</span>
-              <b>60%</b>
+              <b class="progress-percent">66%</b>
             </div>
             <div class="progress-bg">
-              <div class="progress-fill" style="width: 60%;"></div>
+              <div class="progress-fill" style="width: 66%;"></div>
+            </div>
+          </div>
+
+          <div class="subtask-section">
+            <div class="subtask-list">
+              <div class="subtask-item completed">
+                <input type="checkbox" checked onchange="updateProgress('proj-1')">
+                <span>Khảo sát mặt bằng</span>
+              </div>
+              <div class="subtask-item completed">
+                <input type="checkbox" checked onchange="updateProgress('proj-1')">
+                <span>Lắp đặt thiết bị máy chủ</span>
+              </div>
+              <div class="subtask-item">
+                <input type="checkbox" onchange="updateProgress('proj-1')">
+                <span>Kiểm thử hệ thống toàn tuyến</span>
+              </div>
+            </div>
+            <div class="add-task-row">
+              <input type="text" placeholder="Thêm nhiệm vụ chi tiết...">
+              <button onclick="addSubtask('proj-1', this)">Thêm</button>
             </div>
           </div>
         </div>
 
-        <div class="card">
-          <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">G-Ticket</span>
+        <!-- Dự án 2 -->
+        <div class="card" id="proj-2">
+          <div class="card-header">
+            <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">G-Ticket</span>
+            <button class="toggle-arrow" onclick="toggleSubtasks('proj-2', this)">▼</button>
+          </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Hệ thống Vé Điện Tử</h3>
+          <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b>15/02/2026</b> - <b>15/05/2026</b></p>
           <p style="font-size:13px; color:#555;">Ngân sách: <b>20.000.000 VNĐ</b></p>
           <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Nâng cấp cổng thanh toán trực tuyến</p>
+          
           <div class="progress-container">
             <div class="progress-info">
               <span>Tiến độ thực hiện</span>
-              <b>35%</b>
+              <b class="progress-percent">0%</b>
             </div>
             <div class="progress-bg">
-              <div class="progress-fill" style="width: 35%;"></div>
+              <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="subtask-section">
+            <div class="subtask-list"></div>
+            <div class="add-task-row">
+              <input type="text" placeholder="Thêm nhiệm vụ chi tiết...">
+              <button onclick="addSubtask('proj-2', this)">Thêm</button>
             </div>
           </div>
         </div>
@@ -127,19 +181,17 @@
     </div>
 
     <div style="padding-top: 10px;">
-      <!-- CHỈ HIỂN THỊ 3 LOẠI TÀI CHÍNH (ĐÃ BỎ "TẤT CẢ") -->
       <div class="segment">
         <button id="btn-tab-credit" class="active" onclick="switchFinanceTab('credit')">Thẻ tín dụng</button>
         <button id="btn-tab-saving" onclick="switchFinanceTab('saving')">Tiền gửi/Tiết kiệm</button>
         <button id="btn-tab-loan" onclick="switchFinanceTab('loan')">Vay/Trả góp</button>
       </div>
 
-      <!-- Danh sách Thẻ tín dụng -->
       <div id="list-credit" class="finance-group">
         <div class="credit-card">
           <div class="badge">45 ngày miễn lãi</div>
           <div style="font-size: 13px; opacity: 0.9;">VPBank</div>
-          <div style="font-size: 20px; font-weight: bold; margin: 8px 0;">Visa Credit</div>
+          <div style="font-size: 20px; font-weight: bold; margin: 8px 0;">VISA</div>
           <div style="display: flex; justify-content: space-between; font-size: 12px;">
             <div>Hạn mức:<br><b>50.000.000 đ</b></div>
             <div style="text-align: right;">Sao kê: <b>Ngày 15</b><br>Hạn trả: <b>Ngày 05</b></div>
@@ -147,29 +199,34 @@
         </div>
       </div>
 
-      <!-- Danh sách Tiết kiệm -->
       <div id="list-saving" class="finance-group" style="display: none;">
         <div class="card">
-          <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
+            <span style="font-size:11px; color:#666; font-weight:bold;">Cá nhân</span>
+          </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Vietcombank - Tiền gửi</h3>
           <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">100.000.000 VNĐ</b></p>
-          <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Lãi suất 5.5%/năm, kỳ hạn 6 tháng</p>
+          <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>6 tháng</b> | Lãi suất: <b>5.5%/năm</b></p>
+          <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Tiết kiệm tích lũy</p>
         </div>
       </div>
 
-      <!-- Danh sách Vay/Trả góp -->
       <div id="list-loan" class="finance-group" style="display: none;">
         <div class="card">
-          <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
+            <span style="font-size:11px; color:#888;">Kỳ hạn: <b>12 tháng</b></span>
+          </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Vay mua Điện thoại</h3>
           <p style="font-size:13px; color:#555;">Số tiền vay: <b style="color:#c62828;">12.000.000 VNĐ</b></p>
-          <p style="font-size:12px; color:#777; margin-top:4px;">Góp hàng tháng: 1.500.000 VNĐ (Ngày 10)</p>
+          <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: 1.500.000 VNĐ (Ngày 10)</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 1: THÊM DỰ ÁN MỚI -->
+  <!-- MODAL: THÊM DỰ ÁN MỚI -->
   <div id="modal-du-an" class="modal">
     <div class="modal-content">
       <div class="modal-title">Thêm Dự Án Mới</div>
@@ -177,6 +234,17 @@
       <div class="form-group">
         <label>Tên dự án *</label>
         <input type="text" id="project-name" class="form-control" placeholder="Nhập tên dự án...">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ngày bắt đầu</label>
+          <input type="date" id="project-start-date" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Ngày kết thúc</label>
+          <input type="date" id="project-end-date" class="form-control">
+        </div>
       </div>
       
       <div class="form-row">
@@ -206,39 +274,131 @@
     </div>
   </div>
 
-  <!-- MODAL 2: THÊM THẺ / TÀI KHOẢN ĐỘNG THEO TAB -->
+  <!-- MODAL: THÊM TÀI CHÍNH -->
   <div id="modal-tai-khoan" class="modal">
     <div class="modal-content">
       <div class="modal-title" id="modal-finance-title">Thêm Thẻ Tín Dụng</div>
       
+      <!-- Tên tài khoản / Ngân hàng -->
       <div class="form-group">
         <label id="lbl-bank-name">Tên ngân hàng / Tên khoản *</label>
         <input type="text" id="fin-name" class="form-control" placeholder="Ví dụ: VPBank, Vietcombank...">
       </div>
 
-      <div class="form-group">
-        <label id="lbl-amount">Hạn mức / Số tiền (VNĐ) *</label>
-        <input type="number" id="fin-amount" class="form-control" placeholder="0">
+      <!-- TRƯỜNG RIÊNG: THẺ TÍN DỤNG -->
+      <div id="fields-credit">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Loại thẻ *</label>
+            <select id="fin-card-type" class="form-control">
+              <option>VISA</option>
+              <option>Mastercard</option>
+              <option>JCB</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Thời hạn miễn lãi</label>
+            <select id="fin-grace-period" class="form-control">
+              <option value="45 ngày">45 ngày miễn lãi</option>
+              <option value="55 ngày">55 ngày miễn lãi</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Hạn mức tín dụng (VNĐ) *</label>
+          <input type="number" id="fin-credit-limit" class="form-control" placeholder="0">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày sao kê</label>
+            <select id="fin-statement-date" class="form-control">
+              <option value="">-- Chọn ngày --</option>
+              <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">Ngày ${i}</option>`);</script>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ngày hạn trả</label>
+            <select id="fin-due-date" class="form-control">
+              <option value="">-- Chọn ngày --</option>
+              <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">Ngày ${i}</option>`);</script>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <!-- Trường Ngày sao kê / Hạn trả (Chỉ hiển thị khi thêm Thẻ tín dụng) -->
-      <div id="credit-date-fields" class="form-row">
-        <div class="form-group">
-          <label>Ngày sao kê</label>
-          <select id="fin-statement-date" class="form-control">
-            <option value="">-- Chọn ngày --</option>
-            <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">Ngày ${i}</option>`);</script>
-          </select>
+      <!-- TRƯỜNG RIÊNG: TIỀN GỬI / TIẾT KIỆM -->
+      <div id="fields-saving" style="display: none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Loại đối tượng *</label>
+            <select id="fin-customer-type" class="form-control">
+              <option value="Cá nhân">Cá nhân</option>
+              <option value="Tổ chức / Doanh nghiệp">Tổ chức / Doanh nghiệp</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Số tiền gửi (VNĐ) *</label>
+            <input type="number" id="fin-saving-amount" class="form-control" placeholder="0">
+          </div>
         </div>
-        <div class="form-group">
-          <label>Ngày hạn trả</label>
-          <select id="fin-due-date" class="form-control">
-            <option value="">-- Chọn ngày --</option>
-            <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">Ngày ${i}</option>`);</script>
-          </select>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kỳ hạn gửi</label>
+            <select id="fin-saving-term" class="form-control">
+              <option>Không kỳ hạn</option>
+              <option>1 tháng</option>
+              <option>3 tháng</option>
+              <option>6 tháng</option>
+              <option>12 tháng</option>
+              <option>24 tháng</option>
+              <option>36 tháng</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lãi suất (%/năm)</label>
+            <input type="number" id="fin-interest-rate" class="form-control" step="0.1" placeholder="Ví dụ: 5.5">
+          </div>
         </div>
       </div>
 
+      <!-- TRƯỜNG RIÊNG: VAY / TRẢ GÓP -->
+      <div id="fields-loan" style="display: none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tổng số tiền vay (VNĐ) *</label>
+            <input type="number" id="fin-loan-amount" class="form-control" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Kỳ hạn trả góp *</label>
+            <select id="fin-loan-term" class="form-control">
+              <option>3 tháng</option>
+              <option>6 tháng</option>
+              <option>9 tháng</option>
+              <option>12 tháng</option>
+              <option>24 tháng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Số tiền góp/tháng (VNĐ)</label>
+            <input type="number" id="fin-monthly-pay" class="form-control" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Ngày đóng tiền hàng tháng</label>
+            <select id="fin-pay-date" class="form-control">
+              <option value="">-- Chọn ngày --</option>
+              <script>for(let i=1; i<=31; i++) document.write(`<option value="${i}">Ngày ${i}</option>`);</script>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mô tả chung -->
       <div class="form-group">
         <label>Mô tả / Ghi chú</label>
         <textarea id="fin-note" class="form-control" placeholder="Nhập thông tin ghi chú..."></textarea>
@@ -292,109 +452,203 @@
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    // Mở Modal Thêm mới tài chính chuẩn theo Tab đang mở
     function openAddFinanceModal() {
-      const dateFields = document.getElementById('credit-date-fields');
       const title = document.getElementById('modal-finance-title');
+      const creditBlock = document.getElementById('fields-credit');
+      const savingBlock = document.getElementById('fields-saving');
+      const loanBlock = document.getElementById('fields-loan');
       
+      creditBlock.style.display = 'none';
+      savingBlock.style.display = 'none';
+      loanBlock.style.display = 'none';
+
       if(currentFinanceTab === 'credit') {
         title.innerText = "Thêm Thẻ Tín Dụng";
-        dateFields.style.display = 'flex';
+        creditBlock.style.display = 'block';
       } else if(currentFinanceTab === 'saving') {
         title.innerText = "Thêm Sổ Tiết Kiệm / Tiền Gửi";
-        dateFields.style.display = 'none';
+        savingBlock.style.display = 'block';
       } else {
         title.innerText = "Thêm Khoản Vay / Trả Góp";
-        dateFields.style.display = 'none';
+        loanBlock.style.display = 'block';
       }
       openModal('modal-tai-khoan');
     }
 
-    // Xử lý lưu dự án mới (Sửa lỗi không lưu được)
+    function toggleSubtasks(cardId, btn) {
+      const card = document.getElementById(cardId);
+      const section = card.querySelector('.subtask-section');
+      section.classList.toggle('active');
+      btn.classList.toggle('expanded');
+    }
+
+    function addSubtask(cardId, btn) {
+      const input = btn.previousElementSibling;
+      const text = input.value.trim();
+      if(!text) return;
+
+      const subtaskHTML = `
+        <div class="subtask-item">
+          <input type="checkbox" onchange="updateProgress('${cardId}')">
+          <span>${text}</span>
+        </div>`;
+      
+      const list = btn.closest('.subtask-section').querySelector('.subtask-list');
+      list.insertAdjacentHTML('beforeend', subtaskHTML);
+      input.value = '';
+      updateProgress(cardId);
+    }
+
+    function updateProgress(cardId) {
+      const card = document.getElementById(cardId);
+      const checkboxes = card.querySelectorAll('.subtask-item input[type="checkbox"]');
+      const total = checkboxes.length;
+      
+      if(total === 0) return;
+
+      let checkedCount = 0;
+      checkboxes.forEach(cb => {
+        const item = cb.parentElement;
+        if(cb.checked) {
+          checkedCount++;
+          item.classList.add('completed');
+        } else {
+          item.classList.remove('completed');
+        }
+      });
+
+      const percent = Math.round((checkedCount / total) * 100);
+      card.querySelector('.progress-percent').innerText = `${percent}%`;
+      card.querySelector('.progress-fill').style.width = `${percent}%`;
+    }
+
     function saveProject() {
       const name = document.getElementById('project-name').value;
+      const startDate = document.getElementById('project-start-date').value;
+      const endDate = document.getElementById('project-end-date').value;
       const type = document.getElementById('project-type').value;
       const budget = document.getElementById('project-budget').value;
       const note = document.getElementById('project-note').value;
 
       if(!name) { alert('Vui lòng nhập tên dự án!'); return; }
 
+      projectCount++;
+      const cardId = `proj-${projectCount}`;
       const formattedBudget = budget ? Number(budget).toLocaleString('vi-VN') : '0';
+      
+      const formatDate = (dateStr) => {
+        if(!dateStr) return '--/--/----';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+      };
+
       const projectHTML = `
-        <div class="card">
-          <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">${type}</span>
+        <div class="card" id="${cardId}">
+          <div class="card-header">
+            <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">${type}</span>
+            <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+          </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
+          <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b>${formatDate(startDate)}</b> - <b>${formatDate(endDate)}</b></p>
           <p style="font-size:13px; color:#555;">Ngân sách: <b>${formattedBudget} VNĐ</b></p>
           <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Chưa có ghi chú'}</p>
+          
           <div class="progress-container">
             <div class="progress-info">
               <span>Tiến độ thực hiện</span>
-              <b>0%</b>
+              <b class="progress-percent">0%</b>
             </div>
             <div class="progress-bg">
               <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="subtask-section">
+            <div class="subtask-list"></div>
+            <div class="add-task-row">
+              <input type="text" placeholder="Thêm nhiệm vụ chi tiết...">
+              <button onclick="addSubtask('${cardId}', this)">Thêm</button>
             </div>
           </div>
         </div>
       `;
 
       document.getElementById('project-list').insertAdjacentHTML('afterbegin', projectHTML);
-      projectCount++;
       document.getElementById('project-count').innerText = projectCount;
 
-      // Clear input & Đóng modal
       document.getElementById('project-name').value = '';
+      document.getElementById('project-start-date').value = '';
+      document.getElementById('project-end-date').value = '';
       document.getElementById('project-budget').value = '';
       document.getElementById('project-note').value = '';
       closeModal('modal-du-an');
     }
 
-    // Xử lý lưu Khoản Tài chính mới đúng từng tab
     function saveFinanceItem() {
       const name = document.getElementById('fin-name').value;
-      const amount = document.getElementById('fin-amount').value;
       const note = document.getElementById('fin-note').value;
 
       if(!name) { alert('Vui lòng nhập tên tài khoản / ngân hàng!'); return; }
-      const formattedAmount = amount ? Number(amount).toLocaleString('vi-VN') : '0';
 
       if(currentFinanceTab === 'credit') {
+        const cardType = document.getElementById('fin-card-type').value;
+        const grace = document.getElementById('fin-grace-period').value;
+        const limit = document.getElementById('fin-credit-limit').value;
         const stmtDate = document.getElementById('fin-statement-date').value || '15';
         const dueDate = document.getElementById('fin-due-date').value || '05';
+
         const cardHTML = `
           <div class="credit-card">
-            <div class="badge">45 ngày miễn lãi</div>
+            <div class="badge">${grace}</div>
             <div style="font-size: 13px; opacity: 0.9;">${name}</div>
-            <div style="font-size: 20px; font-weight: bold; margin: 8px 0;">Credit Card</div>
+            <div style="font-size: 20px; font-weight: bold; margin: 8px 0;">${cardType}</div>
             <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <div>Hạn mức:<br><b>${formattedAmount} đ</b></div>
+              <div>Hạn mức:<br><b>${limit ? Number(limit).toLocaleString('vi-VN') : 0} đ</b></div>
               <div style="text-align: right;">Sao kê: <b>Ngày ${stmtDate}</b><br>Hạn trả: <b>Ngày ${dueDate}</b></div>
             </div>
           </div>`;
         document.getElementById('list-credit').insertAdjacentHTML('afterbegin', cardHTML);
+
       } else if(currentFinanceTab === 'saving') {
+        const custType = document.getElementById('fin-customer-type').value;
+        const amount = document.getElementById('fin-saving-amount').value;
+        const term = document.getElementById('fin-saving-term').value;
+        const rate = document.getElementById('fin-interest-rate').value;
+
         const savingHTML = `
           <div class="card">
-            <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
+              <span style="font-size:11px; color:#666; font-weight:bold;">${custType}</span>
+            </div>
             <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
-            <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">${formattedAmount} VNĐ</b></p>
-            <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Chưa có ghi chú'}</p>
+            <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">${amount ? Number(amount).toLocaleString('vi-VN') : 0} VNĐ</b></p>
+            <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>${term}</b> ${rate ? `| Lãi suất: <b>${rate}%/năm</b>` : ''}</p>
+            <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Không có'}</p>
           </div>`;
         document.getElementById('list-saving').insertAdjacentHTML('afterbegin', savingHTML);
+
       } else {
+        const loanAmount = document.getElementById('fin-loan-amount').value;
+        const loanTerm = document.getElementById('fin-loan-term').value;
+        const monthlyPay = document.getElementById('fin-monthly-pay').value;
+        const payDate = document.getElementById('fin-pay-date').value;
+
         const loanHTML = `
           <div class="card">
-            <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Vay / Trả góp</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
+              <span style="font-size:11px; color:#888;">Kỳ hạn: <b>${loanTerm}</b></span>
+            </div>
             <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
-            <p style="font-size:13px; color:#555;">Số tiền vay: <b style="color:#c62828;">${formattedAmount} VNĐ</b></p>
-            <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Chưa có ghi chú'}</p>
+            <p style="font-size:13px; color:#555;">Số tiền vay: <b style="color:#c62828;">${loanAmount ? Number(loanAmount).toLocaleString('vi-VN') : 0} VNĐ</b></p>
+            ${monthlyPay ? `<p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: ${Number(monthlyPay).toLocaleString('vi-VN')} VNĐ ${payDate ? `(Ngày ${payDate})` : ''}</p>` : ''}
+            <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Không có'}</p>
           </div>`;
         document.getElementById('list-loan').insertAdjacentHTML('afterbegin', loanHTML);
       }
 
-      // Reset Form & Đóng
       document.getElementById('fin-name').value = '';
-      document.getElementById('fin-amount').value = '';
       document.getElementById('fin-note').value = '';
       closeModal('modal-tai-khoan');
     }

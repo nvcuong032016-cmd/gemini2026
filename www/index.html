@@ -30,15 +30,34 @@
     
     /* Nút Thao tác: Sửa, Xóa */
     .action-icons { display: flex; align-items: center; gap: 4px; }
-    .btn-icon { background: none; border: none; font-size: 14px; cursor: pointer; padding: 4px; line-height: 1; border-radius: 4px; }
-    .btn-icon:hover { background: #f0f0f0; }
-    .toggle-arrow { background: none; border: none; font-size: 16px; cursor: pointer; color: #666; transition: transform 0.2s; padding: 4px; margin-left: 4px; }
+    .btn-icon { background: none; border: none; font-size: 15px; cursor: pointer; padding: 6px; line-height: 1; border-radius: 6px; touch-action: manipulation; }
+    .btn-icon:hover, .btn-icon:active { background: rgba(0,0,0,0.08); }
+    .toggle-arrow { background: none; border: none; font-size: 16px; cursor: pointer; color: #666; transition: transform 0.2s; padding: 6px; margin-left: 2px; touch-action: manipulation; }
     .toggle-arrow.expanded { transform: rotate(180deg); }
 
+    /* Thẻ Tín Dụng & Khắc phục lỗi nút bấm */
     .credit-card { background: linear-gradient(135deg, #4a7c59, #284b33); color: white; border-radius: 16px; padding: 20px; margin-bottom: 12px; position: relative; }
-    .credit-card .badge-group { position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 6px; }
+    .credit-card .badge-group { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 6px; z-index: 10; }
     .credit-card .badge { background: #c8e6c9; color: #1b5e20; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-    .credit-card .btn-edit-card { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    
+    /* Nút sửa/xóa trên Thẻ Tín Dụng đã tối ưu hitbox (34x34px) */
+    .credit-card .btn-edit-card { 
+      background: rgba(255, 255, 255, 0.25); 
+      border: none; 
+      color: white; 
+      border-radius: 8px; 
+      width: 34px; 
+      height: 34px; 
+      font-size: 14px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      touch-action: manipulation; 
+      position: relative; 
+      z-index: 20;
+    }
+    .credit-card .btn-edit-card:active { background: rgba(255, 255, 255, 0.45); transform: scale(0.95); }
     
     /* Tag hiển thị góc trên bên phải */
     .tag-object { background: #f0f0f0; color: #555; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
@@ -275,20 +294,22 @@
 
       <!-- CHỦ NỢ (Vay / Trả góp) -->
       <div id="list-loan" class="finance-group" style="display: none;">
-        <div class="card" id="loan-demo">
+        <div class="card" id="loan-demo" data-name="Vay mua Điện thoại" data-amount="12,000,000" data-term="12" data-note="Trả góp máy mới">
           <div class="card-header">
             <div>
               <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
-              <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b>12 tháng</b></span>
+              <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b class="card-term">12 tháng</b></span>
             </div>
             <div class="action-icons">
+              <button class="btn-icon" title="Sửa" onclick="editLoanItem('loan-demo')">✏️</button>
               <button class="btn-icon" title="Xóa" onclick="deleteItem('loan-demo')">🗑️</button>
               <button class="toggle-arrow" onclick="toggleSubtasks('loan-demo', this)">▼</button>
             </div>
           </div>
-          <h3 style="margin: 8px 0 4px; font-size: 16px;">Vay mua Điện thoại</h3>
-          <p style="font-size:13px; color:#555;">Tổng tiền vay: <b style="color:#c62828;">12,000,000 VNĐ</b></p>
-          <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: 1,000,000 VNĐ/tháng</p>
+          <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">Vay mua Điện thoại</h3>
+          <p style="font-size:13px; color:#555;">Tổng tiền vay: <b class="card-amount" style="color:#c62828;">12,000,000 VNĐ</b></p>
+          <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: <span class="card-monthly">1,000,000 VNĐ/tháng</span></p>
+          <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: <span class="card-note">Trả góp máy mới</span></p>
 
           <div class="progress-container">
             <div class="progress-info">
@@ -562,7 +583,7 @@
     });
 
     function parseCurrency(str) {
-      return str ? parseInt(str.replace(/,/g, ''), 10) || 0 : 0;
+      return str ? parseInt(str.toString().replace(/,/g, ''), 10) || 0 : 0;
     }
 
     function calculateMonthlyLoan() {
@@ -877,6 +898,24 @@
       openModal('modal-tai-khoan');
     }
 
+    // --- SỬA CHỦ NỢ ---
+    function editLoanItem(id) {
+      const card = document.getElementById(id);
+      switchFinanceTab('loan');
+      document.getElementById('modal-finance-title').innerText = "Sửa Khoản Chủ Nợ";
+      document.getElementById('edit-finance-id').value = id;
+      document.getElementById('fin-name').value = card.dataset.name || '';
+      document.getElementById('fin-loan-amount').value = card.dataset.amount ? Number(card.dataset.amount).toLocaleString('en-US') : '';
+      document.getElementById('fin-loan-term').value = card.dataset.term || '12';
+      document.getElementById('fin-note').value = card.dataset.note || '';
+
+      document.getElementById('fields-credit').style.display = 'none';
+      document.getElementById('fields-saving').style.display = 'none';
+      document.getElementById('fields-loan').style.display = 'block';
+      calculateMonthlyLoan();
+      openModal('modal-tai-khoan');
+    }
+
     // --- LƯU TÀI CHÍNH (THÊM / SỬA) ---
     function saveFinanceItem() {
       const editId = document.getElementById('edit-finance-id').value;
@@ -983,50 +1022,79 @@
         if(!rawAmount) { alert('Vui lòng nhập số tiền vay!'); return; }
 
         const monthlyPay = Math.round(rawAmount / termMonths);
-        loanCount++;
-        const cardId = `loan-item-${loanCount}`;
 
         let termItemsHTML = '';
         for(let i = 1; i <= termMonths; i++) {
           termItemsHTML += `
             <div class="subtask-item">
-              <input type="checkbox" onchange="updateProgress('${cardId}')">
+              <input type="checkbox" onchange="updateProgress('${editId || 'loan-item-new'}')">
               <span>Kỳ ${i}: ${monthlyPay.toLocaleString('en-US')} VNĐ</span>
             </div>`;
         }
 
-        const loanHTML = `
-          <div class="card" id="${cardId}">
-            <div class="card-header">
-              <div>
-                <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
-                <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b>${termMonths} tháng</b></span>
-              </div>
-              <div class="action-icons">
-                <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}')">🗑️</button>
-                <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
-              </div>
-            </div>
-            <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
-            <p style="font-size:13px; color:#555;">Tổng tiền vay: <b style="color:#c62828;">${rawAmount.toLocaleString('en-US')} VNĐ</b></p>
-            <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: ${monthlyPay.toLocaleString('en-US')} VNĐ/tháng</p>
-            <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Không có'}</p>
+        if(editId) {
+          const card = document.getElementById(editId);
+          card.dataset.name = name;
+          card.dataset.amount = rawAmount;
+          card.dataset.term = termMonths;
+          card.dataset.note = note;
 
-            <div class="progress-container">
-              <div class="progress-info">
-                <span>Đã hoàn thành</span>
-                <b class="progress-percent">0%</b>
-              </div>
-              <div class="progress-bg">
-                <div class="progress-fill" style="width: 0%;"></div>
-              </div>
-            </div>
+          card.querySelector('.card-title').innerText = name;
+          card.querySelector('.card-amount').innerText = `${rawAmount.toLocaleString('en-US')} VNĐ`;
+          card.querySelector('.card-term').innerText = `${termMonths} tháng`;
+          card.querySelector('.card-monthly').innerText = `${monthlyPay.toLocaleString('en-US')} VNĐ/tháng`;
+          card.querySelector('.card-note').innerText = note || 'Không có';
+          
+          const subtaskList = card.querySelector('.subtask-list');
+          subtaskList.innerHTML = termItemsHTML;
+          updateProgress(editId);
+        } else {
+          loanCount++;
+          const cardId = `loan-item-${loanCount}`;
+          
+          let newTermItemsHTML = '';
+          for(let i = 1; i <= termMonths; i++) {
+            newTermItemsHTML += `
+              <div class="subtask-item">
+                <input type="checkbox" onchange="updateProgress('${cardId}')">
+                <span>Kỳ ${i}: ${monthlyPay.toLocaleString('en-US')} VNĐ</span>
+              </div>`;
+          }
 
-            <div class="subtask-section">
-              <div class="subtask-list">${termItemsHTML}</div>
-            </div>
-          </div>`;
-        document.getElementById('list-loan').insertAdjacentHTML('afterbegin', loanHTML);
+          const loanHTML = `
+            <div class="card" id="${cardId}" data-name="${name}" data-amount="${rawAmount}" data-term="${termMonths}" data-note="${note}">
+              <div class="card-header">
+                <div>
+                  <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
+                  <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b class="card-term">${termMonths} tháng</b></span>
+                </div>
+                <div class="action-icons">
+                  <button class="btn-icon" title="Sửa" onclick="editLoanItem('${cardId}')">✏️</button>
+                  <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}')">🗑️</button>
+                  <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+                </div>
+              </div>
+              <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
+              <p style="font-size:13px; color:#555;">Tổng tiền vay: <b class="card-amount" style="color:#c62828;">${rawAmount.toLocaleString('en-US')} VNĐ</b></p>
+              <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Góp hàng tháng: <span class="card-monthly">${monthlyPay.toLocaleString('en-US')} VNĐ/tháng</span></p>
+              <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: <span class="card-note">${note || 'Không có'}</span></p>
+
+              <div class="progress-container">
+                <div class="progress-info">
+                  <span>Đã hoàn thành</span>
+                  <b class="progress-percent">0%</b>
+                </div>
+                <div class="progress-bg">
+                  <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <div class="subtask-section">
+                <div class="subtask-list">${newTermItemsHTML}</div>
+              </div>
+            </div>`;
+          document.getElementById('list-loan').insertAdjacentHTML('afterbegin', loanHTML);
+        }
       }
 
       closeModal('modal-tai-khoan');

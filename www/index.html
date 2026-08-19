@@ -20,11 +20,12 @@
     
     /* Segment Control */
     .segment { display: flex; background: #e9ecef; padding: 4px; border-radius: 12px; margin-bottom: 15px; }
-    .segment button { flex: 1; padding: 10px 4px; border: none; background: transparent; border-radius: 8px; font-weight: 600; font-size: 12px; color: #666; cursor: pointer; }
+    .segment button { flex: 1; padding: 10px 2px; border: none; background: transparent; border-radius: 8px; font-weight: 600; font-size: 12px; color: #666; cursor: pointer; }
     .segment button.active { background: #fff; color: #2e7d32; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
 
     /* Card Component */
-    .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef0ec; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef0ec; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: opacity 0.3s; }
+    .card.completed-card { opacity: 0.6; background: #f9f9f9; }
     .card-header { display: flex; justify-content: space-between; align-items: center; }
     .toggle-arrow { background: none; border: none; font-size: 18px; cursor: pointer; color: #666; transition: transform 0.2s; }
     .toggle-arrow.expanded { transform: rotate(180deg); }
@@ -32,6 +33,10 @@
     .credit-card { background: linear-gradient(135deg, #4a7c59, #284b33); color: white; border-radius: 16px; padding: 20px; margin-bottom: 12px; position: relative; }
     .credit-card .badge { position: absolute; top: 15px; right: 15px; background: #c8e6c9; color: #1b5e20; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
     
+    /* Checkbox Tất toán / Hoàn thành */
+    .settle-check { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; color: #2e7d32; cursor: pointer; }
+    .settle-check input { width: 16px; height: 16px; accent-color: #2e7d32; }
+
     /* Progress Bar */
     .progress-container { margin-top: 10px; }
     .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px; }
@@ -58,6 +63,7 @@
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #444; }
     .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; outline: none; background: #fff; }
+    .form-control:readonly, .form-control[readonly] { background-color: #f0f0f0; color: #555; }
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
     textarea.form-control { resize: none; height: 70px; }
@@ -95,7 +101,6 @@
 
       <!-- Danh sách Dự án -->
       <div id="work-project-list">
-        <!-- Dự án 1 -->
         <div class="card" id="proj-1">
           <div class="card-header">
             <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">DVCI</span>
@@ -138,7 +143,6 @@
           </div>
         </div>
 
-        <!-- Dự án 2 -->
         <div class="card" id="proj-2">
           <div class="card-header">
             <span style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">G-Ticket</span>
@@ -195,8 +199,8 @@
     <div style="padding-top: 10px;">
       <div class="segment">
         <button id="btn-tab-credit" class="active" onclick="switchFinanceTab('credit')">Thẻ tín dụng</button>
-        <button id="btn-tab-saving" onclick="switchFinanceTab('saving')">Tiền gửi/Tiết kiệm</button>
-        <button id="btn-tab-loan" onclick="switchFinanceTab('loan')">Vay/Trả góp</button>
+        <button id="btn-tab-saving" onclick="switchFinanceTab('saving')">Cho vay/ Tiền gửi</button>
+        <button id="btn-tab-loan" onclick="switchFinanceTab('loan')">Vay/ Trả góp</button>
       </div>
 
       <div id="list-credit" class="finance-group">
@@ -211,19 +215,23 @@
         </div>
       </div>
 
+      <!-- CHO VAY / TIỀN GỬI -->
       <div id="list-saving" class="finance-group" style="display: none;">
-        <div class="card">
+        <div class="card" id="saving-demo">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
-            <span style="font-size:11px; color:#666; font-weight:bold;">Cá nhân</span>
+            <label class="settle-check">
+              <input type="checkbox" onchange="toggleSettled(this, 'saving-demo')"> Đã tất toán
+            </label>
           </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Vietcombank - Tiền gửi</h3>
           <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">100,000,000 VNĐ</b></p>
-          <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>6 tháng</b></p>
+          <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>6 tháng</b> | Đối tượng: <b>Cá nhân</b></p>
           <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: Tiết kiệm tích lũy</p>
         </div>
       </div>
 
+      <!-- VAY / TRẢ GÓP -->
       <div id="list-loan" class="finance-group" style="display: none;">
         <div class="card" id="loan-demo">
           <div class="card-header">
@@ -298,7 +306,7 @@
         </div>
         <div class="form-group">
           <label>Giá trị (VNĐ)</label>
-          <input type="text" id="project-budget" class="form-control currency-input" placeholder="0">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="project-budget" class="form-control currency-input" placeholder="0">
         </div>
       </div>
 
@@ -346,7 +354,7 @@
 
         <div class="form-group">
           <label>Hạn mức tín dụng (VNĐ) *</label>
-          <input type="text" id="fin-credit-limit" class="form-control currency-input" placeholder="0">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="fin-credit-limit" class="form-control currency-input" placeholder="0">
         </div>
 
         <div class="form-row">
@@ -367,7 +375,7 @@
         </div>
       </div>
 
-      <!-- TRƯỜNG RIÊNG: TIỀN GỬI / TIẾT KIỆM -->
+      <!-- TRƯỜNG RIÊNG: CHO VAY / TIỀN GỬI -->
       <div id="fields-saving" style="display: none;">
         <div class="form-row">
           <div class="form-group">
@@ -378,8 +386,8 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Số tiền gửi (VNĐ) *</label>
-            <input type="text" id="fin-saving-amount" class="form-control currency-input" placeholder="0">
+            <label>Số tiền gửi / cho vay (VNĐ) *</label>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="fin-saving-amount" class="form-control currency-input" placeholder="0">
           </div>
         </div>
 
@@ -402,18 +410,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>Tổng số tiền vay (VNĐ) *</label>
-            <input type="text" id="fin-loan-amount" class="form-control currency-input" placeholder="0">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="fin-loan-amount" class="form-control currency-input" placeholder="0" oninput="calculateMonthlyLoan()">
           </div>
           <div class="form-group">
-            <label>Kỳ hạn trả góp *</label>
-            <select id="fin-loan-term" class="form-control">
+            <label>Kỳ hạn (Số tháng) *</label>
+            <select id="fin-loan-term" class="form-control" onchange="calculateMonthlyLoan()">
               <option value="3">3 tháng</option>
               <option value="6">6 tháng</option>
               <option value="9">9 tháng</option>
-              <option value="12">12 tháng</option>
+              <option value="12" selected>12 tháng</option>
               <option value="24">24 tháng</option>
+              <option value="36">36 tháng</option>
             </select>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Số tiền trả hàng tháng (Dự tính)</label>
+          <input type="text" id="fin-loan-monthly" class="form-control" placeholder="0 VNĐ" readonly>
         </div>
       </div>
 
@@ -450,10 +464,11 @@
     let currentFinanceTab = 'credit';
     let projectCount = 2;
     let loanCount = 1;
+    let savingCount = 1;
 
-    // Tự động phân cách hàng nghìn khi nhập số
+    // Tự động phân cách hàng nghìn khi nhập số tiền
     document.querySelectorAll('.currency-input').forEach(input => {
-      input.addEventListener('input', function(e) {
+      input.addEventListener('input', function() {
         let value = this.value.replace(/\D/g, '');
         if (value) {
           this.value = Number(value).toLocaleString('en-US');
@@ -468,6 +483,19 @@
       return parseInt(str.replace(/,/g, ''), 10) || 0;
     }
 
+    // Tính tự động số tiền trả hàng tháng = Tổng vay / Kỳ hạn
+    function calculateMonthlyLoan() {
+      const totalAmount = parseCurrency(document.getElementById('fin-loan-amount').value);
+      const termMonths = parseInt(document.getElementById('fin-loan-term').value, 10);
+      
+      if (totalAmount > 0 && termMonths > 0) {
+        const monthly = Math.round(totalAmount / termMonths);
+        document.getElementById('fin-loan-monthly').value = monthly.toLocaleString('en-US') + ' VNĐ / tháng';
+      } else {
+        document.getElementById('fin-loan-monthly').value = '0 VNĐ';
+      }
+    }
+
     function switchTab(tabId, el) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -476,7 +504,6 @@
       el.classList.add('active');
     }
 
-    // Chuyển tab trong mục Công việc
     function switchWorkSegment(type) {
       if (type === 'project') {
         document.getElementById('btn-work-project').classList.add('active');
@@ -518,11 +545,12 @@
         title.innerText = "Thêm Thẻ Tín Dụng";
         creditBlock.style.display = 'block';
       } else if(currentFinanceTab === 'saving') {
-        title.innerText = "Thêm Sổ Tiết Kiệm / Tiền Gửi";
+        title.innerText = "Thêm Cho Vay / Tiền Gửi";
         savingBlock.style.display = 'block';
       } else {
         title.innerText = "Thêm Khoản Vay / Trả Góp";
         loanBlock.style.display = 'block';
+        calculateMonthlyLoan();
       }
       openModal('modal-tai-khoan');
     }
@@ -532,6 +560,16 @@
       const section = card.querySelector('.subtask-section');
       section.classList.toggle('active');
       btn.classList.toggle('expanded');
+    }
+
+    // Đánh dấu tất toán cho khoản tiền gửi/cho vay
+    function toggleSettled(checkbox, cardId) {
+      const card = document.getElementById(cardId);
+      if(checkbox.checked) {
+        card.classList.add('completed-card');
+      } else {
+        card.classList.remove('completed-card');
+      }
     }
 
     function addSubtask(cardId, btn) {
@@ -639,7 +677,7 @@
       const name = document.getElementById('fin-name').value;
       const note = document.getElementById('fin-note').value;
 
-      if(!name) { alert('Vui lòng nhập tên tài khoản / ngân hàng!'); return; }
+      if(!name) { alert('Vui lòng nhập tên khoản / ngân hàng!'); return; }
 
       if(currentFinanceTab === 'credit') {
         const cardType = document.getElementById('fin-card-type').value;
@@ -665,15 +703,20 @@
         const amount = document.getElementById('fin-saving-amount').value || '0';
         const term = document.getElementById('fin-saving-term').value;
 
+        savingCount++;
+        const cardId = `saving-item-${savingCount}`;
+
         const savingHTML = `
-          <div class="card">
+          <div class="card" id="${cardId}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Sổ tiết kiệm</span>
-              <span style="font-size:11px; color:#666; font-weight:bold;">${custType}</span>
+              <span style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Khoản gửi / vay</span>
+              <label class="settle-check">
+                <input type="checkbox" onchange="toggleSettled(this, '${cardId}')"> Đã tất toán
+              </label>
             </div>
             <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
-            <p style="font-size:13px; color:#555;">Số tiền gửi: <b style="color:#2e7d32;">${amount} VNĐ</b></p>
-            <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>${term}</b></p>
+            <p style="font-size:13px; color:#555;">Số tiền: <b style="color:#2e7d32;">${amount} VNĐ</b></p>
+            <p style="font-size:12px; color:#666; margin-top:2px;">Kỳ hạn: <b>${term}</b> | Đối tượng: <b>${custType}</b></p>
             <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: ${note || 'Không có'}</p>
           </div>`;
         document.getElementById('list-saving').insertAdjacentHTML('afterbegin', savingHTML);
@@ -733,6 +776,7 @@
       document.getElementById('fin-name').value = '';
       document.getElementById('fin-note').value = '';
       document.querySelectorAll('.currency-input').forEach(i => i.value = '');
+      document.getElementById('fin-loan-monthly').value = '0 VNĐ';
       closeModal('modal-tai-khoan');
     }
   </script>

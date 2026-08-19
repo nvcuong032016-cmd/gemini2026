@@ -28,18 +28,20 @@
     .card.completed-card { opacity: 0.6; background: #f9f9f9; }
     .card-header { display: flex; justify-content: space-between; align-items: center; }
     
-    /* Nút Sửa */
-    .btn-edit-item { background: none; border: none; font-size: 14px; cursor: pointer; color: #666; padding: 2px 6px; }
-    .toggle-arrow { background: none; border: none; font-size: 18px; cursor: pointer; color: #666; transition: transform 0.2s; }
+    /* Nút Thao tác: Sửa, Xóa */
+    .action-icons { display: flex; align-items: center; gap: 4px; }
+    .btn-icon { background: none; border: none; font-size: 14px; cursor: pointer; padding: 4px; line-height: 1; border-radius: 4px; }
+    .btn-icon:hover { background: #f0f0f0; }
+    .toggle-arrow { background: none; border: none; font-size: 16px; cursor: pointer; color: #666; transition: transform 0.2s; padding: 4px; margin-left: 4px; }
     .toggle-arrow.expanded { transform: rotate(180deg); }
 
     .credit-card { background: linear-gradient(135deg, #4a7c59, #284b33); color: white; border-radius: 16px; padding: 20px; margin-bottom: 12px; position: relative; }
-    .credit-card .badge-group { position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 8px; }
+    .credit-card .badge-group { position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 6px; }
     .credit-card .badge { background: #c8e6c9; color: #1b5e20; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-    .credit-card .btn-edit-card { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; }
+    .credit-card .btn-edit-card { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     
     /* Tag hiển thị góc trên bên phải */
-    .tag-object { background: #f0f0f0; color: #555; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+    .tag-object { background: #f0f0f0; color: #555; font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; margin-left: 6px; }
 
     /* Checkbox Tất toán / Hoàn thành */
     .settle-check-footer { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 12px; font-weight: bold; color: #2e7d32; cursor: pointer; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #eee; }
@@ -113,9 +115,12 @@
           <div class="card-header">
             <div>
               <span class="badge-type" style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">DVCI</span>
-              <button class="btn-edit-item" onclick="editProject('proj-1')">✏️ Sửa</button>
             </div>
-            <button class="toggle-arrow" onclick="toggleSubtasks('proj-1', this)">▼</button>
+            <div class="action-icons">
+              <button class="btn-icon" title="Sửa" onclick="editProject('proj-1')">✏️</button>
+              <button class="btn-icon" title="Xóa" onclick="deleteItem('proj-1', 'project')">🗑️</button>
+              <button class="toggle-arrow" onclick="toggleSubtasks('proj-1', this)">▼</button>
+            </div>
           </div>
           <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">DVCI Đà Lạt</h3>
           <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b class="card-date">01/03/2026 - 30/04/2026</b></p>
@@ -158,9 +163,12 @@
           <div class="card-header">
             <div>
               <span class="badge-type" style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">G-Ticket</span>
-              <button class="btn-edit-item" onclick="editProject('proj-2')">✏️ Sửa</button>
             </div>
-            <button class="toggle-arrow" onclick="toggleSubtasks('proj-2', this)">▼</button>
+            <div class="action-icons">
+              <button class="btn-icon" title="Sửa" onclick="editProject('proj-2')">✏️</button>
+              <button class="btn-icon" title="Xóa" onclick="deleteItem('proj-2', 'project')">🗑️</button>
+              <button class="toggle-arrow" onclick="toggleSubtasks('proj-2', this)">▼</button>
+            </div>
           </div>
           <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">Hệ thống Vé Điện Tử</h3>
           <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b class="card-date">15/02/2026 - 15/05/2026</b></p>
@@ -191,7 +199,10 @@
       <div id="work-single-list" style="display: none;">
         <div class="card" id="single-1" data-name="Gia hạn hợp đồng dịch vụ Internet" data-start="2026-03-25" data-note="Liên hệ nhà mạng gia hạn gói cước 1 năm">
           <div class="card-header" style="justify-content: flex-end;">
-            <button class="btn-edit-item" onclick="editSingleWork('single-1')">✏️ Sửa</button>
+            <div class="action-icons">
+              <button class="btn-icon" title="Sửa" onclick="editSingleWork('single-1')">✏️</button>
+              <button class="btn-icon" title="Xóa" onclick="deleteItem('single-1', 'single')">🗑️</button>
+            </div>
           </div>
           <div class="subtask-item">
             <input type="checkbox" onchange="toggleSingleTaskComplete(this)">
@@ -221,11 +232,13 @@
         <button id="btn-tab-loan" onclick="switchFinanceTab('loan')">Chủ nợ</button>
       </div>
 
+      <!-- THẺ TÍN DỤNG -->
       <div id="list-credit" class="finance-group">
         <div class="credit-card" id="card-credit-1" data-name="VPBank" data-cardtype="VISA" data-grace="45 ngày" data-limit="50,000,000" data-stmt="15" data-due="05" data-note="">
           <div class="badge-group">
             <div class="badge badge-grace">45 ngày miễn lãi</div>
-            <button class="btn-edit-card" onclick="editCreditCard('card-credit-1')">✏️</button>
+            <button class="btn-edit-card" title="Sửa" onclick="editCreditCard('card-credit-1')">✏️</button>
+            <button class="btn-edit-card" title="Xóa" onclick="deleteItem('card-credit-1')">🗑️</button>
           </div>
           <div class="card-bank-name" style="font-size: 13px; opacity: 0.9;">VPBank</div>
           <div class="card-type-title" style="font-size: 20px; font-weight: bold; margin: 8px 0;">VISA</div>
@@ -242,9 +255,12 @@
           <div class="card-header">
             <div>
               <span class="badge-category" style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Tiết kiệm</span>
-              <button class="btn-edit-item" onclick="editSavingItem('saving-demo')">✏️ Sửa</button>
+              <span class="tag-object badge-custtype">Cá nhân</span>
             </div>
-            <span class="tag-object badge-custtype">Cá nhân</span>
+            <div class="action-icons">
+              <button class="btn-icon" title="Sửa" onclick="editSavingItem('saving-demo')">✏️</button>
+              <button class="btn-icon" title="Xóa" onclick="deleteItem('saving-demo')">🗑️</button>
+            </div>
           </div>
           <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">Vietcombank - Tiền gửi</h3>
           <p style="font-size:13px; color:#555;">Số tiền: <b class="card-amount" style="color:#2e7d32;">100,000,000 VNĐ</b></p>
@@ -265,7 +281,10 @@
               <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
               <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b>12 tháng</b></span>
             </div>
-            <button class="toggle-arrow" onclick="toggleSubtasks('loan-demo', this)">▼</button>
+            <div class="action-icons">
+              <button class="btn-icon" title="Xóa" onclick="deleteItem('loan-demo')">🗑️</button>
+              <button class="toggle-arrow" onclick="toggleSubtasks('loan-demo', this)">▼</button>
+            </div>
           </div>
           <h3 style="margin: 8px 0 4px; font-size: 16px;">Vay mua Điện thoại</h3>
           <p style="font-size:13px; color:#555;">Tổng tiền vay: <b style="color:#c62828;">12,000,000 VNĐ</b></p>
@@ -619,6 +638,23 @@
       openModal('modal-tai-khoan');
     }
 
+    // --- HÀM XÓA NỘI DUNG ---
+    function deleteItem(itemId, type) {
+      if (confirm('Bạn có chắc chắn muốn xóa nội dung này không?')) {
+        const item = document.getElementById(itemId);
+        if (item) {
+          item.remove();
+          if (type === 'project') {
+            projectCount = Math.max(0, projectCount - 1);
+            document.getElementById('project-count').innerText = projectCount;
+          } else if (type === 'single') {
+            singleWorkCount = Math.max(0, singleWorkCount - 1);
+            document.getElementById('single-work-count').innerText = singleWorkCount;
+          }
+        }
+      }
+    }
+
     function toggleSubtasks(cardId, btn) {
       const card = document.getElementById(cardId);
       card.querySelector('.subtask-section').classList.toggle('active');
@@ -697,7 +733,6 @@
       if(!name) { alert('Vui lòng nhập tên dự án!'); return; }
 
       if(editId) {
-        // Cập nhật Dự án cũ
         const card = document.getElementById(editId);
         card.dataset.name = name;
         card.dataset.start = startDate;
@@ -712,7 +747,6 @@
         card.querySelector('.card-budget').innerText = `${budget || 0} VNĐ`;
         card.querySelector('.card-note').innerText = note || 'Chưa có ghi chú';
       } else {
-        // Thêm Dự án mới
         projectCount++;
         const cardId = `proj-${projectCount}`;
         const projectHTML = `
@@ -720,9 +754,12 @@
             <div class="card-header">
               <div>
                 <span class="badge-type" style="background:#eef5e3; color:#2e7d32; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">${type}</span>
-                <button class="btn-edit-item" onclick="editProject('${cardId}')">✏️ Sửa</button>
               </div>
-              <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+              <div class="action-icons">
+                <button class="btn-icon" title="Sửa" onclick="editProject('${cardId}')">✏️</button>
+                <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}', 'project')">🗑️</button>
+                <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+              </div>
             </div>
             <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
             <p style="font-size:12px; color:#666; margin-bottom: 4px;">Thời gian: <b class="card-date">${formatDate(startDate)} - ${formatDate(endDate)}</b></p>
@@ -769,7 +806,6 @@
       if(!startDate) { alert('Vui lòng chọn ngày bắt đầu!'); return; }
 
       if(editId) {
-        // Cập nhật công việc cũ
         const card = document.getElementById(editId);
         card.dataset.name = name;
         card.dataset.start = startDate;
@@ -779,13 +815,15 @@
         card.querySelector('.card-date').innerText = formatDate(startDate);
         card.querySelector('.card-note').innerText = note || 'Không có ghi chú';
       } else {
-        // Thêm công việc mới
         singleWorkCount++;
         const cardId = `single-${singleWorkCount}`;
         const singleWorkHTML = `
           <div class="card" id="${cardId}" data-name="${name}" data-start="${startDate}" data-note="${note}">
             <div class="card-header" style="justify-content: flex-end;">
-              <button class="btn-edit-item" onclick="editSingleWork('${cardId}')">✏️ Sửa</button>
+              <div class="action-icons">
+                <button class="btn-icon" title="Sửa" onclick="editSingleWork('${cardId}')">✏️</button>
+                <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}', 'single')">🗑️</button>
+              </div>
             </div>
             <div class="subtask-item">
               <input type="checkbox" onchange="toggleSingleTaskComplete(this)">
@@ -877,7 +915,8 @@
             <div class="credit-card" id="${cardId}" data-name="${name}" data-cardtype="${cardType}" data-grace="${grace}" data-limit="${limit}" data-stmt="${stmtDate}" data-due="${dueDate}" data-note="${note}">
               <div class="badge-group">
                 <div class="badge badge-grace">${grace}</div>
-                <button class="btn-edit-card" onclick="editCreditCard('${cardId}')">✏️</button>
+                <button class="btn-edit-card" title="Sửa" onclick="editCreditCard('${cardId}')">✏️</button>
+                <button class="btn-edit-card" title="Xóa" onclick="deleteItem('${cardId}')">🗑️</button>
               </div>
               <div class="card-bank-name" style="font-size: 13px; opacity: 0.9;">${name}</div>
               <div class="card-type-title" style="font-size: 20px; font-weight: bold; margin: 8px 0;">${cardType}</div>
@@ -918,9 +957,12 @@
               <div class="card-header">
                 <div>
                   <span class="badge-category" style="background:#e3f2fd; color:#1565c0; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">${category}</span>
-                  <button class="btn-edit-item" onclick="editSavingItem('${cardId}')">✏️ Sửa</button>
+                  <span class="tag-object badge-custtype">${custType}</span>
                 </div>
-                <span class="tag-object badge-custtype">${custType}</span>
+                <div class="action-icons">
+                  <button class="btn-icon" title="Sửa" onclick="editSavingItem('${cardId}')">✏️</button>
+                  <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}')">🗑️</button>
+                </div>
               </div>
               <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
               <p style="font-size:13px; color:#555;">Số tiền: <b class="card-amount" style="color:#2e7d32;">${amount} VNĐ</b></p>
@@ -960,7 +1002,10 @@
                 <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
                 <span style="font-size:11px; color:#888; margin-left: 6px;">Kỳ hạn: <b>${termMonths} tháng</b></span>
               </div>
-              <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+              <div class="action-icons">
+                <button class="btn-icon" title="Xóa" onclick="deleteItem('${cardId}')">🗑️</button>
+                <button class="toggle-arrow" onclick="toggleSubtasks('${cardId}', this)">▼</button>
+              </div>
             </div>
             <h3 style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
             <p style="font-size:13px; color:#555;">Tổng tiền vay: <b style="color:#c62828;">${rawAmount.toLocaleString('en-US')} VNĐ</b></p>

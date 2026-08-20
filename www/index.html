@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Quản Lý Công Việc & Tài Chính Premium</title>
+  <title>Mr Cường - Executive System</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -11,7 +11,7 @@
       --card-bg: rgba(23, 32, 51, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
       --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.25);
+      --primary-glow: rgba(56, 189, 248, 0.35);
       --accent: #f59e0b;
       --text-main: #f8fafc;
       --text-sub: #94a3b8;
@@ -20,18 +20,18 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; min-height: 100vh; }
+    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 100px; overflow-x: hidden; min-height: 100vh; }
     
-    /* Header */
-    .header { background: rgba(11, 15, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); padding: 16px; text-align: center; position: sticky; top: 0; z-index: 50; }
-    .header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; background: linear-gradient(135deg, #fff 0%, #94a3b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    /* Header Header */
+    .header { background: rgba(11, 15, 23, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--card-border); padding: 18px 16px; text-align: center; position: sticky; top: 0; z-index: 50; }
+    .header h1 { font-size: 18px; font-weight: 800; letter-spacing: 1px; background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
 
     .container { padding: 16px; max-width: 600px; margin: 0 auto; }
     .tab-content { display: none; opacity: 0; transform: translateY(8px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
 
     /* Home Banner */
-    .home-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.2); color: white; padding: 20px; border-radius: 20px; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px var(--primary-glow); }
+    .home-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.25); color: white; padding: 20px; border-radius: 20px; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 10px 30px -10px var(--primary-glow); }
     .home-banner::after { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%); transform: rotate(45deg); pointer-events: none; }
     .home-banner h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
@@ -71,10 +71,11 @@
     .btn-icon { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.7; transition: opacity 0.2s; }
     .btn-icon:hover { opacity: 1; }
     
-    .btn-add-main { position: fixed; bottom: 80px; right: 20px; width: 52px; height: 52px; border-radius: 26px; background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; border: none; font-size: 24px; box-shadow: 0 6px 20px var(--primary-glow); cursor: pointer; z-index: 40; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .btn-add-main:active { transform: scale(0.9); }
+    /* NÚT THÊM FLOATING (+) */
+    .btn-add-main { position: fixed; bottom: 95px; right: 20px; width: 56px; height: 56px; border-radius: 28px; background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; border: none; font-size: 28px; font-weight: 300; box-shadow: 0 8px 24px var(--primary-glow); cursor: pointer; z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-add-main:active { transform: scale(0.88); }
 
-    /* Mũi tên & Chi tiết mở rộng */
+    /* Detail Arrow Expansion */
     .toggle-arrow { cursor: pointer; font-size: 11px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; padding: 4px; color: var(--text-sub); }
     .toggle-arrow.open { transform: rotate(180deg); color: var(--primary); }
     .detail-section { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--card-border); }
@@ -84,8 +85,8 @@
 
     .task-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 6px; background: rgba(15, 23, 42, 0.5); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); color: var(--text-sub); }
 
-    /* Modal */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: flex-end; }
+    /* Modal Styling */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: flex-end; }
     .modal.active { display: flex; }
     .modal-content { background: #131b2e; border: 1px solid var(--card-border); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
     .form-group { margin-bottom: 14px; }
@@ -96,18 +97,22 @@
     .btn-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px var(--primary-glow); }
     .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); color: var(--text-sub); border: 1px solid var(--card-border); border-radius: 10px; font-weight: 700; cursor: pointer; }
 
-    /* Bottom Navigation */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: rgba(11, 15, 23, 0.85); backdrop-filter: blur(16px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 50; }
-    .nav-item { border: none; background: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: color 0.2s; }
-    .nav-item.active { color: var(--primary); }
-    .nav-item svg { fill: currentColor; margin-bottom: 4px; transition: transform 0.2s; }
-    .nav-item.active svg { transform: translateY(-2px); }
+    /* BOTTOM NAV PREMIUM (THIẾT KẾ NỔI, MƯỢT MÀ) */
+    .bottom-nav-container { position: fixed; bottom: 16px; left: 0; right: 0; z-index: 80; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+    .bottom-nav { pointer-events: auto; width: 100%; max-width: 480px; height: 64px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 32px; display: flex; justify-content: space-around; align-items: center; padding: 0 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1); }
+    .nav-item { flex: 1; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 11px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+    .nav-item.active { color: var(--primary); font-weight: 700; }
+    .nav-item svg { fill: currentColor; margin-bottom: 3px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-item.active svg { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 2px 8px var(--primary-glow)); }
+    .nav-item::after { content: ''; position: absolute; bottom: 8px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%; opacity: 0; transform: scale(0); transition: all 0.3s ease; }
+    .nav-item.active::after { opacity: 1; transform: scale(1); }
   </style>
 </head>
 <body>
 
+  <!-- HEADER HEADER -->
   <div class="header">
-    <h1>Hệ Thống Quản Lý Executive</h1>
+    <h1>Mr Cường</h1>
   </div>
 
   <div class="container">
@@ -130,7 +135,7 @@
         </div>
       </div>
 
-      <!-- KHU VỰC THỐNG KÊ REALTIME -->
+      <!-- DASHBOARD STATS REALTIME -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-title">📁 Dự Án</div>
@@ -178,7 +183,6 @@
 
       <div id="work-project-list"></div>
       <div id="work-single-list" style="display: none;"></div>
-      <button class="btn-add-main" onclick="openAddWorkModal()">+</button>
     </div>
 
     <!-- TAB THẺ & TÀI CHÍNH -->
@@ -192,10 +196,11 @@
       <div id="list-credit"></div>
       <div id="list-saving" style="display: none;"></div>
       <div id="list-loan" style="display: none;"></div>
-
-      <button class="btn-add-main" onclick="openAddFinanceModal()">+</button>
     </div>
   </div>
+
+  <!-- NÚT THÊM QUYỀN LỰC (+) FLOATING -->
+  <button class="btn-add-main" id="btn-add-global" onclick="handleGlobalAdd()" style="display: none;">+</button>
 
   <!-- MODAL: DỰ ÁN -->
   <div class="modal" id="modal-du-an">
@@ -381,29 +386,33 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('tab-trang-chu', this)">
-      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-      Trang chủ
-    </button>
-    <button class="nav-item" onclick="switchTab('tab-cong-viec', this)">
-      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-5H4v5zm6 0h5v-5h-5v5zm0-13v6h5V5h-5zm6 0v6h5V5h-5zm0 13h5v-5h-5v5z"/></svg>
-      Công việc
-    </button>
-    <button class="nav-item" onclick="switchTab('tab-tai-chinh', this)">
-      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-      Thẻ & Tài chính
-    </button>
+  <!-- FLOATING BOTTOM NAV -->
+  <div class="bottom-nav-container">
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('tab-trang-chu', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Trang chủ
+      </button>
+      <button class="nav-item" onclick="switchTab('tab-cong-viec', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-5H4v5zm6 0h5v-5h-5v5zm0-13v6h5V5h-5zm6 0v6h5V5h-5zm0 13h5v-5h-5v5z"/></svg>
+        Công việc
+      </button>
+      <button class="nav-item" onclick="switchTab('tab-tai-chinh', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        Thẻ & Tài chính
+      </button>
+    </div>
   </div>
 
   <script>
+    let activeMainTab = 'tab-trang-chu';
     let currentFinanceTab = 'credit'; 
     let currentWorkSegment = 'project'; 
 
     window.onload = function() {
       initCalendar();
       updateDashboardStats();
+      toggleAddButtonVisibility();
     };
 
     function initCalendar() {
@@ -417,10 +426,29 @@
     }
 
     function switchTab(tabId, btn) {
+      activeMainTab = tabId;
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btn.classList.add('active');
+      toggleAddButtonVisibility();
+    }
+
+    function toggleAddButtonVisibility() {
+      const addBtn = document.getElementById('btn-add-global');
+      if (activeMainTab === 'tab-trang-chu') {
+        addBtn.style.display = 'none';
+      } else {
+        addBtn.style.display = 'flex';
+      }
+    }
+
+    function handleGlobalAdd() {
+      if (activeMainTab === 'tab-cong-viec') {
+        openAddWorkModal();
+      } else if (activeMainTab === 'tab-tai-chinh') {
+        openAddFinanceModal();
+      }
     }
 
     function switchWorkSegment(type) {

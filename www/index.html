@@ -15,12 +15,18 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* Home Styles */
+    .home-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+    .home-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .calendar-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; justify-content: space-around; text-align: center; }
+    .cal-box h4 { font-size: 12px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .cal-box p { font-size: 18px; font-weight: bold; color: #0f172a; }
+
     .segment-control { display: flex; background: #e2e8f0; border-radius: 8px; padding: 3px; margin-bottom: 16px; }
     .segment-btn { flex: 1; padding: 8px; text-align: center; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #64748b; border-radius: 6px; cursor: pointer; }
     .segment-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
     .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; border: 1px solid #e2e8f0; }
-    .card.completed-card { opacity: 0.6; background: #f8fafc; }
     .card-header { display: flex; justify-content: space-between; align-items: center; }
     
     .credit-card { background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 16px; border-radius: 12px; margin-bottom: 12px; position: relative; }
@@ -28,23 +34,8 @@
     .badge { background: rgba(255,255,255,0.2); font-size: 11px; padding: 3px 8px; border-radius: 4px; }
     .btn-edit-card { background: transparent; border: none; color: white; cursor: pointer; margin-left: 6px; }
 
-    .progress-container { margin-top: 10px; }
-    .progress-info { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 4px; }
-    .progress-bg { background: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden; }
-    .progress-fill { background: #22c55e; height: 100%; transition: width 0.3s; }
-    
-    .subtask-section { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-    .subtask-section.active { display: block; }
-    .subtask-item { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
-    .subtask-item.completed span { text-decoration: line-through; color: #94a3b8; }
-    .add-task-row { display: flex; gap: 6px; margin-top: 8px; }
-    .add-task-row input { flex: 1; padding: 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px; }
-    .add-task-row button { padding: 6px 12px; background: #0f172a; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
-
     .action-icons { display: flex; gap: 8px; align-items: center; }
     .btn-icon { background: none; border: none; cursor: pointer; font-size: 14px; }
-    .toggle-arrow { background: none; border: none; cursor: pointer; font-size: 12px; color: #64748b; transition: transform 0.2s; }
-    .toggle-arrow.expanded { transform: rotate(180deg); }
     .btn-add-main { position: fixed; bottom: 75px; right: 20px; width: 48px; height: 48px; border-radius: 24px; background: #2563eb; color: white; border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(37,99,235,0.3); cursor: pointer; z-index: 10; }
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: flex-end; }
@@ -66,12 +57,32 @@
 <body>
 
   <div class="header">
-    <h1>Xử Lý Nghiệp Vụ Quản Lý</h1>
+    <h1>Hệ Thống Quản Lý</h1>
   </div>
 
   <div class="container">
+    <!-- TAB TRANG CHỦ -->
+    <div id="tab-trang-chu" class="tab-content active">
+      <div class="home-banner">
+        <h2>👑 Bệ hạ vạn tuế!</h2>
+        <p style="font-size: 13px; opacity: 0.9;">Chúc Bệ hạ một ngày làm việc hiệu quả và vạn sự như ý.</p>
+      </div>
+
+      <div class="calendar-card">
+        <div class="cal-box">
+          <h4>Dương Lịch</h4>
+          <p id="solar-date-text">--/--/----</p>
+        </div>
+        <div style="border-right: 1px solid #e2e8f0;"></div>
+        <div class="cal-box">
+          <h4>Âm Lịch</h4>
+          <p id="lunar-date-text" style="color: #2563eb;">--/--</p>
+        </div>
+      </div>
+    </div>
+
     <!-- TAB CÔNG VIỆC -->
-    <div id="tab-cong-viec" class="tab-content active">
+    <div id="tab-cong-viec" class="tab-content">
       <div class="segment-control">
         <button class="segment-btn active" id="btn-work-project" onclick="switchWorkSegment('project')">Dự Án (<span id="project-count">0</span>)</button>
         <button class="segment-btn" id="btn-work-single" onclick="switchWorkSegment('single')">Việc Riêng Lẻ (<span id="single-work-count">0</span>)</button>
@@ -98,7 +109,7 @@
     </div>
   </div>
 
-  <!-- MODAL: DỰ ÁN (Đã bỏ Ngày kết thúc) -->
+  <!-- MODAL: DỰ ÁN -->
   <div class="modal" id="modal-du-an">
     <div class="modal-content">
       <h3 id="modal-project-title" style="margin-bottom: 12px;">Thêm Dự Án Mới</h3>
@@ -116,8 +127,8 @@
           <label>Loại dự án *</label>
           <select id="project-type">
             <option value="DVCI">DVCI</option>
-            <option value="Thường">Thường</option>
-            <option value="Trọng điểm">Trọng điểm</option>
+            <option value="G-Tickit">G-Tickit</option>
+            <option value="Khác">Khác</option>
           </select>
         </div>
       </div>
@@ -160,7 +171,7 @@
     </div>
   </div>
 
-  <!-- MODAL: TÀI CHÍNH (Đã sửa lại Selects & Bàn phím số) -->
+  <!-- MODAL: TÀI CHÍNH -->
   <div class="modal" id="modal-tai-khoan">
     <div class="modal-content">
       <h3 id="modal-finance-title" style="margin-bottom: 12px;">Thêm Mục Tài Chính</h3>
@@ -174,8 +185,13 @@
       <div id="fields-credit">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
           <div class="form-group">
-            <label>Loại thẻ</label>
-            <input type="text" id="fin-card-type" placeholder="VISA, Mastercard...">
+            <label>Loại thẻ *</label>
+            <select id="fin-card-type">
+              <option value="VISA">VISA</option>
+              <option value="JCB">JCB</option>
+              <option value="Mastercard">Mastercard</option>
+              <option value="Khác">Khác</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Thời gian miễn lãi *</label>
@@ -260,8 +276,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Góp hàng tháng (Tính tự động)</label>
-          <input type="text" id="fin-loan-monthly" readonly style="background: #f1f5f9; font-weight: bold; color: #c62828;">
+          <label>Góp hàng tháng (VNĐ - Tự tính, có thể gõ chỉnh sửa)</label>
+          <input type="text" id="fin-loan-monthly" class="currency-input" inputmode="numeric" placeholder="0">
         </div>
       </div>
 
@@ -279,7 +295,11 @@
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('tab-cong-viec', this)">
+    <button class="nav-item active" onclick="switchTab('tab-trang-chu', this)">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Trang chủ
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-cong-viec', this)">
       <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 11h5V5H4v6zm0 7h5v-5H4v5zm6 0h5v-5h-5v5zm0-13v6h5V5h-5zm6 0v6h5V5h-5zm0 13h5v-5h-5v5z"/></svg>
       Công việc
     </button>
@@ -292,6 +312,21 @@
   <script>
     let currentFinanceTab = 'credit'; 
     let currentWorkSegment = 'project'; 
+
+    window.onload = function() {
+      initCalendar();
+    };
+
+    function initCalendar() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      
+      document.getElementById('solar-date-text').textContent = `${day}/${month}/${year}`;
+      // Lịch âm mô phỏng hiển thị ngày/tháng âm tương đối
+      document.getElementById('lunar-date-text').textContent = `${day}/${month} (Âm)`;
+    }
 
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -372,7 +407,7 @@
         document.getElementById('fields-loan').style.display = 'block';
         document.getElementById('fin-loan-amount').value = '';
         document.getElementById('fin-loan-term').value = '12';
-        calculateMonthlyLoan();
+        document.getElementById('fin-loan-monthly').value = '';
       }
 
       document.getElementById('modal-tai-khoan').classList.add('active');
@@ -404,7 +439,7 @@
       const amount = parseCurrency(document.getElementById('fin-loan-amount').value);
       const term = parseInt(document.getElementById('fin-loan-term').value) || 1;
       const monthly = Math.round(amount / term);
-      document.getElementById('fin-loan-monthly').value = formatCurrency(monthly) + ' VNĐ/tháng';
+      document.getElementById('fin-loan-monthly').value = monthly ? formatCurrency(monthly) : '';
     }
 
     function deleteItem(id) {
@@ -615,37 +650,25 @@
       } else if (currentFinanceTab === 'loan') {
         const amount = document.getElementById('fin-loan-amount').value || '0';
         const term = document.getElementById('fin-loan-term').value;
-        const numTerm = parseInt(term) || 12;
-        const monthlyVal = Math.round(parseCurrency(amount) / numTerm);
+        const monthly = document.getElementById('fin-loan-monthly').value || '0';
 
         if (editId) {
           const card = document.getElementById(editId);
           card.dataset.name = name;
           card.dataset.amount = amount;
           card.dataset.term = term;
+          card.dataset.monthly = monthly;
           card.dataset.note = note;
 
           card.querySelector('.card-title').textContent = name;
           card.querySelector('.card-amount').textContent = `${amount} VNĐ`;
           card.querySelector('.card-term').textContent = `${term} tháng`;
-          card.querySelector('.card-monthly').textContent = `${formatCurrency(monthlyVal)} VNĐ/tháng`;
+          card.querySelector('.card-monthly').textContent = `${monthly} VNĐ/tháng`;
           card.querySelector('.card-note').textContent = note;
-
-          // Cập nhật lại danh sách các kỳ vay khi sửa
-          let subtasksHtml = '';
-          for (let i = 1; i <= numTerm; i++) {
-            subtasksHtml += `<div class="subtask-item"><input type="checkbox"> <span>Kỳ ${i}: ${formatCurrency(monthlyVal)} VNĐ</span></div>`;
-          }
-          card.querySelector('.subtask-list').innerHTML = subtasksHtml;
         } else {
           const id = 'loan-' + Date.now();
-          let subtasksHtml = '';
-          for (let i = 1; i <= numTerm; i++) {
-            subtasksHtml += `<div class="subtask-item"><input type="checkbox"> <span>Kỳ ${i}: ${formatCurrency(monthlyVal)} VNĐ</span></div>`;
-          }
-
           const html = `
-            <div class="card" id="${id}" data-name="${name}" data-amount="${amount}" data-term="${term}" data-note="${note}">
+            <div class="card" id="${id}" data-name="${name}" data-amount="${amount}" data-term="${term}" data-monthly="${monthly}" data-note="${note}">
               <div class="card-header">
                 <div>
                   <span style="background:#ffebee; color:#c62828; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">Trả góp</span>
@@ -658,11 +681,8 @@
               </div>
               <h3 class="card-title" style="margin: 8px 0 4px; font-size: 16px;">${name}</h3>
               <p style="font-size:13px; color:#555;">Tổng tiền: <b class="card-amount" style="color:#c62828;">${amount} VNĐ</b></p>
-              <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Hàng tháng: <span class="card-monthly">${formatCurrency(monthlyVal)} VNĐ/tháng</span></p>
+              <p style="font-size:12px; color:#333; font-weight:bold; margin-top:2px;">Hàng tháng: <span class="card-monthly">${monthly} VNĐ/tháng</span></p>
               <p style="font-size:12px; color:#777; margin-top:4px;">Ghi chú: <span class="card-note">${note}</span></p>
-              <div class="subtask-section active" style="margin-top:8px;">
-                <div class="subtask-list">${subtasksHtml}</div>
-              </div>
             </div>
           `;
           document.getElementById('list-loan').insertAdjacentHTML('beforeend', html);
@@ -710,8 +730,8 @@
       document.getElementById('fin-name').value = card.dataset.name || '';
       document.getElementById('fin-loan-amount').value = card.dataset.amount || '';
       document.getElementById('fin-loan-term').value = card.dataset.term || '12';
+      document.getElementById('fin-loan-monthly').value = card.dataset.monthly || '';
       document.getElementById('fin-note').value = card.dataset.note || '';
-      calculateMonthlyLoan();
     }
 
     function updateCounts() {

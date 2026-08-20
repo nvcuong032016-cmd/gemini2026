@@ -1,651 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mr Cuog</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg-main: #0b0f17;
-      --card-bg: rgba(23, 32, 51, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.35);
-      --accent: #f59e0b;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --danger: #f43f5e;
-      --success: #10b981;
-    }
-
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-      -webkit-tap-highlight-color: transparent; 
-      -webkit-font-smoothing: antialiased;
-    }
-    
-    body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; min-height: 100vh; }
-    
-    .header { background: rgba(11, 15, 23, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--card-border); padding: 14px 16px; text-align: center; position: sticky; top: 0; z-index: 50; }
-    .header h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
-
-    .container { padding: 16px 16px 95px 16px; max-width: 600px; margin: 0 auto; }
-    .tab-content { display: none; opacity: 0; transform: translateY(8px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
-
-    .home-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(56, 189, 248, 0.25); color: white; padding: 18px 20px; border-radius: 16px; margin-bottom: 14px; position: relative; overflow: hidden; box-shadow: 0 6px 20px -6px var(--primary-glow); }
-    .home-banner h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .home-banner p { font-size: 13px; color: var(--text-sub); }
-
-    .calendar-card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 14px; padding: 12px; border: 1px solid var(--card-border); margin-bottom: 14px; display: flex; justify-content: space-around; text-align: center; }
-    .cal-box h4 { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .cal-box p { font-size: 15px; font-weight: 700; color: var(--text-main); }
-
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .stat-card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 14px; padding: 14px 16px; border: 1px solid var(--card-border); transition: transform 0.2s; }
-    .stat-card.full-width { grid-column: span 2; }
-    .stat-title { font-size: 12px; font-weight: 600; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; }
-    .stat-value { font-size: 18px; font-weight: 800; color: var(--text-main); letter-spacing: -0.3px; margin-top: 4px; word-break: break-word; }
-    .stat-sub { font-size: 11px; color: var(--text-sub); }
-    .stat-highlight { color: var(--primary); }
-    .stat-danger { color: var(--danger); }
-    .stat-success { color: var(--success); }
-
-    .segment-control { display: flex; background: rgba(15, 23, 42, 0.8); border-radius: 12px; padding: 4px; border: 1px solid var(--card-border); margin-bottom: 16px; }
-    .segment-btn { flex: 1; padding: 10px; text-align: center; border: none; background: transparent; font-size: 12px; font-weight: 700; color: var(--text-sub); border-radius: 8px; cursor: pointer; transition: all 0.25s ease; }
-    .segment-btn.active { background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; box-shadow: 0 4px 12px var(--primary-glow); }
-
-    .card { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--card-border); position: relative; transition: all 0.2s; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    
-    .badge { background: rgba(56, 189, 248, 0.15); color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.3); font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 700; }
-    .badge-budget { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 700; margin-left: 6px; }
-
-    .action-icons { display: flex; gap: 10px; align-items: center; }
-    .btn-icon { background: none; border: none; cursor: pointer; font-size: 13px; opacity: 0.7; transition: opacity 0.2s; color: var(--text-main); }
-    .btn-icon:hover { opacity: 1; }
-    
-    .btn-add-main { position: fixed; bottom: 90px; right: 20px; width: 52px; height: 52px; border-radius: 26px; background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; border: none; font-size: 26px; font-weight: 300; box-shadow: 0 8px 24px var(--primary-glow); cursor: pointer; z-index: 90; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-    .btn-add-main:active { transform: scale(0.88); }
-
-    .toggle-arrow { cursor: pointer; font-size: 14px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; padding: 4px; color: var(--primary); font-weight: bold; }
-    .toggle-arrow.open { transform: rotate(180deg); }
-    .detail-section { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--card-border); }
-    .detail-section.active { display: block; animation: fadeIn 0.25s ease-in-out; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-
-    .add-task-box { display: flex; gap: 8px; margin-bottom: 10px; margin-top: 6px; }
-    .add-task-input { flex: 1; padding: 8px 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); border-radius: 8px; font-size: 12px; color: var(--text-main); outline: none; }
-    .add-task-input:focus { border-color: var(--primary); }
-    .btn-add-task { padding: 8px 12px; background: var(--primary); border: none; border-radius: 8px; color: #000; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
-
-    .task-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; margin-bottom: 6px; background: rgba(15, 23, 42, 0.5); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); color: var(--text-sub); }
-    .task-item.completed span { text-decoration: line-through; opacity: 0.5; }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: flex-end; }
-    .modal.active { display: flex; }
-    .modal-content { background: #131b2e; border: 1px solid var(--card-border); width: 100%; max-width: 600px; border-radius: 24px 24px 0 0; padding: 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); border-radius: 10px; font-size: 13px; color: var(--text-main); outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
-    .form-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-save { flex: 1; padding: 12px; background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px var(--primary-glow); }
-    .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); color: var(--text-sub); border: 1px solid var(--card-border); border-radius: 10px; font-weight: 700; cursor: pointer; }
-
-    .bottom-nav-container { position: fixed; bottom: 12px; left: 0; right: 0; z-index: 80; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
-    .bottom-nav { pointer-events: auto; width: 100%; max-width: 480px; height: 62px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 31px; display: flex; justify-content: space-around; align-items: center; padding: 0 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); }
-    .nav-item { flex: 1; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; font-size: 11px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-    .nav-item.active { color: var(--primary); font-weight: 700; }
-    .nav-item svg { fill: currentColor; margin-bottom: 3px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .nav-item.active svg { transform: translateY(-2px) scale(1.1); filter: drop-shadow(0 2px 8px var(--primary-glow)); }
-    .nav-item::after { content: ''; position: absolute; bottom: 6px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%; opacity: 0; transform: scale(0); transition: all 0.3s ease; }
-    .nav-item.active::after { opacity: 1; transform: scale(1); }
-  </style>
-</head>
-<body>
-
-  <div class="header">
-    <h1>Mr Cuog</h1>
-  </div>
-
-  <div class="container">
-    <div id="tab-trang-chu" class="tab-content active">
-      <div class="home-banner">
-        <h2>👑 Bệ hạ vạn tuế!</h2>
-        <p>Tổng quan công việc & tài chính cao cấp.</p>
-      </div>
-
-      <div class="calendar-card">
-        <div class="cal-box">
-          <h4>Dương Lịch</h4>
-          <p id="solar-date-text">--/--/----</p>
-        </div>
-        <div style="border-right: 1px solid var(--card-border);"></div>
-        <div class="cal-box">
-          <h4>Âm Lịch</h4>
-          <p id="lunar-date-text" style="color: var(--primary);">--/--</p>
-        </div>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-title">📁 Dự Án</div>
-          <div class="stat-value stat-highlight" id="stat-project-count">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">📌 Việc Riêng</div>
-          <div class="stat-value" id="stat-single-count">0</div>
-        </div>
-
-        <div class="stat-card full-width">
-          <div class="stat-title">💳 Thẻ Tín Dụng <span>Số lượng: <b id="stat-credit-count" class="stat-highlight">0</b></span></div>
-          <div class="stat-sub" style="margin-top: 4px;">Tổng hạn mức:</div>
-          <div class="stat-value stat-success" id="stat-credit-limit">0 VNĐ</div>
-        </div>
-
-        <div class="stat-card full-width">
-          <div class="stat-title">🤝 Con Nợ (Tiền Cho Vay)</div>
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
-            <div>
-              <div class="stat-sub">Cá nhân:</div>
-              <div class="stat-value" style="font-size: 17px;" id="stat-debtor-personal">0 VNĐ</div>
-            </div>
-            <div style="border-top: 1px dashed var(--card-border); padding-top: 8px;">
-              <div class="stat-sub">Tổ chức:</div>
-              <div class="stat-value" style="font-size: 17px;" id="stat-debtor-org">0 VNĐ</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- THÊM MỤC TIẾT KIỆM NÀY VÀO DASHBOARD -->
-        <div class="stat-card full-width">
-          <div class="stat-title">💰 Tiền Tiết Kiệm (Gửi Ngân Hàng)</div>
-          <div class="stat-value stat-success" id="stat-saving-total">0 VNĐ</div>
-        </div>
-
-        <div class="stat-card full-width">
-          <div class="stat-title">🏦 Chủ Nợ</div>
-          <div class="stat-sub" style="margin-top: 4px;">Số khoản đang vay / trả góp:</div>
-          <div class="stat-value stat-danger" id="stat-creditor-count">0</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-cong-viec" class="tab-content">
-      <div class="segment-control">
-        <button class="segment-btn active" id="btn-work-project" onclick="switchWorkSegment('project')">Dự Án (<span id="project-count">0</span>)</button>
-        <button class="segment-btn" id="btn-work-single" onclick="switchWorkSegment('single')">Việc Riêng Lẻ (<span id="single-work-count">0</span>)</button>
-      </div>
-
-      <div id="work-project-list"></div>
-      <div id="work-single-list" style="display: none;"></div>
-    </div>
-
-    <div id="tab-tai-chinh" class="tab-content">
-      <div class="segment-control">
-        <button class="segment-btn active" id="btn-tab-credit" onclick="switchFinanceTab('credit')">Tín Dụng</button>
-        <button class="segment-btn" id="btn-tab-saving" onclick="switchFinanceTab('saving')">Cho Vay/Gửi</button>
-        <button class="segment-btn" id="btn-tab-loan" onclick="switchFinanceTab('loan')">Vay/Trả Góp</button>
-      </div>
-
-      <div id="list-credit"></div>
-      <div id="list-saving" style="display: none;"></div>
-      <div id="list-loan" style="display: none;"></div>
-    </div>
-  </div>
-
-  <button class="btn-add-main" id="btn-add-global" onclick="handleGlobalAdd()" style="display: none;">+</button>
-
-  <!-- Modal Dự Án -->
-  <div class="modal" id="modal-du-an">
-    <div class="modal-content">
-      <h3 id="modal-project-title" style="margin-bottom: 14px; font-size: 16px;">Thêm Dự Án Mới</h3>
-      <input type="hidden" id="edit-project-id">
-      <div class="form-group">
-        <label>Tên dự án *</label>
-        <input type="text" id="project-name" placeholder="Nhập tên dự án">
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="form-group">
-          <label>Ngày bắt đầu</label>
-          <input type="date" id="project-start-date">
-        </div>
-        <div class="form-group">
-          <label>Loại dự án *</label>
-          <select id="project-type">
-            <option value="DVCI">DVCI</option>
-            <option value="G-Tickit">G-Tickit</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Ngân sách (VNĐ)</label>
-        <input type="text" id="project-budget" class="currency-input" inputmode="numeric" placeholder="0">
-      </div>
-      <div class="form-group">
-        <label>Ghi chú</label>
-        <textarea id="project-note" rows="2"></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeModal('modal-du-an')">Hủy</button>
-        <button class="btn-save" onclick="saveProject()">Lưu Dự Án</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Việc Riêng Lẻ -->
-  <div class="modal" id="modal-viec-rieng-le">
-    <div class="modal-content">
-      <h3 id="modal-single-title" style="margin-bottom: 14px; font-size: 16px;">Thêm Việc Riêng Lẻ</h3>
-      <input type="hidden" id="edit-single-id">
-      <div class="form-group">
-        <label>Tên công việc *</label>
-        <input type="text" id="single-work-name" placeholder="Nhập tên việc">
-      </div>
-      <div class="form-group">
-        <label>Ngày bắt đầu</label>
-        <input type="date" id="single-work-start-date">
-      </div>
-      <div class="form-group">
-        <label>Ghi chú</label>
-        <textarea id="single-work-note" rows="2"></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeModal('modal-viec-rieng-le')">Hủy</button>
-        <button class="btn-save" onclick="saveSingleWork()">Lưu Công Việc</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Tài Chính -->
-  <div class="modal" id="modal-tai-khoan">
-    <div class="modal-content">
-      <h3 id="modal-finance-title" style="margin-bottom: 14px; font-size: 16px;">Thêm Mục Tài Chính</h3>
-      <input type="hidden" id="edit-finance-id">
-      <div class="form-group">
-        <label id="lbl-bank-name">Tên ngân hàng / Đối tượng *</label>
-        <input type="text" id="fin-name" placeholder="Nhập tên">
-      </div>
-
-      <div id="fields-credit">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label>Loại thẻ *</label>
-            <select id="fin-card-type">
-              <option value="VISA">VISA</option>
-              <option value="JCB">JCB</option>
-              <option value="Mastercard">Mastercard</option>
-              <option value="Khác">Khác</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Thời gian miễn lãi *</label>
-            <select id="fin-grace-period">
-              <option value="45 ngày">45 ngày</option>
-              <option value="55 ngày">55 ngày</option>
-              <option value="60 ngày">60 ngày</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Hạn mức thẻ (VNĐ)</label>
-          <input type="text" id="fin-credit-limit" class="currency-input" inputmode="numeric" placeholder="0">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label>Ngày sao kê</label>
-            <input type="text" id="fin-statement-date" inputmode="numeric" placeholder="VD: 15">
-          </div>
-          <div class="form-group">
-            <label>Ngày hạn trả</label>
-            <input type="text" id="fin-due-date" inputmode="numeric" placeholder="VD: 05">
-          </div>
-        </div>
-      </div>
-
-      <div id="fields-saving" style="display: none;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label>Phân loại</label>
-            <select id="fin-saving-category">
-              <option value="Tiết kiệm">Tiết kiệm</option>
-              <option value="Cho vay">Cho vay</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Đối tượng</label>
-            <select id="fin-customer-type">
-              <option value="Cá nhân">Cá nhân</option>
-              <option value="Tổ chức">Tổ chức</option>
-            </select>
-          </div>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label>Số tiền (VNĐ)</label>
-            <input type="text" id="fin-saving-amount" class="currency-input" inputmode="numeric" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Kỳ hạn gửi/cho vay *</label>
-            <select id="fin-saving-term">
-              <option value="Không kỳ hạn">Không kỳ hạn</option>
-              <option value="1 tháng">1 tháng</option>
-              <option value="3 tháng">3 tháng</option>
-              <option value="6 tháng">6 tháng</option>
-              <option value="12 tháng">12 tháng</option>
-              <option value="24 tháng">24 tháng</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div id="fields-loan" style="display: none;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="form-group">
-            <label>Tổng tiền vay (VNĐ)</label>
-            <input type="text" id="fin-loan-amount" class="currency-input" inputmode="numeric" placeholder="0" oninput="calculateMonthlyLoan()">
-          </div>
-          <div class="form-group">
-            <label>Số tháng trả góp *</label>
-            <select id="fin-loan-term" onchange="calculateMonthlyLoan()">
-              <option value="3">3 tháng</option>
-              <option value="6">6 tháng</option>
-              <option value="9">9 tháng</option>
-              <option value="12" selected>12 tháng</option>
-              <option value="18">18 tháng</option>
-              <option value="24">24 tháng</option>
-              <option value="36">36 tháng</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Góp hàng tháng (VNĐ)</label>
-          <input type="text" id="fin-loan-monthly" class="currency-input" inputmode="numeric" placeholder="0">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Ghi chú</label>
-        <textarea id="fin-note" rows="2"></textarea>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeModal('modal-tai-khoan')">Hủy</button>
-        <button class="btn-save" onclick="saveFinanceItem()">Lưu Thông Tin</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="bottom-nav-container">
-    <div class="bottom-nav">
-      <button class="nav-item active" onclick="switchTab('tab-trang-chu', this)">
-        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.5l5 4.5v7h-2v-6H9v6H7v-7l5-4.5z"/></svg>
-        Trang chủ
-      </button>
-      <button class="nav-item" onclick="switchTab('tab-cong-viec', this)">
-        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-        Công việc
-      </button>
-      <button class="nav-item" onclick="switchTab('tab-tai-chinh', this)">
-        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M21 4H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h18c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H3V8h18v10zm-10-7h8v5h-8v-5z"/></svg>
-        Tài chính
-      </button>
-    </div>
-  </div>
-
-  <script>
-    let appData = {
-      projects: [],
-      singles: [],
-      credits: [],
-      savings: [],
-      loans: []
-    };
-
-    let activeMainTab = 'tab-trang-chu';
-    let currentFinanceTab = 'credit'; 
-    let currentWorkSegment = 'project'; 
-
-    window.onload = function() {
-      initCalendar();
-      loadDataFromStorage();
-      bindCurrencyInputs();
-      renderAll();
-      toggleAddButtonVisibility();
-    };
-
-    function loadDataFromStorage() {
-      const stored = localStorage.getItem('executive_app_data');
-      if (stored) {
-        try { appData = JSON.parse(stored); } catch(e) {}
-      }
-      appData = appData || {};
-      appData.projects = Array.isArray(appData.projects) ? appData.projects : [];
-      appData.singles = Array.isArray(appData.singles) ? appData.singles : [];
-      appData.credits = Array.isArray(appData.credits) ? appData.credits : [];
-      appData.savings = Array.isArray(appData.savings) ? appData.savings : [];
-      appData.loans = Array.isArray(appData.loans) ? appData.loans : [];
-      
-      appData.projects.forEach(p => { if (!Array.isArray(p.tasks)) p.tasks = []; });
-    }
-
-    function saveDataToStorage() {
-      localStorage.setItem('executive_app_data', JSON.stringify(appData));
-      updateDashboardStats();
-    }
-
-    function initCalendar() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      
-      document.getElementById('solar-date-text').textContent = `${day}/${month}/${year}`;
-      const lunar = getLunarDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
-      document.getElementById('lunar-date-text').textContent =
-        `${lunar.day}/${lunar.month}${lunar.leap ? ' (N)' : ''} (Âm)`;
-    }
-
-    /* --- Thuật toán tính Âm lịch Việt Nam chuẩn UTC+7 (Hồ Ngọc Đức) --- */
-    function INT(x) { return Math.floor(x); }
-
-    function jdFromDate(dd, mm, yy) {
-      const a = INT((14 - mm) / 12);
-      const y = yy + 4800 - a;
-      const m = mm + 12 * a - 3;
-      let jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - INT(y / 100) + INT(y / 400) - 32045;
-      if (jd < 2299161) {
-        jd = dd + INT((153 * m + 2) / 5) + 365 * y + INT(y / 4) - 32083;
-      }
-      return jd;
-    }
-
-    function getNewMoonDay(k, timeZone) {
-      const T = k / 1236.85;
-      const T2 = T * T;
-      const T3 = T2 * T;
-      const dr = Math.PI / 180;
-      let jd1 = 2415020.75933 + 29.53058868 * k + 0.0001178 * T2 - 0.000000155 * T3 + 0.00033 * Math.sin((166.56 + 132.87 * T - 0.009173 * T2) * dr);
-      const M = 359.2242 + 29.10535608 * k - 0.0000333 * T2 - 0.00000347 * T3;
-      const Mpr = 306.0253 + 385.81691806 * k + 0.0107306 * T2 + 0.00001236 * T3;
-      const F = 21.2964 + 390.67050646 * k - 0.0016528 * T2 - 0.00000239 * T3;
-
-      let C1 = (0.1734 - 0.000393 * T) * Math.sin(M * dr) + 0.0021 * Math.sin(2 * M * dr) - 0.4068 * Math.sin(Mpr * dr) + 0.0161 * Math.sin(2 * Mpr * dr) - 0.0004 * Math.sin(3 * Mpr * dr) + 0.0104 * Math.sin(2 * F * dr) - 0.0051 * Math.sin((M + Mpr) * dr) - 0.0074 * Math.sin((M - Mpr) * dr) + 0.0004 * Math.sin((2 * F + M) * dr) - 0.0004 * Math.sin((2 * F - M) * dr) - 0.0006 * Math.sin((2 * F + Mpr) * dr) + 0.0010 * Math.sin((2 * F - Mpr) * dr) + 0.0005 * Math.sin((2 * Mpr + M) * dr);
-      let deltat = (T < -11) ? (0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T2 * T2) : (-0.000278 + 0.000265 * T + 0.000262 * T2);
-      return INT(jd1 + C1 - deltat + 0.5 + timeZone / 24);
-    }
-
-    function getSunLongitude(jdn, timeZone) {
-      const T = (jdn - 2451545.5 - timeZone / 24) / 36525;
-      const T2 = T * T;
-      const dr = Math.PI / 180;
-      const M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T2 * T;
-      const L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
-      const DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * Math.sin(M * dr) + (0.019993 - 0.000101 * T) * Math.sin(2 * M * dr) + 0.000290 * Math.sin(3 * M * dr);
-      let L = L0 + DL;
-      L = L * dr;
-      L -= Math.PI * 2 * INT(L / (Math.PI * 2));
-      return INT(L / Math.PI * 6);
-    }
-
-    function getLunarMonth11(year, timeZone) {
-      const off = jdFromDate(31, 12, year) - 2415021;
-      const k = INT(off / 29.530588853);
-      const nm = getNewMoonDay(k, timeZone);
-      const sunLong = getSunLongitude(nm, timeZone);
-      if (sunLong >= 9) return getNewMoonDay(k - 1, timeZone);
-      return nm;
-    }
-
-    function getLeapMonthOffset(a11, timeZone) {
-      const k = INT(0.5 + (a11 - 2415021.076998695) / 29.530588853);
-      let last = 0, i = 1;
-      let arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-      do {
-        last = arc;
-        i++;
-        arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
-      } while (arc !== last && i < 15);
-      return i - 1;
-    }
-
-    function convertSolar2Lunar(dd, mm, yy, timeZone = 7) {
-      const dayNumber = jdFromDate(dd, mm, yy);
-      const k = INT((dayNumber - 2415021.076998695) / 29.530588853);
-      let monthStart = getNewMoonDay(k + 1, timeZone);
-      if (monthStart > dayNumber) monthStart = getNewMoonDay(k, timeZone);
-
-      let a11 = getLunarMonth11(yy, timeZone);
-      let b11 = a11;
-      let lunarYear;
-
-      if (a11 >= monthStart) {
-        lunarYear = yy;
-        a11 = getLunarMonth11(yy - 1, timeZone);
-      } else {
-        lunarYear = yy + 1;
-        b11 = getLunarMonth11(yy + 1, timeZone);
-      }
-
-      const lunarDay = dayNumber - monthStart + 1;
-      const diff = INT((monthStart - a11) / 29);
-      let lunarMonth = diff + 11;
-      let lunarLeap = 0;
-
-      if (b11 - a11 > 365) {
-        const leapMonthDiff = getLeapMonthOffset(a11, timeZone);
-        if (diff >= leapMonthDiff) {
-          lunarMonth = diff + 10;
-          if (diff === leapMonthDiff) lunarLeap = 1;
-        }
-      }
-
-      if (lunarMonth > 12) lunarMonth -= 12;
-      if (lunarMonth >= 11 && diff < 4) lunarYear--;
-
-      return { day: lunarDay, month: lunarMonth, year: lunarYear, leap: lunarLeap };
-    }
-
-    function getLunarDate(day, month, year) {
-      return convertSolar2Lunar(day, month, year, 7);
-    }
-
-    /* --- Formatter helpers --- */
-    function parseMoney(val) {
-      if (!val) return 0;
-      return parseInt(val.toString().replace(/\D/g, '')) || 0;
-    }
-
-    function formatMoney(num) {
-      if (!num) return '0';
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
-
-    function bindCurrencyInputs() {
-      document.querySelectorAll('.currency-input').forEach(input => {
-        input.addEventListener('input', function(e) {
-          let value = parseMoney(e.target.value);
-          e.target.value = value > 0 ? formatMoney(value) : '';
-        });
-      });
-    }
-
-    /* --- Tab & UI Navigation --- */
-    function switchTab(tabId, btn) {
-      activeMainTab = tabId;
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-      toggleAddButtonVisibility();
-    }
-
-    function toggleAddButtonVisibility() {
-      const addBtn = document.getElementById('btn-add-global');
-      addBtn.style.display = (activeMainTab === 'tab-trang-chu') ? 'none' : 'flex';
-    }
-
-    function handleGlobalAdd() {
-      if (activeMainTab === 'tab-cong-viec') {
-        openAddWorkModal();
-      } else if (activeMainTab === 'tab-tai-chinh') {
-        openAddFinanceModal();
-      }
-    }
-
-    function switchWorkSegment(type) {
-      currentWorkSegment = type;
-      document.getElementById('btn-work-project').classList.toggle('active', type === 'project');
-      document.getElementById('btn-work-single').classList.toggle('active', type === 'single');
-      document.getElementById('work-project-list').style.display = type === 'project' ? 'block' : 'none';
-      document.getElementById('work-single-list').style.display = type === 'single' ? 'block' : 'none';
-    }
-
-    function switchFinanceTab(tab) {
-      currentFinanceTab = tab;
-      ['credit', 'saving', 'loan'].forEach(t => {
-        document.getElementById(`btn-tab-${t}`).classList.toggle('active', t === tab);
-        document.getElementById(`list-${t}`).style.display = (t === tab) ? 'block' : 'none';
-      });
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    function toggleDetail(id) {
-      const detailEl = document.getElementById(`detail-${id}`);
-      const arrowEl = document.getElementById(`arrow-${id}`);
-      if (detailEl) detailEl.classList.toggle('active');
-      if (arrowEl) arrowEl.classList.toggle('open');
-    }
-
-    /* --- Calculation Helpers --- */
-    function calculateMonthlyLoan() {
-      const total = parseMoney(document.getElementById('fin-loan-amount').value);
-      const months = parseInt(document.getElementById('fin-loan-term').value) || 12;
-      if (total > 0 && months > 0) {
-        const monthly = Math.round(total / months);
-        document.getElementById('fin-loan-monthly').value = formatMoney(monthly);
-      }
-    }
-
-    /* --- Modal Handlers & Logic CRUD --- */
-    function openAddWorkModal() {
-      if (currentWorkSegment === 'project') {
-        document.getElementById('modal-project-title').textContent = 'Thêm Dự Án Mới';
-        document.getElementById('edit-project-id').value = '';
-        document.getElementById('project-name').value = '';
+document.getElementById('project-name').value = '';
         document.getElementById('project-start-date').value = '';
         document.getElementById('project-type').value = 'DVCI';
         document.getElementById('project-budget').value = '';
@@ -662,7 +15,6 @@
     }
 
     function openAddFinanceModal() {
-      document.getElementById('modal-finance-title').textContent = 'Thêm Mục Tài Chính';
       document.getElementById('edit-finance-id').value = '';
       document.getElementById('fin-name').value = '';
       document.getElementById('fin-credit-limit').value = '';
@@ -673,200 +25,278 @@
       document.getElementById('fin-loan-monthly').value = '';
       document.getElementById('fin-note').value = '';
 
-      document.getElementById('fields-credit').style.display = currentFinanceTab === 'credit' ? 'block' : 'none';
-      document.getElementById('fields-saving').style.display = currentFinanceTab === 'saving' ? 'block' : 'none';
-      document.getElementById('fields-loan').style.display = currentFinanceTab === 'loan' ? 'block' : 'none';
+      const isCredit = currentFinanceTab === 'credit';
+      const isSaving = currentFinanceTab === 'saving';
+      const isLoan = currentFinanceTab === 'loan';
+
+      document.getElementById('fields-credit').style.display = isCredit ? 'block' : 'none';
+      document.getElementById('fields-saving').style.display = isSaving ? 'block' : 'none';
+      document.getElementById('fields-loan').style.display = isLoan ? 'block' : 'none';
+
+      if (isCredit) {
+        document.getElementById('modal-finance-title').textContent = 'Thêm Thẻ Tín Dụng';
+        document.getElementById('lbl-bank-name').textContent = 'Tên Ngân Hàng / Thẻ *';
+      } else if (isSaving) {
+        document.getElementById('modal-finance-title').textContent = 'Thêm Khoản Cho Vay / Gửi';
+        document.getElementById('lbl-bank-name').textContent = 'Tên Tín Chấp / Đối Tượng *';
+      } else {
+        document.getElementById('modal-finance-title').textContent = 'Thêm Khoản Vay / Trả Góp';
+        document.getElementById('lbl-bank-name').textContent = 'Tên Chủ Nợ / Tổ Chức *';
+      }
 
       document.getElementById('modal-tai-khoan').classList.add('active');
     }
 
-    /* --- Save Functions --- */
+    /* --- Project Functions --- */
     function saveProject() {
       const name = document.getElementById('project-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên dự án!');
+      if (!name) return alert('Vui lòng nhập tên dự án');
 
-      const id = document.getElementById('edit-project-id').value || Date.now().toString();
-      const existing = appData.projects.find(p => p.id === id);
-
+      const id = document.getElementById('edit-project-id').value;
       const projectData = {
-        id,
+        id: id ? parseInt(id) : Date.now(),
         name,
         startDate: document.getElementById('project-start-date').value,
         type: document.getElementById('project-type').value,
         budget: parseMoney(document.getElementById('project-budget').value),
         note: document.getElementById('project-note').value,
-        tasks: existing ? existing.tasks : []
+        tasks: id ? (appData.projects.find(p => p.id == id)?.tasks || []) : []
       };
 
-      if (existing) {
-        Object.assign(existing, projectData);
+      if (id) {
+        const index = appData.projects.findIndex(p => p.id == id);
+        if (index !== -1) appData.projects[index] = projectData;
       } else {
         appData.projects.push(projectData);
       }
 
       saveDataToStorage();
-      renderAll();
+      renderProjects();
       closeModal('modal-du-an');
     }
 
+    function editProject(id) {
+      const p = appData.projects.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modal-project-title').textContent = 'Sửa Dự Án';
+      document.getElementById('edit-project-id').value = p.id;
+      document.getElementById('project-name').value = p.name;
+      document.getElementById('project-start-date').value = p.startDate || '';
+      document.getElementById('project-type').value = p.type || 'DVCI';
+      document.getElementById('project-budget').value = p.budget ? formatMoney(p.budget) : '';
+      document.getElementById('project-note').value = p.note || '';
+      document.getElementById('modal-du-an').classList.add('active');
+    }
+
+    function deleteProject(id) {
+      if (confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
+        appData.projects = appData.projects.filter(p => p.id !== id);
+        saveDataToStorage();
+        renderProjects();
+      }
+    }
+
+    function addTaskToProject(projectId) {
+      const input = document.getElementById(`task-input-${projectId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const project = appData.projects.find(p => p.id === projectId);
+      if (project) {
+        project.tasks.push({ id: Date.now(), name: text, completed: false });
+        saveDataToStorage();
+        renderProjects();
+      }
+    }
+
+    function toggleTask(projectId, taskId) {
+      const project = appData.projects.find(p => p.id === projectId);
+      if (project) {
+        const task = project.tasks.find(t => t.id === taskId);
+        if (task) {
+          task.completed = !task.completed;
+          saveDataToStorage();
+          renderProjects();
+        }
+      }
+    }
+
+    function deleteTask(projectId, taskId) {
+      const project = appData.projects.find(p => p.id === projectId);
+      if (project) {
+        project.tasks = project.tasks.filter(t => t.id !== taskId);
+        saveDataToStorage();
+        renderProjects();
+      }
+    }
+
+    /* --- Single Work Functions --- */
     function saveSingleWork() {
       const name = document.getElementById('single-work-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên công việc!');
+      if (!name) return alert('Vui lòng nhập tên công việc');
 
-      const id = document.getElementById('edit-single-id').value || Date.now().toString();
-      const existing = appData.singles.find(s => s.id === id);
-
+      const id = document.getElementById('edit-single-id').value;
       const singleData = {
-        id,
+        id: id ? parseInt(id) : Date.now(),
         name,
         startDate: document.getElementById('single-work-start-date').value,
         note: document.getElementById('single-work-note').value,
-        completed: existing ? existing.completed : false
+        completed: id ? (appData.singles.find(s => s.id == id)?.completed || false) : false
       };
 
-      if (existing) {
-        Object.assign(existing, singleData);
+      if (id) {
+        const index = appData.singles.findIndex(s => s.id == id);
+        if (index !== -1) appData.singles[index] = singleData;
       } else {
         appData.singles.push(singleData);
       }
 
       saveDataToStorage();
-      renderAll();
+      renderSingles();
       closeModal('modal-viec-rieng-le');
     }
 
+    function toggleSingleComplete(id) {
+      const single = appData.singles.find(s => s.id === id);
+      if (single) {
+        single.completed = !single.completed;
+        saveDataToStorage();
+        renderSingles();
+      }
+    }
+
+    function editSingleWork(id) {
+      const s = appData.singles.find(item => item.id === id);
+      if (!s) return;
+
+      document.getElementById('modal-single-title').textContent = 'Sửa Việc Riêng Lẻ';
+      document.getElementById('edit-single-id').value = s.id;
+      document.getElementById('single-work-name').value = s.name;
+      document.getElementById('single-work-start-date').value = s.startDate || '';
+      document.getElementById('single-work-note').value = s.note || '';
+      document.getElementById('modal-viec-rieng-le').classList.add('active');
+    }
+
+    function deleteSingleWork(id) {
+      if (confirm('Bạn có chắc muốn xóa công việc này?')) {
+        appData.singles = appData.singles.filter(s => s.id !== id);
+        saveDataToStorage();
+        renderSingles();
+      }
+    }
+
+    /* --- Finance Functions --- */
     function saveFinanceItem() {
       const name = document.getElementById('fin-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên ngân hàng/đối tượng!');
+      if (!name) return alert('Vui lòng nhập tên');
 
-      const id = document.getElementById('edit-finance-id').value || Date.now().toString();
+      const id = document.getElementById('edit-finance-id').value;
       const note = document.getElementById('fin-note').value;
 
       if (currentFinanceTab === 'credit') {
         const item = {
-          id, name, note,
+          id: id ? parseInt(id) : Date.now(),
+          name,
           cardType: document.getElementById('fin-card-type').value,
           gracePeriod: document.getElementById('fin-grace-period').value,
           limit: parseMoney(document.getElementById('fin-credit-limit').value),
           statementDate: document.getElementById('fin-statement-date').value,
-          dueDate: document.getElementById('fin-due-date').value
+          dueDate: document.getElementById('fin-due-date').value,
+          note
         };
-        updateOrPush(appData.credits, item);
+        if (id) {
+          const idx = appData.credits.findIndex(c => c.id == id);
+          if (idx !== -1) appData.credits[idx] = item;
+        } else appData.credits.push(item);
       } else if (currentFinanceTab === 'saving') {
         const item = {
-          id, name, note,
+          id: id ? parseInt(id) : Date.now(),
+          name,
           category: document.getElementById('fin-saving-category').value,
           customerType: document.getElementById('fin-customer-type').value,
           amount: parseMoney(document.getElementById('fin-saving-amount').value),
-          term: document.getElementById('fin-saving-term').value
+          term: document.getElementById('fin-saving-term').value,
+          note
         };
-        updateOrPush(appData.savings, item);
-      } else if (currentFinanceTab === 'loan') {
+        if (id) {
+          const idx = appData.savings.findIndex(s => s.id == id);
+          if (idx !== -1) appData.savings[idx] = item;
+        } else appData.savings.push(item);
+      } else {
         const item = {
-          id, name, note,
+          id: id ? parseInt(id) : Date.now(),
+          name,
           amount: parseMoney(document.getElementById('fin-loan-amount').value),
           term: document.getElementById('fin-loan-term').value,
-          monthly: parseMoney(document.getElementById('fin-loan-monthly').value)
+          monthly: parseMoney(document.getElementById('fin-loan-monthly').value),
+          note
         };
-        updateOrPush(appData.loans, item);
+        if (id) {
+          const idx = appData.loans.findIndex(l => l.id == id);
+          if (idx !== -1) appData.loans[idx] = item;
+        } else appData.loans.push(item);
       }
 
       saveDataToStorage();
-      renderAll();
+      renderFinance();
       closeModal('modal-tai-khoan');
     }
 
-    function updateOrPush(arr, item) {
-      const idx = arr.findIndex(x => x.id === item.id);
-      if (idx > -1) arr[idx] = item;
-      else arr.push(item);
+    function editFinanceItem(id, type) {
+      currentFinanceTab = type;
+      switchFinanceTab(type);
+
+      const list = appData[type === 'credit' ? 'credits' : type === 'saving' ? 'savings' : 'loans'];
+      const item = list.find(i => i.id === id);
+      if (!item) return;
+
+      openAddFinanceModal();
+      document.getElementById('edit-finance-id').value = item.id;
+      document.getElementById('fin-name').value = item.name;
+      document.getElementById('fin-note').value = item.note || '';
+
+      if (type === 'credit') {
+        document.getElementById('fin-card-type').value = item.cardType || 'VISA';
+        document.getElementById('fin-grace-period').value = item.gracePeriod || '45 ngày';
+        document.getElementById('fin-credit-limit').value = item.limit ? formatMoney(item.limit) : '';
+        document.getElementById('fin-statement-date').value = item.statementDate || '';
+        document.getElementById('fin-due-date').value = item.dueDate || '';
+      } else if (type === 'saving') {
+        document.getElementById('fin-saving-category').value = item.category || 'Tiết kiệm';
+        document.getElementById('fin-customer-type').value = item.customerType || 'Cá nhân';
+        document.getElementById('fin-saving-amount').value = item.amount ? formatMoney(item.amount) : '';
+        document.getElementById('fin-saving-term').value = item.term || 'Không kỳ hạn';
+      } else {
+        document.getElementById('fin-loan-amount').value = item.amount ? formatMoney(item.amount) : '';
+        document.getElementById('fin-loan-term').value = item.term || '12';
+        document.getElementById('fin-loan-monthly').value = item.monthly ? formatMoney(item.monthly) : '';
+      }
     }
 
-    /* --- Delete Handlers --- */
-    function deleteItem(type, id) {
-      if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
-      if (type === 'project') appData.projects = appData.projects.filter(x => x.id !== id);
-      else if (type === 'single') appData.singles = appData.singles.filter(x => x.id !== id);
-      else if (type === 'credit') appData.credits = appData.credits.filter(x => x.id !== id);
-      else if (type === 'saving') appData.savings = appData.savings.filter(x => x.id !== id);
-      else if (type === 'loan') appData.loans = appData.loans.filter(x => x.id !== id);
-
-      saveDataToStorage();
-      renderAll();
-    }
-
-    /* --- Task Sub-item Logic inside Projects --- */
-    function addTaskToProject(projectId) {
-      const input = document.getElementById(`input-task-${projectId}`);
-      const name = input.value.trim();
-      if (!name) return;
-
-      const project = appData.projects.find(p => p.id === projectId);
-      if (project) {
-        project.tasks.push({ id: Date.now().toString(), name, completed: false });
+    function deleteFinanceItem(id, type) {
+      if (confirm('Bạn chắc chắn muốn xóa khoản này?')) {
+        const key = type === 'credit' ? 'credits' : type === 'saving' ? 'savings' : 'loans';
+        appData[key] = appData[key].filter(i => i.id !== id);
         saveDataToStorage();
-        renderProjects();
+        renderFinance();
       }
     }
 
-    function toggleTaskStatus(projectId, taskId) {
-      const project = appData.projects.find(p => p.id === projectId);
-      if (project) {
-        const task = project.tasks.find(t => t.id === taskId);
-        if (task) task.completed = !task.completed;
-        saveDataToStorage();
-        renderProjects();
-      }
-    }
-
-    /* --- Dashboard Calculations --- */
-    function updateDashboardStats() {
-      // 1. Công việc
-      document.getElementById('stat-project-count').textContent = appData.projects.length;
-      document.getElementById('stat-single-count').textContent = appData.singles.length;
-      document.getElementById('project-count').textContent = appData.projects.length;
-      document.getElementById('single-work-count').textContent = appData.singles.length;
-
-      // 2. Thẻ Tín Dụng
-      document.getElementById('stat-credit-count').textContent = appData.credits.length;
-      const totalCreditLimit = appData.credits.reduce((sum, c) => sum + (c.limit || 0), 0);
-      document.getElementById('stat-credit-limit').textContent = formatMoney(totalCreditLimit) + ' VNĐ';
-
-      // 3. Con Nợ (Tiền Cho Vay) - Bóc tách Cá nhân vs Tổ chức
-      const personalLoans = appData.savings.filter(s => s.category === 'Cho vay' && s.customerType === 'Cá nhân');
-      const totalPersonal = personalLoans.reduce((sum, item) => sum + (item.amount || 0), 0);
-      document.getElementById('stat-debtor-personal').textContent = formatMoney(totalPersonal) + ' VNĐ';
-
-      const orgLoans = appData.savings.filter(s => s.category === 'Cho vay' && s.customerType === 'Tổ chức');
-      const totalOrg = orgLoans.reduce((sum, item) => sum + (item.amount || 0), 0);
-      document.getElementById('stat-debtor-org').textContent = formatMoney(totalOrg) + ' VNĐ';
-
-      // 4. Tiền Tiết Kiệm (Gửi Ngân Hàng) -> HIỂN THỊ LÊN DASHBOARD
-      const bankSavings = appData.savings.filter(s => s.category === 'Tiết kiệm');
-      const totalSavings = bankSavings.reduce((sum, item) => sum + (item.amount || 0), 0);
-      const savingEl = document.getElementById('stat-saving-total');
-      if (savingEl) {
-        savingEl.textContent = formatMoney(totalSavings) + ' VNĐ';
-      }
-
-      // 5. Chủ Nợ (Vay / Trả góp)
-      document.getElementById('stat-creditor-count').textContent = appData.loans.length;
-    }
-
-    /* --- Render Functions --- */
+    /* --- Rendering Logic --- */
     function renderAll() {
-      updateDashboardStats();
       renderProjects();
       renderSingles();
-      renderCredits();
-      renderSavings();
-      renderLoans();
+      renderFinance();
+      updateDashboardStats();
     }
 
     function renderProjects() {
       const container = document.getElementById('work-project-list');
-      if (appData.projects.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px; font-size:13px;">Chưa có dự án nào</div>';
+      document.getElementById('project-count').textContent = appData.projects.length;
+
+      if (!appData.projects.length) {
+        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có dự án nào được tạo.</div>';
         return;
       }
 
@@ -875,27 +305,33 @@
           <div class="card-header">
             <div>
               <span class="badge">${p.type}</span>
-              ${p.budget ? `<span class="badge-budget">${formatMoney(p.budget)} VNĐ</span>` : ''}
-              <h3 style="font-size:15px; margin-top:6px; font-weight:700;">${p.name}</h3>
-              <p style="font-size:11px; color:var(--text-sub); margin-top:2px;">Bắt đầu: ${p.startDate || 'N/A'}</p>
+              ${p.budget ? `<span class="badge-budget">💵 ${formatMoney(p.budget)} VNĐ</span>` : ''}
+              <h3 style="font-size: 15px; font-weight: 700; margin-top: 6px;">${p.name}</h3>
+              <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">
+                ${p.startDate ? `📅 ${p.startDate}` : ''}
+              </div>
             </div>
             <div class="action-icons">
-              <span class="toggle-arrow" id="arrow-${p.id}" onclick="toggleDetail('${p.id}')">▼</span>
-              <button class="btn-icon" onclick="deleteItem('project', '${p.id}')">🗑️</button>
+              <button class="btn-icon" onclick="editProject(${p.id})">✏️</button>
+              <button class="btn-icon" onclick="deleteProject(${p.id})">🗑️</button>
+              <span class="toggle-arrow" id="arrow-${p.id}" onclick="toggleDetail(${p.id})">▼</span>
             </div>
           </div>
+          ${p.note ? `<p style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">${p.note}</p>` : ''}
           
           <div class="detail-section" id="detail-${p.id}">
-            ${p.note ? `<p style="font-size:12px; color:var(--text-sub); margin-bottom:8px;">💡 ${p.note}</p>` : ''}
             <div class="add-task-box">
-              <input type="text" class="add-task-input" id="input-task-${p.id}" placeholder="Thêm việc nhỏ...">
-              <button class="btn-add-task" onclick="addTaskToProject('${p.id}')">Thêm</button>
+              <input type="text" class="add-task-input" id="task-input-${p.id}" placeholder="Thêm việc nhỏ...">
+              <button class="btn-add-task" onclick="addTaskToProject(${p.id})">+ Thêm</button>
             </div>
             <div>
               ${p.tasks.map(t => `
                 <div class="task-item ${t.completed ? 'completed' : ''}">
-                  <span>${t.name}</span>
-                  <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskStatus('${p.id}', '${t.id}')">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${p.id}, ${t.id})">
+                    <span>${t.name}</span>
+                  </div>
+                  <button class="btn-icon" onclick="deleteTask(${p.id}, ${t.id})">✕</button>
                 </div>
               `).join('')}
             </div>
@@ -906,95 +342,160 @@
 
     function renderSingles() {
       const container = document.getElementById('work-single-list');
-      if (appData.singles.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px; font-size:13px;">Chưa có việc riêng nào</div>';
+      document.getElementById('single-work-count').textContent = appData.singles.length;
+
+      if (!appData.singles.length) {
+        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Không có việc riêng lẻ nào.</div>';
         return;
       }
 
       container.innerHTML = appData.singles.map(s => `
-        <div class="card">
+        <div class="card" style="opacity: ${s.completed ? '0.6' : '1'}">
           <div class="card-header">
-            <div>
-              <h3 style="font-size:14px; font-weight:700;">${s.name}</h3>
-              <p style="font-size:11px; color:var(--text-sub); margin-top:2px;">Ngày: ${s.startDate || 'N/A'}</p>
-              ${s.note ? `<p style="font-size:12px; color:var(--text-sub); margin-top:4px;">💡 ${s.note}</p>` : ''}
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" ${s.completed ? 'checked' : ''} onchange="toggleSingleComplete(${s.id})">
+              <div>
+                <h3 style="font-size: 14px; font-weight: 700; ${s.completed ? 'text-decoration: line-through;' : ''}">${s.name}</h3>
+                ${s.startDate ? `<div style="font-size: 11px; color: var(--text-sub);">📅 ${s.startDate}</div>` : ''}
+              </div>
             </div>
             <div class="action-icons">
-              <button class="btn-icon" onclick="deleteItem('single', '${s.id}')">🗑️</button>
+              <button class="btn-icon" onclick="editSingleWork(${s.id})">✏️</button>
+              <button class="btn-icon" onclick="deleteSingleWork(${s.id})">🗑️</button>
             </div>
           </div>
+          ${s.note ? `<p style="font-size: 12px; color: var(--text-sub); margin-top: 6px; padding-left:28px;">${s.note}</p>` : ''}
         </div>
       `).join('');
     }
 
-    function renderCredits() {
-      const container = document.getElementById('list-credit');
-      if (appData.credits.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px; font-size:13px;">Chưa có thẻ tín dụng</div>';
-        return;
+    function renderFinance() {
+      // Credit cards
+      const cContainer = document.getElementById('list-credit');
+      if (!appData.credits.length) {
+        cContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có thẻ tín dụng nào.</div>';
+      } else {
+        cContainer.innerHTML = appData.credits.map(c => `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="badge">${c.cardType}</span>
+                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${c.name}</h3>
+              </div>
+              <div class="action-icons">
+                <button class="btn-icon" onclick="editFinanceItem(${c.id}, 'credit')">✏️</button>
+                <button class="btn-icon" onclick="deleteFinanceItem(${c.id}, 'credit')">🗑️</button>
+              </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
+              <div>
+                <div style="font-size: 11px; color: var(--text-sub);">Hạn mức thẻ:</div>
+                <div style="font-size: 16px; font-weight: 800; color: var(--success);">${formatMoney(c.limit)} VNĐ</div>
+              </div>
+              <div style="text-align: right; font-size: 11px; color: var(--text-sub);">
+                <div>Sao kê: <b>Ngày ${c.statementDate || '--'}</b></div>
+                <div>Hạn trả: <b>Ngày ${c.dueDate || '--'}</b> (${c.gracePeriod})</div>
+              </div>
+            </div>
+            ${c.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${c.note}</div>` : ''}
+          </div>
+        `).join('');
       }
 
-      container.innerHTML = appData.credits.map(c => `
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="badge">${c.cardType}</span>
-              <h3 style="font-size:15px; margin-top:6px; font-weight:700;">${c.name}</h3>
-              <p style="font-size:13px; color:var(--success); font-weight:700; margin-top:4px;">Hạn mức: ${formatMoney(c.limit)} VNĐ</p>
+      // Savings / Loans given
+      const sContainer = document.getElementById('list-saving');
+      if (!appData.savings.length) {
+        sContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có khoản tiết kiệm/cho vay nào.</div>';
+      } else {
+        sContainer.innerHTML = appData.savings.map(s => `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="badge" style="${s.category === 'Tiết kiệm' ? 'background:rgba(16,185,129,0.15);color:var(--success);border-color:rgba(16,185,129,0.3);' : ''}">${s.category} - ${s.customerType}</span>
+                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${s.name}</h3>
+              </div>
+              <div class="action-icons">
+                <button class="btn-icon" onclick="editFinanceItem(${s.id}, 'saving')">✏️</button>
+                <button class="btn-icon" onclick="deleteFinanceItem(${s.id}, 'saving')">🗑️</button>
+              </div>
             </div>
-            <button class="btn-icon" onclick="deleteItem('credit', '${c.id}')">🗑️</button>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
+              <div>
+                <div style="font-size: 11px; color: var(--text-sub);">Số tiền:</div>
+                <div style="font-size: 16px; font-weight: 800; color: var(--primary);">${formatMoney(s.amount)} VNĐ</div>
+              </div>
+              <div style="font-size: 11px; color: var(--text-sub);">
+                Kỳ hạn: <b>${s.term}</b>
+              </div>
+            </div>
+            ${s.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${s.note}</div>` : ''}
           </div>
-          <div style="font-size:11px; color:var(--text-sub); margin-top:8px; display:flex; gap:12px;">
-            <span>Sao kê: Ngày ${c.statementDate || '--'}</span>
-            <span>Hạn trả: Ngày ${c.dueDate || '--'}</span>
-            <span>Miễn lãi: ${c.gracePeriod}</span>
+        `).join('');
+      }
+
+      // Borrowed / Installments
+      const lContainer = document.getElementById('list-loan');
+      if (!appData.loans.length) {
+        lContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Không có khoản nợ/trả góp nào.</div>';
+      } else {
+        lContainer.innerHTML = appData.loans.map(l => `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="badge" style="background:rgba(244,63,94,0.15);color:var(--danger);border-color:rgba(244,63,94,0.3);">Vay / Trả góp</span>
+                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${l.name}</h3>
+              </div>
+              <div class="action-icons">
+                <button class="btn-icon" onclick="editFinanceItem(${l.id}, 'loan')">✏️</button>
+                <button class="btn-icon" onclick="deleteFinanceItem(${l.id}, 'loan')">🗑️</button>
+              </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
+              <div>
+                <div style="font-size: 11px; color: var(--text-sub);">Tổng tiền vay:</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--danger);">${formatMoney(l.amount)} VNĐ</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: var(--text-sub);">Trả hàng tháng (${l.term}T):</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--accent);">${formatMoney(l.monthly)} VNĐ</div>
+              </div>
+            </div>
+            ${l.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${l.note}</div>` : ''}
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
     }
 
-    function renderSavings() {
-      const container = document.getElementById('list-saving');
-      if (appData.savings.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px; font-size:13px;">Chưa có khoản gửi/cho vay</div>';
-        return;
-      }
+    function updateDashboardStats() {
+      document.getElementById('stat-project-count').textContent = appData.projects.length;
+      document.getElementById('stat-single-count').textContent = appData.singles.length;
 
-      container.innerHTML = appData.savings.map(s => `
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="badge" style="background:rgba(245, 158, 11, 0.15); color:var(--accent); border-color:rgba(245, 158, 11, 0.3);">${s.category} - ${s.customerType}</span>
-              <h3 style="font-size:15px; margin-top:6px; font-weight:700;">${s.name}</h3>
-              <p style="font-size:14px; color:var(--primary); font-weight:700; margin-top:4px;">${formatMoney(s.amount)} VNĐ</p>
-            </div>
-            <button class="btn-icon" onclick="deleteItem('saving', '${s.id}')">🗑️</button>
-          </div>
-          <p style="font-size:11px; color:var(--text-sub); margin-top:6px;">Kỳ hạn: ${s.term}</p>
-        </div>
-      `).join('');
-    }
+      // Credit card stats
+      document.getElementById('stat-credit-count').textContent = appData.credits.length;
+      const totalLimit = appData.credits.reduce((sum, c) => sum + (c.limit || 0), 0);
+      document.getElementById('stat-credit-limit').textContent = `${formatMoney(totalLimit)} VNĐ`;
 
-    function renderLoans() {
-      const container = document.getElementById('list-loan');
-      if (appData.loans.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px; font-size:13px;">Chưa có khoản vay/trả góp</div>';
-        return;
-      }
+      // Debtors stats
+      const personalLend = appData.savings
+        .filter(s => s.category === 'Cho vay' && s.customerType === 'Cá nhân')
+        .reduce((sum, s) => sum + (s.amount || 0), 0);
 
-      container.innerHTML = appData.loans.map(l => `
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="badge" style="background:rgba(244, 63, 94, 0.15); color:var(--danger); border-color:rgba(244, 63, 94, 0.3);">Vay / Trả Góp</span>
-              <h3 style="font-size:15px; margin-top:6px; font-weight:700;">${l.name}</h3>
-              <p style="font-size:14px; color:var(--danger); font-weight:700; margin-top:4px;">Tổng vay: ${formatMoney(l.amount)} VNĐ</p>
-            </div>
-            <button class="btn-icon" onclick="deleteItem('loan', '${l.id}')">🗑️</button>
-          </div>
-          <p style="font-size:12px; color:var(--text-sub); margin-top:6px;">Góp hàng tháng: <b style="color:var(--text-main);">${formatMoney(l.monthly)} VNĐ</b> (${l.term} tháng)</p>
-        </div>
-      `).join('');
+      const orgLend = appData.savings
+        .filter(s => s.category === 'Cho vay' && s.customerType === 'Tổ chức')
+        .reduce((sum, s) => sum + (s.amount || 0), 0);
+
+      document.getElementById('stat-debtor-personal').textContent = `${formatMoney(personalLend)} VNĐ`;
+      document.getElementById('stat-debtor-org').textContent = `${formatMoney(orgLend)} VNĐ`;
+
+      // Savings total
+      const totalSaving = appData.savings
+        .filter(s => s.category === 'Tiết kiệm')
+        .reduce((sum, s) => sum + (s.amount || 0), 0);
+
+      document.getElementById('stat-saving-total').textContent = `${formatMoney(totalSaving)} VNĐ`;
+
+      // Creditors count
+      document.getElementById('stat-creditor-count').textContent = appData.loans.length;
     }
   </script>
 </body>

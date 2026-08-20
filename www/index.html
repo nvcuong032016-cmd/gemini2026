@@ -16,11 +16,22 @@
     .tab-content.active { display: block; }
 
     /* Home Styles */
-    .home-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
-    .home-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .calendar-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; justify-content: space-around; text-align: center; }
-    .cal-box h4 { font-size: 12px; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-    .cal-box p { font-size: 18px; font-weight: bold; color: #0f172a; }
+    .home-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 18px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+    .home-banner h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .calendar-card { background: white; border-radius: 12px; padding: 12px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; justify-content: space-around; text-align: center; }
+    .cal-box h4 { font-size: 11px; color: #64748b; margin-bottom: 2px; text-transform: uppercase; }
+    .cal-box p { font-size: 16px; font-weight: bold; color: #0f172a; }
+
+    /* Dashboard Stats Styles */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: white; border-radius: 12px; padding: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .stat-card.full-width { grid-column: span 2; }
+    .stat-title { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .stat-value { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .stat-sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .stat-highlight { color: #2563eb; }
+    .stat-danger { color: #dc2626; }
+    .stat-success { color: #16a34a; }
 
     .segment-control { display: flex; background: #e2e8f0; border-radius: 8px; padding: 3px; margin-bottom: 16px; }
     .segment-btn { flex: 1; padding: 8px; text-align: center; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #64748b; border-radius: 6px; cursor: pointer; }
@@ -65,7 +76,7 @@
     <div id="tab-trang-chu" class="tab-content active">
       <div class="home-banner">
         <h2>👑 Bệ hạ vạn tuế!</h2>
-        <p style="font-size: 13px; opacity: 0.9;">Chúc Bệ hạ một ngày làm việc hiệu quả và vạn sự như ý.</p>
+        <p style="font-size: 12px; opacity: 0.9;">Tổng quan công việc & tài chính của Bệ hạ.</p>
       </div>
 
       <div class="calendar-card">
@@ -77,6 +88,48 @@
         <div class="cal-box">
           <h4>Âm Lịch</h4>
           <p id="lunar-date-text" style="color: #2563eb;">--/--</p>
+        </div>
+      </div>
+
+      <!-- KHU VỰC THỐNG KÊ -->
+      <div class="stats-grid">
+        <!-- Công việc -->
+        <div class="stat-card">
+          <div class="stat-title">📁 Dự Án</div>
+          <div class="stat-value stat-highlight" id="stat-project-count">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">📌 Việc Riêng</div>
+          <div class="stat-value" id="stat-single-count">0</div>
+        </div>
+
+        <!-- Thẻ tín dụng -->
+        <div class="stat-card full-width">
+          <div class="stat-title">💳 Thẻ Tín Dụng <span>Số lượng: <b id="stat-credit-count" class="stat-highlight">0</b></span></div>
+          <div class="stat-sub">Tổng hạn mức:</div>
+          <div class="stat-value stat-success" id="stat-credit-limit">0 VNĐ</div>
+        </div>
+
+        <!-- Con nợ -->
+        <div class="stat-card full-width">
+          <div class="stat-title">🤝 Con Nợ (Tiền Cho Vay)</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+            <div>
+              <div class="stat-sub">Cá nhân:</div>
+              <div class="stat-value" style="font-size: 15px;" id="stat-debtor-personal">0 VNĐ</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="stat-sub">Tổ chức:</div>
+              <div class="stat-value" style="font-size: 15px;" id="stat-debtor-org">0 VNĐ</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chủ nợ -->
+        <div class="stat-card full-width">
+          <div class="stat-title">🏦 Chủ Nợ</div>
+          <div class="stat-sub">Số lượng khoản đang nợ / trả góp:</div>
+          <div class="stat-value stat-danger" id="stat-creditor-count">0</div>
         </div>
       </div>
     </div>
@@ -276,7 +329,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Góp hàng tháng (VNĐ - Tự tính, có thể gõ chỉnh sửa)</label>
+          <label>Góp hàng tháng (VNĐ)</label>
           <input type="text" id="fin-loan-monthly" class="currency-input" inputmode="numeric" placeholder="0">
         </div>
       </div>
@@ -315,6 +368,7 @@
 
     window.onload = function() {
       initCalendar();
+      updateDashboardStats();
     };
 
     function initCalendar() {
@@ -324,7 +378,6 @@
       const year = now.getFullYear();
       
       document.getElementById('solar-date-text').textContent = `${day}/${month}/${year}`;
-      // Lịch âm mô phỏng hiển thị ngày/tháng âm tương đối
       document.getElementById('lunar-date-text').textContent = `${day}/${month} (Âm)`;
     }
 
@@ -446,8 +499,51 @@
       if (confirm('Xóa mục này?')) {
         const el = document.getElementById(id);
         if (el) el.remove();
-        updateCounts();
+        updateDashboardStats();
       }
+    }
+
+    /* HÀM TÍNH TOÁN THỐNG KÊ TRANG CHỦ */
+    function updateDashboardStats() {
+      // 1. Số lượng Dự án & Việc riêng
+      const projCount = document.querySelectorAll('#work-project-list .card').length;
+      const singleCount = document.querySelectorAll('#work-single-list .card').length;
+      
+      document.getElementById('project-count').textContent = projCount;
+      document.getElementById('single-work-count').textContent = singleCount;
+      document.getElementById('stat-project-count').textContent = projCount;
+      document.getElementById('stat-single-count').textContent = singleCount;
+
+      // 2. Thẻ tín dụng (Số lượng + Tổng hạn mức)
+      const creditCards = document.querySelectorAll('#list-credit .credit-card');
+      let totalLimit = 0;
+      creditCards.forEach(card => {
+        totalLimit += parseCurrency(card.dataset.limit);
+      });
+      document.getElementById('stat-credit-count').textContent = creditCards.length;
+      document.getElementById('stat-credit-limit').textContent = `${formatCurrency(totalLimit)} VNĐ`;
+
+      // 3. Con nợ (Chỉ tính loại "Cho vay", phân loại Cá nhân & Tổ chức)
+      const savingItems = document.querySelectorAll('#list-saving .card');
+      let debtorPersonal = 0;
+      let debtorOrg = 0;
+
+      savingItems.forEach(card => {
+        if (card.dataset.category === 'Cho vay') {
+          const amt = parseCurrency(card.dataset.amount);
+          if (card.dataset.custtype === 'Tổ chức') {
+            debtorOrg += amt;
+          } else {
+            debtorPersonal += amt;
+          }
+        }
+      });
+      document.getElementById('stat-debtor-personal').textContent = `${formatCurrency(debtorPersonal)} VNĐ`;
+      document.getElementById('stat-debtor-org').textContent = `${formatCurrency(debtorOrg)} VNĐ`;
+
+      // 4. Chủ nợ (Số lượng khoản đang vay / trả góp)
+      const loanCount = document.querySelectorAll('#list-loan .card').length;
+      document.getElementById('stat-creditor-count').textContent = loanCount;
     }
 
     function saveProject() {
@@ -493,7 +589,7 @@
         document.getElementById('work-project-list').insertAdjacentHTML('beforeend', html);
       }
       closeModal('modal-du-an');
-      updateCounts();
+      updateDashboardStats();
     }
 
     function editProject(id) {
@@ -542,7 +638,7 @@
         document.getElementById('work-single-list').insertAdjacentHTML('beforeend', html);
       }
       closeModal('modal-viec-rieng-le');
-      updateCounts();
+      updateDashboardStats();
     }
 
     function editSingleWork(id) {
@@ -690,6 +786,7 @@
       }
 
       closeModal('modal-tai-khoan');
+      updateDashboardStats();
     }
 
     function editCreditCard(id) {
@@ -732,11 +829,6 @@
       document.getElementById('fin-loan-term').value = card.dataset.term || '12';
       document.getElementById('fin-loan-monthly').value = card.dataset.monthly || '';
       document.getElementById('fin-note').value = card.dataset.note || '';
-    }
-
-    function updateCounts() {
-      document.getElementById('project-count').textContent = document.querySelectorAll('#work-project-list .card').length;
-      document.getElementById('single-work-count').textContent = document.querySelectorAll('#work-single-list .card').length;
     }
   </script>
 </body>

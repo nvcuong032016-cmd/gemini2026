@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Fuck You</title>
+  <title>Mr Cuog</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -164,6 +164,12 @@
               <div class="stat-value" style="font-size: 17px;" id="stat-debtor-org">0 VNĐ</div>
             </div>
           </div>
+        </div>
+
+        <!-- THÊM MỤC TIẾT KIỆM NÀY VÀO DASHBOARD -->
+        <div class="stat-card full-width">
+          <div class="stat-title">💰 Tiền Tiết Kiệm (Gửi Ngân Hàng)</div>
+          <div class="stat-value stat-success" id="stat-saving-total">0 VNĐ</div>
         </div>
 
         <div class="stat-card full-width">
@@ -835,7 +841,15 @@
       const totalOrg = orgLoans.reduce((sum, item) => sum + (item.amount || 0), 0);
       document.getElementById('stat-debtor-org').textContent = formatMoney(totalOrg) + ' VNĐ';
 
-      // 4. Chủ Nợ (Vay / Trả góp)
+      // 4. Tiền Tiết Kiệm (Gửi Ngân Hàng) -> HIỂN THỊ LÊN DASHBOARD
+      const bankSavings = appData.savings.filter(s => s.category === 'Tiết kiệm');
+      const totalSavings = bankSavings.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const savingEl = document.getElementById('stat-saving-total');
+      if (savingEl) {
+        savingEl.textContent = formatMoney(totalSavings) + ' VNĐ';
+      }
+
+      // 5. Chủ Nợ (Vay / Trả góp)
       document.getElementById('stat-creditor-count').textContent = appData.loans.length;
     }
 

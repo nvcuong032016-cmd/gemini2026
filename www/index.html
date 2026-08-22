@@ -319,7 +319,7 @@
       gap: 10px;
     }
   
-    /* ===== MR CUOG HOME / DASHBOARD REDESIGN ===== */
+    /* ===== DASHBOARD ===== */
     .dashboard-home {
       padding: 2px 0 24px;
     }
@@ -646,7 +646,7 @@
           </div>
           <div class="hero-date">
             <span class="date-chip">📅 <span id="dashboard-date">--/--/----</span></span>
-            <span class="date-chip">🌙 <span id="dashboard-lunar">--/-- Âm</span></span>
+            <span class="date-chip">🌙 <span id="dashboard-lunar">Cập nhật</span></span>
           </div>
         </section>
 
@@ -790,7 +790,7 @@
     </div>
   </div>
 
-  <button class="fab" id="fab-add" onclick="openAddModal()">+</button>
+  <button class="fab" id="fab-add" style="display:none;" onclick="openAddModal()">+</button>
 
   <!-- BOTTOM NAVIGATION -->
   <div class="bottom-nav">
@@ -996,6 +996,7 @@
           console.error("Lỗi parse data:", e);
         }
       }
+      initDashboardHeader();
       renderAll();
     };
 
@@ -1018,6 +1019,18 @@
     function formatMoneyInput(input) {
       let val = input.value.replace(/\D/g, '');
       input.value = formatMoney(val);
+    }
+
+    function initDashboardHeader() {
+      const today = new Date();
+      document.getElementById('dashboard-date').textContent = today.toLocaleDateString('vi-VN');
+      
+      const hour = today.getHours();
+      let greeting = "Xin chào 👋";
+      if (hour < 12) greeting = "Chào buổi sáng ☀️";
+      else if (hour < 18) greeting = "Chào buổi chiều 🌤️";
+      else greeting = "Chào buổi tối 🌙";
+      document.getElementById('dashboard-greeting').textContent = greeting;
     }
 
     /* Tab Switchers */
@@ -1130,53 +1143,46 @@
       document.getElementById('fin-statement-date').value = '';
       document.getElementById('fin-due-date').value = '';
       document.getElementById('fin-saving-amount').value = '';
+      document.getElementById('fin-saving-term').value = '';
       document.getElementById('fin-loan-amount').value = '';
+      document.getElementById('fin-loan-term').value = '';
       document.getElementById('fin-loan-monthly').value = '';
       document.getElementById('fin-note').value = '';
 
-      const isCredit = currentFinanceTab === 'credit';
-      const isSaving = currentFinanceTab === 'saving';
-      const isLoan = currentFinanceTab === 'loan';
+      document.getElementById('fields-credit').style.display = currentFinanceTab === 'credit' ? 'block' : 'none';
+      document.getElementById('fields-saving').style.display = currentFinanceTab === 'saving' ? 'block' : 'none';
+      document.getElementById('fields-loan').style.display = currentFinanceTab === 'loan' ? 'block' : 'none';
 
-      document.getElementById('fields-credit').style.display = isCredit ? 'block' : 'none';
-      document.getElementById('fields-saving').style.display = isSaving ? 'block' : 'none';
-      document.getElementById('fields-loan').style.display = isLoan ? 'block' : 'none';
-
-      if (isCredit) {
-        document.getElementById('modal-finance-title').textContent = 'Thêm Thẻ Tín Dụng';
-        document.getElementById('lbl-bank-name').textContent = 'Tên Ngân Hàng / Thẻ *';
-      } else if (isSaving) {
-        document.getElementById('modal-finance-title').textContent = 'Thêm Khoản Cho Vay / Gửi';
-        document.getElementById('lbl-bank-name').textContent = 'Tên Tín Chấp / Đối Tượng *';
-      } else {
-        document.getElementById('modal-finance-title').textContent = 'Thêm Khoản Vay / Trả Góp';
-        document.getElementById('lbl-bank-name').textContent = 'Tên Chủ Nợ / Tổ Chức *';
-      }
+      const modalTitle = document.getElementById('modal-finance-title');
+      if (currentFinanceTab === 'credit') modalTitle.textContent = 'Thêm Thẻ Tín Dụng';
+      else if (currentFinanceTab === 'saving') modalTitle.textContent = 'Thêm Khoản Tiết Kiệm / Cho Vay';
+      else modalTitle.textContent = 'Thêm Khoản Vay / Trả Góp';
 
       document.getElementById('modal-tai-khoan').classList.add('active');
     }
 
-    /* --- Project Functions --- */
+    /* Save Logic */
     function saveProject() {
       const name = document.getElementById('project-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên dự án');
+      if (!name) return alert('Vui lòng nhập tên dự án!');
 
-      const id = document.getElementById('edit-project-id').value;
-      const projectData = {
-        id: id ? parseInt(id) : Date.now(),
-        name,
+      const id = document.getElementById('edit-project-id').value || 'proj_' + Date.now();
+      const project = {
+        id: id,
+        name: name,
         startDate: document.getElementById('project-start-date').value,
         type: document.getElementById('project-type').value,
         budget: parseMoney(document.getElementById('project-budget').value),
         note: document.getElementById('project-note').value,
-        tasks: id ? (appData.projects.find(p => p.id == id)?.tasks || []) : []
+        tasks: []
       };
 
-      if (id) {
-        const index = appData.projects.findIndex(p => p.id == id);
-        if (index !== -1) appData.projects[index] = projectData;
+      const index = appData.projects.findIndex(p => p.id === id);
+      if (index > -1) {
+        project.tasks = appData.projects[index].tasks || [];
+        appData.projects[index] = project;
       } else {
-        appData.projects.push(projectData);
+        appData.projects.push(project);
       }
 
       saveDataToStorage();
@@ -1184,81 +1190,25 @@
       closeModal('modal-du-an');
     }
 
-    function editProject(id) {
-      const p = appData.projects.find(item => item.id === id);
-      if (!p) return;
-
-      document.getElementById('modal-project-title').textContent = 'Sửa Dự Án';
-      document.getElementById('edit-project-id').value = p.id;
-      document.getElementById('project-name').value = p.name;
-      document.getElementById('project-start-date').value = p.startDate || '';
-      document.getElementById('project-type').value = p.type || 'DVCI';
-      document.getElementById('project-budget').value = p.budget ? formatMoney(p.budget) : '';
-      document.getElementById('project-note').value = p.note || '';
-      document.getElementById('modal-du-an').classList.add('active');
-    }
-
-    function deleteProject(id) {
-      if (confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
-        appData.projects = appData.projects.filter(p => p.id !== id);
-        saveDataToStorage();
-        renderProjects();
-      }
-    }
-
-    function addTaskToProject(projectId) {
-      const input = document.getElementById(`task-input-${projectId}`);
-      const text = input.value.trim();
-      if (!text) return;
-
-      const project = appData.projects.find(p => p.id === projectId);
-      if (project) {
-        project.tasks.push({ id: Date.now(), name: text, completed: false });
-        saveDataToStorage();
-        renderProjects();
-      }
-    }
-
-    function toggleTask(projectId, taskId) {
-      const project = appData.projects.find(p => p.id === projectId);
-      if (project) {
-        const task = project.tasks.find(t => t.id === taskId);
-        if (task) {
-          task.completed = !task.completed;
-          saveDataToStorage();
-          renderProjects();
-        }
-      }
-    }
-
-    function deleteTask(projectId, taskId) {
-      const project = appData.projects.find(p => p.id === projectId);
-      if (project) {
-        project.tasks = project.tasks.filter(t => t.id !== taskId);
-        saveDataToStorage();
-        renderProjects();
-      }
-    }
-
-    /* --- Single Work Functions --- */
     function saveSingleWork() {
       const name = document.getElementById('single-work-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên công việc');
+      if (!name) return alert('Vui lòng nhập tên công việc!');
 
-      const id = document.getElementById('edit-single-id').value;
-      const singleData = {
-        id: id ? parseInt(id) : Date.now(),
-        name,
+      const id = document.getElementById('edit-single-id').value || 'single_' + Date.now();
+      const single = {
+        id: id,
+        name: name,
         startDate: document.getElementById('single-work-start-date').value,
         note: document.getElementById('single-work-note').value,
-        completed: id ? (appData.singles.find(s => s.id == id)?.completed || false) : false
+        completed: false
       };
 
-      if (id) {
-        const index = appData.singles.findIndex(s => s.id == id);
-        if (index !== -1) appData.singles[index] = singleData;
+      const index = appData.singles.findIndex(s => s.id === id);
+      if (index > -1) {
+        single.completed = appData.singles[index].completed;
+        appData.singles[index] = single;
       } else {
-        appData.singles.push(singleData);
+        appData.singles.push(single);
       }
 
       saveDataToStorage();
@@ -1266,85 +1216,40 @@
       closeModal('modal-viec-rieng-le');
     }
 
-    function toggleSingleComplete(id) {
-      const single = appData.singles.find(s => s.id === id);
-      if (single) {
-        single.completed = !single.completed;
-        saveDataToStorage();
-        renderSingles();
-      }
-    }
-
-    function editSingleWork(id) {
-      const s = appData.singles.find(item => item.id === id);
-      if (!s) return;
-
-      document.getElementById('modal-single-title').textContent = 'Sửa Việc Riêng Lẻ';
-      document.getElementById('edit-single-id').value = s.id;
-      document.getElementById('single-work-name').value = s.name;
-      document.getElementById('single-work-start-date').value = s.startDate || '';
-      document.getElementById('single-work-note').value = s.note || '';
-      document.getElementById('modal-viec-rieng-le').classList.add('active');
-    }
-
-    function deleteSingleWork(id) {
-      if (confirm('Bạn có chắc muốn xóa công việc này?')) {
-        appData.singles = appData.singles.filter(s => s.id !== id);
-        saveDataToStorage();
-        renderSingles();
-      }
-    }
-
-    /* --- Finance Functions --- */
     function saveFinanceItem() {
       const name = document.getElementById('fin-name').value.trim();
-      if (!name) return alert('Vui lòng nhập tên');
+      if (!name) return alert('Vui lòng nhập tên!');
 
-      const id = document.getElementById('edit-finance-id').value;
+      const id = document.getElementById('edit-finance-id').value || 'fin_' + Date.now();
       const note = document.getElementById('fin-note').value;
 
       if (currentFinanceTab === 'credit') {
         const item = {
-          id: id ? parseInt(id) : Date.now(),
-          name,
-          cardType: document.getElementById('fin-card-type').value,
-          gracePeriod: document.getElementById('fin-grace-period').value,
+          id, name, note,
+          type: document.getElementById('fin-card-type').value,
+          grace: document.getElementById('fin-grace-period').value,
           limit: parseMoney(document.getElementById('fin-credit-limit').value),
           statementDate: document.getElementById('fin-statement-date').value,
-          dueDate: document.getElementById('fin-due-date').value,
-          note
+          dueDate: document.getElementById('fin-due-date').value
         };
-        if (id) {
-          const idx = appData.credits.findIndex(c => c.id == id);
-          if (idx !== -1) appData.credits[idx] = item;
-        } else appData.credits.push(item);
+        saveItemToArray(appData.credits, item, id);
       } else if (currentFinanceTab === 'saving') {
         const item = {
-          id: id ? parseInt(id) : Date.now(),
-          name,
+          id, name, note,
           category: document.getElementById('fin-saving-category').value,
           customerType: document.getElementById('fin-customer-type').value,
           amount: parseMoney(document.getElementById('fin-saving-amount').value),
-          term: document.getElementById('fin-saving-term').value,
-          note
+          term: document.getElementById('fin-saving-term').value
         };
-        if (id) {
-          const idx = appData.savings.findIndex(s => s.id == id);
-          if (idx !== -1) appData.savings[idx] = item;
-        } else appData.savings.push(item);
+        saveItemToArray(appData.savings, item, id);
       } else {
         const item = {
-          id: id ? parseInt(id) : Date.now(),
-          name,
+          id, name, note,
           amount: parseMoney(document.getElementById('fin-loan-amount').value),
           term: document.getElementById('fin-loan-term').value,
-          monthly: parseMoney(document.getElementById('fin-loan-monthly').value),
-          note
+          monthly: parseMoney(document.getElementById('fin-loan-monthly').value)
         };
-        if (id) {
-          const idx = appData.loans.findIndex(l => l.id == id);
-          if (idx !== -1) appData.loans[idx] = item;
-        } else appData.loans.push(item);
+        saveItemToArray(appData.loans, item, id);
       }
 
       saveDataToStorage();
@@ -1352,47 +1257,60 @@
       closeModal('modal-tai-khoan');
     }
 
-    function editFinanceItem(id, type) {
-      currentFinanceTab = type;
-      switchFinanceTab(type);
-
-      const list = appData[type === 'credit' ? 'credits' : type === 'saving' ? 'savings' : 'loans'];
-      const item = list.find(i => i.id === id);
-      if (!item) return;
-
-      openAddFinanceModal();
-      document.getElementById('edit-finance-id').value = item.id;
-      document.getElementById('fin-name').value = item.name;
-      document.getElementById('fin-note').value = item.note || '';
-
-      if (type === 'credit') {
-        document.getElementById('fin-card-type').value = item.cardType || 'VISA';
-        document.getElementById('fin-grace-period').value = item.gracePeriod || '45 ngày';
-        document.getElementById('fin-credit-limit').value = item.limit ? formatMoney(item.limit) : '';
-        document.getElementById('fin-statement-date').value = item.statementDate || '';
-        document.getElementById('fin-due-date').value = item.dueDate || '';
-      } else if (type === 'saving') {
-        document.getElementById('fin-saving-category').value = item.category || 'Tiết kiệm';
-        document.getElementById('fin-customer-type').value = item.customerType || 'Cá nhân';
-        document.getElementById('fin-saving-amount').value = item.amount ? formatMoney(item.amount) : '';
-        document.getElementById('fin-saving-term').value = item.term || 'Không kỳ hạn';
-      } else {
-        document.getElementById('fin-loan-amount').value = item.amount ? formatMoney(item.amount) : '';
-        document.getElementById('fin-loan-term').value = item.term || '12';
-        document.getElementById('fin-loan-monthly').value = item.monthly ? formatMoney(item.monthly) : '';
-      }
+    function saveItemToArray(arr, item, id) {
+      const idx = arr.findIndex(x => x.id === id);
+      if (idx > -1) arr[idx] = item;
+      else arr.push(item);
     }
 
-    function deleteFinanceItem(id, type) {
-      if (confirm('Bạn chắc chắn muốn xóa khoản này?')) {
-        const key = type === 'credit' ? 'credits' : type === 'saving' ? 'savings' : 'loans';
-        appData[key] = appData[key].filter(i => i.id !== id);
+    /* Tasks Logic (Trực thuộc Dự án) */
+    function addTaskToProject(projId) {
+      const input = document.getElementById(`task-input-${projId}`);
+      const title = input.value.trim();
+      if (!title) return;
+
+      const proj = appData.projects.find(p => p.id === projId);
+      if (proj) {
+        if (!proj.tasks) proj.tasks = [];
+        proj.tasks.push({ id: 't_' + Date.now(), title, completed: false });
         saveDataToStorage();
-        renderFinance();
+        renderProjects();
       }
     }
 
-    /* --- Rendering Logic --- */
+    function toggleTask(projId, taskId) {
+      const proj = appData.projects.find(p => p.id === projId);
+      if (proj) {
+        const t = proj.tasks.find(x => x.id === taskId);
+        if (t) t.completed = !t.completed;
+        saveDataToStorage();
+        renderProjects();
+      }
+    }
+
+    function toggleSingleWork(id) {
+      const s = appData.singles.find(x => x.id === id);
+      if (s) {
+        s.completed = !s.completed;
+        saveDataToStorage();
+        renderSingles();
+      }
+    }
+
+    /* Delete Logic */
+    function deleteItem(type, id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa mục này?')) return;
+      if (type === 'project') appData.projects = appData.projects.filter(x => x.id !== id);
+      else if (type === 'single') appData.singles = appData.singles.filter(x => x.id !== id);
+      else if (type === 'credit') appData.credits = appData.credits.filter(x => x.id !== id);
+      else if (type === 'saving') appData.savings = appData.savings.filter(x => x.id !== id);
+      else if (type === 'loan') appData.loans = appData.loans.filter(x => x.id !== id);
+
+      saveDataToStorage();
+      renderAll();
+    }
+
+    /* Render Logic */
     function renderAll() {
       renderProjects();
       renderSingles();
@@ -1405,48 +1323,48 @@
       document.getElementById('project-count').textContent = appData.projects.length;
 
       if (!appData.projects.length) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có dự án nào được tạo.</div>';
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);">Chưa có dự án nào</div>';
         return;
       }
 
-      container.innerHTML = appData.projects.map(p => `
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <span class="badge">${p.type}</span>
-              ${p.budget ? `<span class="badge-budget">💵 ${formatMoney(p.budget)} VNĐ</span>` : ''}
-              <h3 style="font-size: 15px; font-weight: 700; margin-top: 6px;">${p.name}</h3>
-              <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">
-                ${p.startDate ? `📅 ${p.startDate}` : ''}
+      container.innerHTML = appData.projects.map(p => {
+        const tasks = p.tasks || [];
+        const completedCount = tasks.filter(t => t.completed).length;
+        return `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="badge">${p.type || 'DỰ ÁN'}</span>
+                <h3 style="font-size:15px; margin-top:4px;">${p.name}</h3>
+              </div>
+              <div class="action-icons">
+                <button class="btn-icon" onclick="deleteItem('project', '${p.id}')">🗑</button>
+                <span class="toggle-arrow" onclick="toggleDetail('${p.id}')" id="arrow-${p.id}">▼</span>
               </div>
             </div>
-            <div class="action-icons">
-              <button class="btn-icon" onclick="editProject(${p.id})">✏️</button>
-              <button class="btn-icon" onclick="deleteProject(${p.id})">🗑️</button>
-              <span class="toggle-arrow" id="arrow-${p.id}" onclick="toggleDetail(${p.id})">▼</span>
+            <div style="font-size:12px; color:var(--text-sub); margin-top:6px;">
+              Ngân sách: <span class="badge-budget">${formatMoney(p.budget)} VNĐ</span> | 
+              Nhiệm vụ: ${completedCount}/${tasks.length}
             </div>
-          </div>
-          ${p.note ? `<p style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">${p.note}</p>` : ''}
-          
-          <div class="detail-section" id="detail-${p.id}">
-            <div class="add-task-box">
-              <input type="text" class="add-task-input" id="task-input-${p.id}" placeholder="Thêm việc nhỏ...">
-              <button class="btn-add-task" onclick="addTaskToProject(${p.id})">+ Thêm</button>
-            </div>
-            <div>
-              ${p.tasks.map(t => `
-                <div class="task-item ${t.completed ? 'completed' : ''}">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask(${p.id}, ${t.id})">
-                    <span>${t.name}</span>
+            <div class="detail-section" id="detail-${p.id}">
+              <div class="add-task-box">
+                <input type="text" class="add-task-input" id="task-input-${p.id}" placeholder="Thêm công việc con...">
+                <button class="btn-add-task" onclick="addTaskToProject('${p.id}')">Thêm</button>
+              </div>
+              <div>
+                ${tasks.map(t => `
+                  <div class="task-item ${t.completed ? 'completed' : ''}">
+                    <label style="display:flex; align-items:center; gap:8px;">
+                      <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTask('${p.id}', '${t.id}')">
+                      <span>${t.title}</span>
+                    </label>
                   </div>
-                  <button class="btn-icon" onclick="deleteTask(${p.id}, ${t.id})">✕</button>
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function renderSingles() {
@@ -1454,190 +1372,120 @@
       document.getElementById('single-work-count').textContent = appData.singles.length;
 
       if (!appData.singles.length) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Không có việc riêng lẻ nào.</div>';
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);">Chưa có công việc nào</div>';
         return;
       }
 
       container.innerHTML = appData.singles.map(s => `
-        <div class="card" style="opacity: ${s.completed ? '0.6' : '1'}">
+        <div class="card">
           <div class="card-header">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <input type="checkbox" ${s.completed ? 'checked' : ''} onchange="toggleSingleComplete(${s.id})">
-              <div>
-                <h3 style="font-size: 14px; font-weight: 700; ${s.completed ? 'text-decoration: line-through;' : ''}">${s.name}</h3>
-                ${s.startDate ? `<div style="font-size: 11px; color: var(--text-sub);">📅 ${s.startDate}</div>` : ''}
-              </div>
+            <div class="task-item ${s.completed ? 'completed' : ''}" style="width:100%;">
+              <label style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" ${s.completed ? 'checked' : ''} onchange="toggleSingleWork('${s.id}')">
+                <span style="font-size:14px; font-weight:bold;">${s.name}</span>
+              </label>
             </div>
-            <div class="action-icons">
-              <button class="btn-icon" onclick="editSingleWork(${s.id})">✏️</button>
-              <button class="btn-icon" onclick="deleteSingleWork(${s.id})">🗑️</button>
-            </div>
+            <button class="btn-icon" onclick="deleteItem('single', '${s.id}')">🗑</button>
           </div>
-          ${s.note ? `<p style="font-size: 12px; color: var(--text-sub); margin-top: 6px; padding-left:28px;">${s.note}</p>` : ''}
+          ${s.note ? `<div style="font-size:12px; color:var(--text-sub); margin-top:4px;">${s.note}</div>` : ''}
         </div>
       `).join('');
     }
 
     function renderFinance() {
-      // Credit cards
-      const cContainer = document.getElementById('list-credit');
-      if (!appData.credits.length) {
-        cContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có thẻ tín dụng nào.</div>';
-      } else {
-        cContainer.innerHTML = appData.credits.map(c => `
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <span class="badge">${c.cardType}</span>
-                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${c.name}</h3>
-              </div>
-              <div class="action-icons">
-                <button class="btn-icon" onclick="editFinanceItem(${c.id}, 'credit')">✏️</button>
-                <button class="btn-icon" onclick="deleteFinanceItem(${c.id}, 'credit')">🗑️</button>
-              </div>
+      // 1. Tín Dụng
+      const cList = document.getElementById('list-credit');
+      cList.innerHTML = appData.credits.length ? appData.credits.map(c => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="badge">${c.type}</span>
+              <h3 style="font-size:15px; margin-top:4px;">${c.name}</h3>
             </div>
-            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-              <div>
-                <div style="font-size: 11px; color: var(--text-sub);">Hạn mức thẻ:</div>
-                <div style="font-size: 16px; font-weight: 800; color: var(--success);">${formatMoney(c.limit)} VNĐ</div>
-              </div>
-              <div style="text-align: right; font-size: 11px; color: var(--text-sub);">
-                <div>Sao kê: <b>Ngày ${c.statementDate || '--'}</b></div>
-                <div>Hạn trả: <b>Ngày ${c.dueDate || '--'}</b> (${c.gracePeriod})</div>
-              </div>
-            </div>
-            ${c.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${c.note}</div>` : ''}
+            <button class="btn-icon" onclick="deleteItem('credit', '${c.id}')">🗑</button>
           </div>
-        `).join('');
-      }
+          <div style="margin-top:8px; font-size:13px;">
+            <div>Hạn mức: <b>${formatMoney(c.limit)} VNĐ</b></div>
+            <div style="font-size:11px; color:var(--text-sub);">Sao kê ngày ${c.statementDate || '--'} • Hạn trả ngày ${c.dueDate || '--'}</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center; padding:20px; color:var(--text-sub);">Chưa có thẻ tín dụng</div>';
 
-      // Savings / Loans given
-      const sContainer = document.getElementById('list-saving');
-      if (!appData.savings.length) {
-        sContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Chưa có khoản tiết kiệm/cho vay nào.</div>';
-      } else {
-        sContainer.innerHTML = appData.savings.map(s => `
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <span class="badge" style="${s.category === 'Tiết kiệm' ? 'background:rgba(16,185,129,0.15);color:var(--success);border-color:rgba(16,185,129,0.3);' : ''}">${s.category} - ${s.customerType}</span>
-                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${s.name}</h3>
-              </div>
-              <div class="action-icons">
-                <button class="btn-icon" onclick="editFinanceItem(${s.id}, 'saving')">✏️</button>
-                <button class="btn-icon" onclick="deleteFinanceItem(${s.id}, 'saving')">🗑️</button>
-              </div>
+      // 2. Gửi / Cho vay
+      const sList = document.getElementById('list-saving');
+      sList.innerHTML = appData.savings.length ? appData.savings.map(s => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="badge">${s.category}</span>
+              <h3 style="font-size:15px; margin-top:4px;">${s.name}</h3>
             </div>
-            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-              <div>
-                <div style="font-size: 11px; color: var(--text-sub);">Số tiền:</div>
-                <div style="font-size: 16px; font-weight: 800; color: var(--primary);">${formatMoney(s.amount)} VNĐ</div>
-              </div>
-              <div style="font-size: 11px; color: var(--text-sub);">
-                Kỳ hạn: <b>${s.term}</b>
-              </div>
-            </div>
-            ${s.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${s.note}</div>` : ''}
+            <button class="btn-icon" onclick="deleteItem('saving', '${s.id}')">🗑</button>
           </div>
-        `).join('');
-      }
+          <div style="margin-top:8px; font-size:13px;">
+            <div>Số tiền: <b>${formatMoney(s.amount)} VNĐ</b></div>
+            <div style="font-size:11px; color:var(--text-sub);">Đối tượng: ${s.customerType} | Kỳ hạn: ${s.term || 'N/A'}</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center; padding:20px; color:var(--text-sub);">Chưa có thông tin cho vay/tiết kiệm</div>';
 
-      // Borrowed / Installments
-      const lContainer = document.getElementById('list-loan');
-      if (!appData.loans.length) {
-        lContainer.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px 0; font-size:13px;">Không có khoản nợ/trả góp nào.</div>';
-      } else {
-        lContainer.innerHTML = appData.loans.map(l => `
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <span class="badge" style="background:rgba(244,63,94,0.15);color:var(--danger);border-color:rgba(244,63,94,0.3);">Vay / Trả góp</span>
-                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">${l.name}</h3>
-              </div>
-              <div class="action-icons">
-                <button class="btn-icon" onclick="editFinanceItem(${l.id}, 'loan')">✏️</button>
-                <button class="btn-icon" onclick="deleteFinanceItem(${l.id}, 'loan')">🗑️</button>
-              </div>
+      // 3. Vay / Trả góp
+      const lList = document.getElementById('list-loan');
+      lList.innerHTML = appData.loans.length ? appData.loans.map(l => `
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <span class="badge" style="background:rgba(244,63,94,0.2); color:var(--danger);">KHOẢN VAY</span>
+              <h3 style="font-size:15px; margin-top:4px;">${l.name}</h3>
             </div>
-            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-              <div>
-                <div style="font-size: 11px; color: var(--text-sub);">Tổng tiền vay:</div>
-                <div style="font-size: 15px; font-weight: 800; color: var(--danger);">${formatMoney(l.amount)} VNĐ</div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 11px; color: var(--text-sub);">Trả hàng tháng (${l.term}T):</div>
-                <div style="font-size: 14px; font-weight: 700; color: var(--accent);">${formatMoney(l.monthly)} VNĐ</div>
-              </div>
-            </div>
-            ${l.note ? `<div style="font-size: 11px; color: var(--text-sub); margin-top: 8px; border-top: 1px dashed var(--card-border); padding-top: 6px;">${l.note}</div>` : ''}
+            <button class="btn-icon" onclick="deleteItem('loan', '${l.id}')">🗑</button>
           </div>
-        `).join('');
-      }
+          <div style="margin-top:8px; font-size:13px;">
+            <div>Tổng nợ: <b>${formatMoney(l.amount)} VNĐ</b></div>
+            <div style="font-size:11px; color:var(--text-sub);">Gốc+Lãi hàng tháng: ${formatMoney(l.monthly)} VNĐ (${l.term || 0} tháng)</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center; padding:20px; color:var(--text-sub);">Chưa có khoản vay/trả góp</div>';
     }
 
     function updateDashboardStats() {
+      // KPIs
       document.getElementById('stat-project-count').textContent = appData.projects.length;
       document.getElementById('stat-single-count').textContent = appData.singles.length;
-
       document.getElementById('stat-credit-count').textContent = appData.credits.length;
-      const totalLimit = appData.credits.reduce((sum, c) => sum + (Number(c.limit) || 0), 0);
-      document.getElementById('stat-credit-limit').textContent = `${formatMoney(totalLimit)} VNĐ`;
-
-      const personalLend = appData.savings
-        .filter(s => s.category === 'Cho vay' && s.customerType === 'Cá nhân')
-        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-
-      const orgLend = appData.savings
-        .filter(s => s.category === 'Cho vay' && s.customerType === 'Tổ chức')
-        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-
-      document.getElementById('stat-debtor-personal').textContent = `${formatMoney(personalLend)} VNĐ`;
-      document.getElementById('stat-debtor-org').textContent = `${formatMoney(orgLend)} VNĐ`;
-
-      const totalSaving = appData.savings
-        .filter(s => s.category === 'Tiết kiệm')
-        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-      document.getElementById('stat-saving-total').textContent = `${formatMoney(totalSaving)} VNĐ`;
-
-      const totalLoan = appData.loans
-        .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-      document.getElementById('stat-loan-total').textContent = `${formatMoney(totalLoan)} VNĐ`;
       document.getElementById('stat-creditor-count').textContent = appData.loans.length;
 
-      const tasks = appData.projects.flatMap(p => Array.isArray(p.tasks) ? p.tasks : []);
-      const taskDone = tasks.filter(t => t.completed).length;
-      const taskTotal = tasks.length;
-      const percent = taskTotal ? Math.round((taskDone / taskTotal) * 100) : 0;
+      // Work Progress
+      let totalTasks = appData.singles.length;
+      let completedTasks = appData.singles.filter(s => s.completed).length;
 
-      const totalEl = document.getElementById('dashboard-task-total');
-      const doneEl = document.getElementById('dashboard-task-done');
-      const percentEl = document.getElementById('dashboard-task-percent');
-      const progressEl = document.getElementById('dashboard-task-progress');
-      const captionEl = document.getElementById('dashboard-task-caption');
-      if (totalEl) totalEl.textContent = taskTotal;
-      if (doneEl) doneEl.textContent = taskDone;
-      if (percentEl) percentEl.textContent = `${percent}%`;
-      if (progressEl) progressEl.style.width = `${percent}%`;
-      if (captionEl) captionEl.textContent = `${taskDone} / ${taskTotal} việc`;
+      appData.projects.forEach(p => {
+        if (p.tasks) {
+          totalTasks += p.tasks.length;
+          completedTasks += p.tasks.filter(t => t.completed).length;
+        }
+      });
 
-      const now = new Date();
-      const hour = now.getHours();
-      const greeting = hour < 11 ? 'Chào buổi sáng ☀️' : hour < 18 ? 'Chào buổi chiều 🌤️' : 'Chào buổi tối 🌙';
-      const greetingEl = document.getElementById('dashboard-greeting');
-      if (greetingEl) greetingEl.textContent = greeting;
+      const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      document.getElementById('dashboard-task-total').textContent = totalTasks;
+      document.getElementById('dashboard-task-done').textContent = completedTasks;
+      document.getElementById('dashboard-task-percent').textContent = percent + '%';
+      document.getElementById('dashboard-task-progress').style.width = percent + '%';
+      document.getElementById('dashboard-task-caption').textContent = `${completedTasks} / ${totalTasks} việc`;
 
-      const dateEl = document.getElementById('dashboard-date');
-      if (dateEl) {
-        dateEl.textContent = now.toLocaleDateString('vi-VN', {
-          weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
-        });
-      }
+      // Finance Totals
+      const totalSaving = appData.savings.reduce((acc, x) => acc + (x.amount || 0), 0);
+      const totalCreditLimit = appData.credits.reduce((acc, x) => acc + (x.limit || 0), 0);
+      const totalLoan = appData.loans.reduce((acc, x) => acc + (x.amount || 0), 0);
 
-      const lunarEl = document.getElementById('dashboard-lunar');
-      if (lunarEl && typeof getLunarDate === 'function') {
-        const lunar = getLunarDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
-        lunarEl.textContent = `${lunar.day}/${lunar.month}${lunar.leap ? ' nhuận' : ''} Âm`;
-      }
+      const personalDebt = appData.savings.filter(s => s.customerType === 'Cá nhân').reduce((acc, x) => acc + (x.amount || 0), 0);
+      const orgDebt = appData.savings.filter(s => s.customerType === 'Tổ chức').reduce((acc, x) => acc + (x.amount || 0), 0);
+
+      document.getElementById('stat-saving-total').textContent = formatMoney(totalSaving) + ' VNĐ';
+      document.getElementById('stat-credit-limit').textContent = formatMoney(totalCreditLimit) + ' VNĐ';
+      document.getElementById('stat-debtor-personal').textContent = formatMoney(personalDebt) + ' VNĐ';
+      document.getElementById('stat-debtor-org').textContent = formatMoney(orgDebt) + ' VNĐ';
+      document.getElementById('stat-loan-total').textContent = formatMoney(totalLoan) + ' VNĐ';
     }
   </script>
 </body>

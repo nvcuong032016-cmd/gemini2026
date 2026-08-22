@@ -318,46 +318,450 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
+  
+    /* ===== MR CUOG HOME / DASHBOARD REDESIGN ===== */
+    .dashboard-home {
+      padding: 2px 0 24px;
+    }
+
+    .home-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      margin-bottom: 14px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 92% 10%, rgba(59,130,246,.32), transparent 34%),
+        linear-gradient(145deg, #172554 0%, #111827 52%, #0f172a 100%);
+      border: 1px solid rgba(96,165,250,.20);
+      box-shadow: 0 14px 36px rgba(0,0,0,.25);
+    }
+
+    .home-hero::after {
+      content: '';
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      right: -70px;
+      bottom: -80px;
+      border-radius: 50%;
+      background: rgba(245,158,11,.13);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hero-kicker {
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .hero-title {
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -.6px;
+    }
+
+    .hero-subtitle {
+      margin-top: 8px;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 290px;
+    }
+
+    .hero-date {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .date-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.09);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .hero-mark {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 23px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 2px 9px;
+    }
+
+    .section-head h2 {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .section-head span {
+      color: var(--text-sub);
+      font-size: 10px;
+    }
+
+    .home-kpis {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .kpi-card {
+      position: relative;
+      min-height: 104px;
+      padding: 14px;
+      border-radius: 17px;
+      background: linear-gradient(150deg, rgba(30,41,59,.98), rgba(20,30,47,.98));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,.16);
+    }
+
+    .kpi-card.blue { border-color: rgba(59,130,246,.25); }
+    .kpi-card.green { border-color: rgba(16,185,129,.22); }
+    .kpi-card.orange { border-color: rgba(245,158,11,.23); }
+    .kpi-card.red { border-color: rgba(244,63,94,.22); }
+
+    .kpi-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(255,255,255,.07);
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-label {
+      color: var(--text-sub);
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .kpi-value {
+      margin-top: 3px;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -.3px;
+    }
+
+    .kpi-note {
+      margin-top: 5px;
+      color: #64748b;
+      font-size: 9px;
+    }
+
+    .home-work-card,
+    .home-finance-card {
+      padding: 15px;
+      border-radius: 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 9px;
+    }
+
+    .progress-title {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .progress-percent {
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .progress-track {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      transition: width .35s ease;
+    }
+
+    .work-mini-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mini-stat {
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.055);
+    }
+
+    .mini-stat-label {
+      color: var(--text-sub);
+      font-size: 9px;
+    }
+
+    .mini-stat-value {
+      margin-top: 3px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .finance-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.055);
+    }
+
+    .finance-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .finance-row:first-child { padding-top: 0; }
+
+    .finance-label {
+      color: var(--text-sub);
+      font-size: 11px;
+    }
+
+    .finance-value {
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .quick-btn {
+      min-height: 66px;
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .quick-btn:active { transform: scale(.97); }
+    .quick-btn:hover { background: var(--bg-card-hover); }
+
+    .quick-icon {
+      width: 29px;
+      height: 29px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(59,130,246,.12);
+      font-size: 14px;
+    }
+
+    .home-empty-note {
+      color: var(--text-sub);
+      font-size: 10px;
+      line-height: 1.5;
+      margin-top: 9px;
+    }
+
+    @media (min-width: 560px) {
+      .home-kpis { grid-template-columns: repeat(4, 1fr); }
+      .quick-actions { grid-template-columns: repeat(6, 1fr); }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1 id="header-title">Tổng Quan Dashboard</h1>
+    <h1 id="header-title">Mr Cuog</h1>
   </header>
 
   <div class="container">
-    <!-- TAB 1: DASHBOARD -->
+    <!-- TAB 1: TRANG CHỦ -->
     <div id="tab-dashboard" class="tab-content active">
-      <div class="card">
-        <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-sub);">📊 Tiến Độ Công Việc</h3>
-        <div style="font-size: 13px;">
-          <div>Dự án đang chạy: <b id="stat-project-count">0</b></div>
-          <div>Việc riêng lẻ: <b id="stat-single-count">0</b></div>
-        </div>
-      </div>
+      <div class="dashboard-home">
+        <section class="home-hero">
+          <div class="hero-top">
+            <div>
+              <div class="hero-kicker">MR CUOG • DASHBOARD</div>
+              <div class="hero-title" id="dashboard-greeting">Xin chào 👋</div>
+              <div class="hero-subtitle">Mọi thứ quan trọng của công việc và tài chính, gói gọn trong một màn hình.</div>
+            </div>
+            <div class="hero-mark">⌂</div>
+          </div>
+          <div class="hero-date">
+            <span class="date-chip">📅 <span id="dashboard-date">--/--/----</span></span>
+            <span class="date-chip">🌙 <span id="dashboard-lunar">--/-- Âm</span></span>
+          </div>
+        </section>
 
-      <div class="card">
-        <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-sub);">💳 Tín Dụng & Tiết Kiệm</h3>
-        <div style="font-size: 13px;">
-          <div>Thẻ tín dụng: <b id="stat-credit-count">0</b> thẻ (Hạn mức: <span id="stat-credit-limit" style="color:var(--success);">0 VNĐ</span>)</div>
-          <div>Tổng sổ tiết kiệm: <b id="stat-saving-total" style="color:var(--primary);">0 VNĐ</b></div>
+        <div class="section-head">
+          <h2>Tổng quan nhanh</h2>
+          <span>Hiện tại</span>
         </div>
-      </div>
 
-      <div class="card">
-        <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-sub);">💰 Các Khoản Cho Vay / Cho Mượn</h3>
-        <div style="font-size: 13px;">
-          <div>Cá nhân nợ: <b id="stat-debtor-personal" style="color:var(--accent);">0 VNĐ</b></div>
-          <div>Tổ chức nợ: <b id="stat-debtor-org" style="color:var(--accent);">0 VNĐ</b></div>
-        </div>
-      </div>
+        <section class="home-kpis">
+          <div class="kpi-card blue">
+            <div class="kpi-icon">📋</div>
+            <div class="kpi-label">Dự án</div>
+            <div class="kpi-value" id="stat-project-count">0</div>
+            <div class="kpi-note">đang quản lý</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-icon">✓</div>
+            <div class="kpi-label">Việc riêng</div>
+            <div class="kpi-value" id="stat-single-count">0</div>
+            <div class="kpi-note">công việc cá nhân</div>
+          </div>
+          <div class="kpi-card orange">
+            <div class="kpi-icon">💳</div>
+            <div class="kpi-label">Tín dụng</div>
+            <div class="kpi-value" id="stat-credit-count">0</div>
+            <div class="kpi-note">thẻ đang theo dõi</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-icon">↘</div>
+            <div class="kpi-label">Khoản vay</div>
+            <div class="kpi-value" id="stat-creditor-count">0</div>
+            <div class="kpi-note">khoản đang nợ</div>
+          </div>
+        </section>
 
-      <div class="card">
-        <h3 style="font-size: 14px; margin-bottom: 8px; color: var(--text-sub);">🔻 Các Khoản Vay / Trả Góp</h3>
-        <div style="font-size: 13px;">
-          <div>Số khoản đang nợ: <b id="stat-creditor-count" style="color:var(--danger);">0</b></div>
+        <div class="section-head">
+          <h2>Tiến độ công việc</h2>
+          <span id="dashboard-task-caption">0 / 0 việc</span>
         </div>
+
+        <section class="home-work-card">
+          <div class="progress-row">
+            <span class="progress-title">Hoàn thành công việc</span>
+            <span class="progress-percent" id="dashboard-task-percent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="dashboard-task-progress"></div>
+          </div>
+          <div class="work-mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-label">Tổng nhiệm vụ</div>
+              <div class="mini-stat-value" id="dashboard-task-total">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-label">Đã hoàn thành</div>
+              <div class="mini-stat-value" id="dashboard-task-done">0</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-head">
+          <h2>Tình hình tài chính</h2>
+          <span>Tổng hợp</span>
+        </div>
+
+        <section class="home-finance-card">
+          <div class="finance-row">
+            <div class="finance-label">💰 Tiền gửi tiết kiệm</div>
+            <div class="finance-value" id="stat-saving-total">0 VNĐ</div>
+          </div>
+          <div class="finance-row">
+            <div class="finance-label">💳 Tổng hạn mức tín dụng</div>
+            <div class="finance-value" id="stat-credit-limit">0 VNĐ</div>
+          </div>
+          <div class="finance-row">
+            <div class="finance-label">👤 Cá nhân đang nợ</div>
+            <div class="finance-value" id="stat-debtor-personal">0 VNĐ</div>
+          </div>
+          <div class="finance-row">
+            <div class="finance-label">🏢 Tổ chức đang nợ</div>
+            <div class="finance-value" id="stat-debtor-org">0 VNĐ</div>
+          </div>
+          <div class="finance-row">
+            <div class="finance-label">🔻 Tổng khoản vay</div>
+            <div class="finance-value" id="stat-loan-total">0 VNĐ</div>
+          </div>
+        </section>
+
+        <div class="section-head">
+          <h2>Thao tác nhanh</h2>
+          <span>Truy cập</span>
+        </div>
+
+        <section class="quick-actions">
+          <button class="quick-btn" onclick="goToWorkAndAdd('project')">
+            <span class="quick-icon">📁</span><span>Thêm dự án</span>
+          </button>
+          <button class="quick-btn" onclick="goToWorkAndAdd('single')">
+            <span class="quick-icon">✓</span><span>Thêm việc</span>
+          </button>
+          <button class="quick-btn" onclick="goToFinanceAndAdd('credit')">
+            <span class="quick-icon">💳</span><span>Thêm thẻ</span>
+          </button>
+          <button class="quick-btn" onclick="goToFinanceAndAdd('saving')">
+            <span class="quick-icon">💰</span><span>Cho vay / gửi</span>
+          </button>
+          <button class="quick-btn" onclick="goToFinanceAndAdd('loan')">
+            <span class="quick-icon">↘</span><span>Thêm khoản vay</span>
+          </button>
+          <button class="quick-btn" onclick="switchMainTab('dashboard')">
+            <span class="quick-icon">⌂</span><span>Trang chủ</span>
+          </button>
+        </section>
+
+        <div class="home-empty-note">Dữ liệu được lưu trực tiếp trên thiết bị. Bạn có thể quản lý công việc và tài chính mà không cần kết nối máy chủ.</div>
       </div>
     </div>
 
@@ -617,6 +1021,18 @@
     }
 
     /* Tab Switchers */
+    function goToWorkAndAdd(type) {
+      switchMainTab('cong-viec');
+      switchWorkTab(type);
+      openAddWorkModal();
+    }
+
+    function goToFinanceAndAdd(type) {
+      switchMainTab('tai-chinh');
+      switchFinanceTab(type);
+      openAddFinanceModal();
+    }
+
     function switchMainTab(tab) {
       currentMainTab = tab;
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -628,7 +1044,7 @@
       if (tab === 'dashboard') {
         document.getElementById('tab-dashboard').classList.add('active');
         fab.style.display = 'none';
-        headerTitle.textContent = 'Tổng Quan Dashboard';
+        headerTitle.textContent = 'Mr Cuog';
       } else if (tab === 'cong-viec') {
         document.getElementById('tab-cong-viec').classList.add('active');
         fab.style.display = 'block';
@@ -1163,32 +1579,65 @@
       document.getElementById('stat-project-count').textContent = appData.projects.length;
       document.getElementById('stat-single-count').textContent = appData.singles.length;
 
-      // Credit card stats
       document.getElementById('stat-credit-count').textContent = appData.credits.length;
-      const totalLimit = appData.credits.reduce((sum, c) => sum + (c.limit || 0), 0);
+      const totalLimit = appData.credits.reduce((sum, c) => sum + (Number(c.limit) || 0), 0);
       document.getElementById('stat-credit-limit').textContent = `${formatMoney(totalLimit)} VNĐ`;
 
-      // Debtors stats
       const personalLend = appData.savings
         .filter(s => s.category === 'Cho vay' && s.customerType === 'Cá nhân')
-        .reduce((sum, s) => sum + (s.amount || 0), 0);
+        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
 
       const orgLend = appData.savings
         .filter(s => s.category === 'Cho vay' && s.customerType === 'Tổ chức')
-        .reduce((sum, s) => sum + (s.amount || 0), 0);
+        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
 
       document.getElementById('stat-debtor-personal').textContent = `${formatMoney(personalLend)} VNĐ`;
       document.getElementById('stat-debtor-org').textContent = `${formatMoney(orgLend)} VNĐ`;
 
-      // Savings total
       const totalSaving = appData.savings
         .filter(s => s.category === 'Tiết kiệm')
-        .reduce((sum, s) => sum + (s.amount || 0), 0);
-
+        .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
       document.getElementById('stat-saving-total').textContent = `${formatMoney(totalSaving)} VNĐ`;
 
-      // Creditors count
+      const totalLoan = appData.loans
+        .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+      document.getElementById('stat-loan-total').textContent = `${formatMoney(totalLoan)} VNĐ`;
       document.getElementById('stat-creditor-count').textContent = appData.loans.length;
+
+      const tasks = appData.projects.flatMap(p => Array.isArray(p.tasks) ? p.tasks : []);
+      const taskDone = tasks.filter(t => t.completed).length;
+      const taskTotal = tasks.length;
+      const percent = taskTotal ? Math.round((taskDone / taskTotal) * 100) : 0;
+
+      const totalEl = document.getElementById('dashboard-task-total');
+      const doneEl = document.getElementById('dashboard-task-done');
+      const percentEl = document.getElementById('dashboard-task-percent');
+      const progressEl = document.getElementById('dashboard-task-progress');
+      const captionEl = document.getElementById('dashboard-task-caption');
+      if (totalEl) totalEl.textContent = taskTotal;
+      if (doneEl) doneEl.textContent = taskDone;
+      if (percentEl) percentEl.textContent = `${percent}%`;
+      if (progressEl) progressEl.style.width = `${percent}%`;
+      if (captionEl) captionEl.textContent = `${taskDone} / ${taskTotal} việc`;
+
+      const now = new Date();
+      const hour = now.getHours();
+      const greeting = hour < 11 ? 'Chào buổi sáng ☀️' : hour < 18 ? 'Chào buổi chiều 🌤️' : 'Chào buổi tối 🌙';
+      const greetingEl = document.getElementById('dashboard-greeting');
+      if (greetingEl) greetingEl.textContent = greeting;
+
+      const dateEl = document.getElementById('dashboard-date');
+      if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString('vi-VN', {
+          weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+      }
+
+      const lunarEl = document.getElementById('dashboard-lunar');
+      if (lunarEl && typeof getLunarDate === 'function') {
+        const lunar = getLunarDate(now.getDate(), now.getMonth() + 1, now.getFullYear());
+        lunarEl.textContent = `${lunar.day}/${lunar.month}${lunar.leap ? ' nhuận' : ''} Âm`;
+      }
     }
   </script>
 </body>
